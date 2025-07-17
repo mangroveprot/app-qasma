@@ -1,0 +1,15 @@
+{
+  // Format on save for all files in this project
+  "editor.formatOnSave": true,
+
+  "[dart]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit" // Applies Dart lint fixes like missing `const`, `required`, etc.
+    }
+  },
+
+  // Optional Dart-specific behavior
+  "dart.lineLength": 80,
+  "dart.enableSdkFormatter": true
+}

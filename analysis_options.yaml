@@ -1,0 +1,187 @@
+analyzer:
+  exclude:
+    - "**/*.g.dart" # Exclude generated files (e.g., json_serializable, freezed)
+    - "**/*.freezed.dart"
+    - "**/*.config.dart"
+  plugins:
+    - dart_code_metrics # Extra metrics like complexity, nesting, etc.
+
+linter:
+  rules:
+    # 🔧 FORMATTING & STYLE
+
+    prefer_single_quotes: true
+
+    # ✅ Enforces single quotes for strings
+    # → Cleaner and more consistent code
+    # → Only use double quotes when the string contains an apostrophe
+    # Example:
+    # Good:  final name = 'Yawa';
+    # Bad:   final name = "Yawa";
+
+    always_declare_return_types: true
+    # ✅ Forces explicit return types on functions/methods
+    # → Improves readability and code clarity
+    # Example:
+    # Good:  String greet() => 'Hi';
+    # Bad:   greet() => 'Hi';
+
+    always_specify_types: false
+    # 🔄 Don’t force all variables to be explicitly typed — allows var when clear
+    # Example:
+    # Good:  var count = 0;
+
+    avoid_types_on_closure_parameters: false
+    # 🔄 Allows type hints in closure parameters — helps with context
+    # Example:
+    # Good:  list.forEach((String name) => print(name));
+
+    prefer_relative_imports: true
+    # ✅ Use relative imports like ../../folder/file.dart instead of package:
+    # → Useful for monorepos or nested libs
+    # Example:
+    # Good:  import '../../domain/auth.dart';
+    # Bad:   import 'package:your_app/domain/auth.dart';
+
+    # ✅ NAMING CONVENTIONS
+
+    camel_case_types: true
+    # ✅ Ensures class names use camel case
+    # Example:
+    # Good:  class AuthService {}
+    # Bad:   class auth_service {}
+
+    non_constant_identifier_names: false
+    constant_identifier_names: false
+    # 🔄 Allow lowercase_with_underscores for variables or constants
+    # Useful when working with APIs or database fields
+
+    # 🧹 CODE CLEANLINESS
+
+    avoid_print: true
+    # ✅ Avoid using print (use logger instead, especially in production)
+    # Example:
+    # Bad:   print('Hello');
+    # Good:  logger.i('Hello');
+
+    avoid_unnecessary_containers: true
+    # ✅ Prevents unnecessary Container() widgets
+    # → Use padding/margin directly if no decoration
+    # Bad:   return Container(child: Text('Hi'));
+    # Good:  return Padding(...);
+
+    prefer_const_constructors: true
+    # ✅ Use const where possible for optimization
+    # Good:  const Text('Hi');
+
+    prefer_final_fields: true
+    prefer_final_locals: true
+    # ✅ Use final instead of var when value doesn't change
+    # → Improves readability and prevents bugs
+
+    unnecessary_this: true
+    # ✅ Avoid this. when not needed
+    # Bad:   this.name = name;
+    # Good:  name = name;
+
+    # 🔍 READABILITY & SAFETY
+
+    annotate_overrides: true
+    # ✅ Ensures overridden methods are marked
+    # Example:
+    # @override
+    # void initState() {}
+
+    avoid_empty_else: true
+    # ✅ Prevents empty else blocks — they are useless or error-prone
+    # Bad:   if (a) {} else {}
+
+    avoid_init_to_null: true
+    # ✅ No need to initialize to null, Dart does it by default
+    # Bad:   String? name = null;
+    # Good:  String? name;
+
+    use_key_in_widget_constructors: true
+    # ✅ Ensures widgets use Key key in their constructor
+    # Good:  const MyWidget({super.key});
+
+    empty_constructor_bodies: true
+    # ✅ Constructors with no body should use ;
+    # Good:  MyClass();
+
+    unnecessary_new: true
+    # ✅ Don't use new — Dart doesn't require it
+    # Bad:   var x = new MyClass();
+    # Good:  var x = MyClass();
+
+    unnecessary_null_checks: true
+    # ✅ Removes redundant ?? or if checks
+    # Bad:   name ??= 'default'; when name is already not null
+
+    # 🧪 DEBUGGING & TESTING
+
+    avoid_returning_null: true
+    # ✅ Avoid returning null in methods that expect non-nullable values
+
+    avoid_void_async: true
+    # ✅ Avoid async on void functions — use Future<void> instead
+    # Good:  Future<void> logout() async {}
+
+    use_full_hex_values_for_flutter_colors: true
+    # ✅ Requires full 8-digit hex color (with opacity)
+    # Good:  Color(0xFF112233);
+
+    # 🧭 STRUCTURE & API BOUNDARIES
+
+    implementation_imports: false
+    # ✅ Discourages importing files from lib/src/ in public packages
+    # (can ignore this if not building packages)
+
+dart_code_metrics:
+  extends:
+    - recommended
+  rules:
+    - member-ordering
+    # ✅ Groups members in classes: fields, constructors, then methods
+
+    - no-boolean-literal-compare
+    # ✅ Avoid if (flag == true) → just use if (flag)
+
+    - no-equal-arguments
+    # ✅ Detects doSomething(a, a); — likely a mistake
+
+    - no-equal-then-else
+    # ✅ Warns when if and else do the same thing
+
+    - prefer-trailing-comma
+    # ✅ Encourages trailing commas — better diffs and formatting
+    # Good:
+    # return Column(
+    #   children: [
+    #     Text('One'),
+    #     Text('Two'),
+    #   ],
+    # );
+
+  metrics:
+    cyclomatic-complexity: 20
+    # ✅ Warn if a function is too complex (too many if/switch/cases)
+
+    maximum-nesting-level: 5
+    # ✅ Helps avoid deeply nested code (e.g., 5+ nested ifs)
+
+    number-of-parameters: 5
+    # ✅ Warns if a function has too many parameters (design smell)
+
+    source-lines-of-code: 150
+    # ✅ Flags files with too much code — consider breaking them down
+
+    number-of-methods: 10
+    # ✅ Warns if a class has too many methods
+
+  anti-patterns:
+    - long-method
+    # ✅ Break up long methods into smaller ones
+
+    - long-parameter-list
+    # ✅ Refactor functions with too many parameters (use object/class instead)
