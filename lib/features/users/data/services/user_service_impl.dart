@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../common/error/app_error.dart';
 import '../../../../common/networks/api_client.dart';
+import '../../../../common/networks/response/api_response.dart';
 import '../../../../core/_base/_repository/base_repository/abstract_repositories.dart';
 import '../../../../core/_base/_services/base_service/base_service.dart';
 import '../../../../core/_config/url_provider.dart';
@@ -15,18 +16,21 @@ class UserServiceImpl extends BaseService<UserModel> implements UserService {
   final URLProviderConfig _urlProviderConfig = sl<URLProviderConfig>();
 
   @override
-  Future<Either> getUser(String identifier) async {
+  Future<Either<AppError, bool>> isRegister(String identifier) async {
     try {
       final url = _urlProviderConfig.addPathSegments(
-        _urlProviderConfig.getProfile,
+        _urlProviderConfig.isRegister,
         [identifier],
       );
 
       final response = await _apiClient.get(url);
+      final apiResponse = ApiResponse.fromJson(response.data, (json) => json);
 
-      final data = response.data;
-
-      return Right(data);
+      if (apiResponse.isSuccess) {
+        return const Right(true);
+      } else {
+        return Left(apiResponse.error!);
+      }
     } catch (e, stack) {
       final error =
           e is AppError

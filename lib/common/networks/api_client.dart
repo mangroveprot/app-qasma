@@ -110,7 +110,7 @@ class ApiClient {
   // shared error handling logic
   Never _handleDioError(String action, String endpoint, DioException e) {
     final appError =
-        e.error is AppError ? e.error as AppError : AppError.fromDioError(e);
+        e.error is AppError ? e.error as AppError : AppError.fromDio(e);
 
     throw appError;
   }
@@ -129,7 +129,7 @@ class ApiClient {
         options: _mergeOptions(options, requiresAuth),
       );
     } on DioException catch (e) {
-      _handleDioError('GET', endpoint, e);
+      throw _handleDioError('GET', endpoint, e);
     }
   }
 

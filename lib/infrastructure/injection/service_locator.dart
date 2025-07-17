@@ -20,7 +20,7 @@ import '../../features/users/data/repository/user_repositories_impl.dart';
 import '../../features/users/data/services/user_service_impl.dart';
 import '../../features/users/domain/repository/auth_repositories.dart';
 import '../../features/users/domain/services/user_service.dart';
-import '../../features/users/domain/usecases/get_profile_usecase.dart';
+import '../../features/users/domain/usecases/is_register_usecase.dart';
 
 final sl = GetIt.instance;
 
@@ -64,8 +64,8 @@ void setupServiceLocator() {
     () => RemoteRepository<UserModel>(
       localRepository: sl<LocalRepository<UserModel>>(),
       endpoint: '/user',
-      fromJson: (map) => UserModel.fromDb(map),
-      toJson: (user) => user.toDb(),
+      fromJson: (map) => UserModel.fromJson(map),
+      toJson: (user) => user.toJson(),
       getId: (model) => model.idNumber,
       getItemPath: (id) => '/user/getUserById/$id',
       deletePath: (id) => '/user/delete/$id',
@@ -88,5 +88,5 @@ void setupServiceLocator() {
   sl.registerLazySingleton<SigninUsecase>(() => SigninUsecase());
 
   // USER
-  sl.registerLazySingleton<GetProfileUsecase>(() => GetProfileUsecase());
+  sl.registerLazySingleton<IsRegisterUsecase>(() => IsRegisterUsecase());
 }

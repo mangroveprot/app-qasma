@@ -5,161 +5,109 @@ import '../../core/_config/app_config.dart';
 
 class AppError {
   final String message;
+  final ErrorType type;
   final Object? originalError;
   final StackTrace? stackTrace;
-  final ErrorType type;
-  final List<dynamic>? suggestions;
+  final int? status;
+  final List<String>? suggestions;
 
   AppError({
     required this.message,
+    required this.type,
     this.originalError,
     this.stackTrace,
-    this.type = ErrorType.unknown,
+    this.status,
     this.suggestions,
   });
 
   void log() {
-    if (AppConfig.shouldShowLogs) {
-      final logger = Logger(
-        printer: PrettyPrinter(methodCount: 0, colors: true, printEmojis: true),
-      );
+    if (!AppConfig.shouldShowLogs) return;
 
-      switch (type) {
-        case ErrorType.network:
-          logger.e(
-            '🌐 Network Error: $message',
-            error: originalError,
-            stackTrace: stackTrace,
-          );
-          break;
-        case ErrorType.authentication:
-          logger.e(
-            '🔐 Authentication Error: $message',
-            error: originalError,
-            stackTrace: stackTrace,
-          );
-          break;
-        case ErrorType.validation:
-          logger.w(
-            '🧾 Validation Error: $message',
-            error: originalError,
-            stackTrace: stackTrace,
-          );
-          break;
-        default:
-          logger.e(
-            '❌ Unknown Error: $message',
-            error: originalError,
-            stackTrace: stackTrace,
-          );
-      }
-
-      if (originalError is DioException) {
-        final dioErr = originalError as DioException;
-        final req = dioErr.requestOptions;
-        final path = '${req.baseUrl}${req.path}';
-
-        logger.i('➡️ ${req.method} request ==> $path');
-        logger.d('🔎 Error Type: ${dioErr.type}');
-        logger.d('💬 Error Message: ${dioErr.message}');
-      }
-
-      if (kDebugMode) {
-        debugPrint('Error: $message');
-      }
-    }
-  }
-
-  factory AppError.fromException(dynamic exception) {
-    if (exception is NetworkException) {
-      return AppError(
-        message: exception.message,
-        type: ErrorType.network,
-        stackTrace: exception.stackTrace,
-      );
-    }
-
-    return AppError(message: exception.toString(), type: ErrorType.unknown);
-  }
-
-  factory AppError.fromDioError(DioException dioException, {String? message}) {
-    String defaultMessage = 'Unexpected error occurred';
-    List<String> suggestions = [];
-
-    try {
-      final data = dioException.response?.data;
-      if (data is Map<String, dynamic> &&
-          data['error'] is Map<String, dynamic>) {
-        final errorData = data['error'];
-        final apiMessage = errorData['message'];
-        final apiSuggestions = errorData['suggestions'];
-
-        if (apiMessage is String && apiMessage.trim().isNotEmpty) {
-          defaultMessage = apiMessage;
-        }
-
-        if (apiSuggestions is List) {
-          suggestions = List<String>.from(apiSuggestions);
-        }
-      } else if (data is Map<String, dynamic> && data['message'] is String) {
-        defaultMessage = data['message'];
-      }
-    } catch (e) {}
-
-    // fallback if no message is parsed
-    defaultMessage = message ?? defaultMessage;
-
-    final error = AppError(
-      message: defaultMessage,
-      type: ErrorType.network,
-      stackTrace: dioException.stackTrace,
-      originalError: dioException,
-      suggestions: suggestions,
+    final logger = Logger(
+      printer: PrettyPrinter(methodCount: 0, colors: true, printEmojis: true),
     );
 
-    error.log();
-    return error;
+    final emoji = switch (type) {
+      ErrorType.network => '🌐',
+      ErrorType.authentication => '🔐',
+      ErrorType.validation => '🧾',
+      ErrorType.server => '⚠️',
+      _ => '❌',
+    };
+
+    logger.e(
+      '$emoji ${type.name}: $message',
+      error: originalError,
+      stackTrace: stackTrace,
+    );
+
+    if (kDebugMode) {
+      debugPrint('Error: $message');
+    }
   }
 
-  static AppError create({
+  /// Create error from DioException
+  factory AppError.fromDio(DioException e) {
+    final responseData = e.response?.data;
+
+    // Check if it follows your standard error format
+    if (responseData is Map<String, dynamic> &&
+        responseData['error'] is Map<String, dynamic>) {
+      final errorJson = responseData['error'];
+      return AppError.fromJson(errorJson);
+    }
+
+    // Fallback if it's not your known format
+    return AppError(
+      type: ErrorType.network,
+      message: e.message ?? 'Network error occurred',
+      originalError: e,
+      stackTrace: e.stackTrace,
+    );
+  }
+
+  factory AppError.fromJson(Map<String, dynamic> json) {
+    return AppError(
+      type: ErrorType.api,
+      status: json['status'],
+      message: json['message'] ?? 'Unknown API error',
+      suggestions: (json['suggestions'] as List?)?.cast<String>(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type.toString(),
+      'status': status,
+      'message': message,
+      'suggestions': suggestions,
+    };
+  }
+
+  // General factory
+  factory AppError.create({
     required String message,
     ErrorType type = ErrorType.unknown,
     Object? originalError,
     StackTrace? stackTrace,
-    bool shouldLog = true,
+    shouldLog = true,
   }) {
-    String finalMessage = message;
-    List<dynamic>? suggestions;
-
-    if (originalError is DioException) {
-      final data = originalError.response?.data;
-
-      if (data is Map && data['error'] is Map) {
-        final errorData = data['error'] as Map;
-
-        if (errorData['message'] is String) {
-          finalMessage = errorData['message'];
-        }
-
-        if (errorData['suggestions'] is List) {
-          suggestions = errorData['suggestions'];
-        }
-      }
-    }
-
     final error = AppError(
-      message: finalMessage,
+      message: message,
       type: type,
       originalError: originalError,
       stackTrace: stackTrace,
-      suggestions: suggestions,
     );
 
     if (shouldLog) {
       error.log();
     }
-
     return error;
+  }
+
+  @override
+  String toString() {
+    return toJson().toString();
   }
 }
 
@@ -167,17 +115,11 @@ enum ErrorType {
   network,
   authentication,
   validation,
-  unknown,
-  database,
-  configuration,
-  canceled,
   server,
+  unknown,
+  configuration,
+  database,
   timeout,
-}
-
-class NetworkException implements Exception {
-  final String message;
-  final StackTrace? stackTrace;
-
-  NetworkException(this.message, {this.stackTrace});
+  canceled,
+  api,
 }

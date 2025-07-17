@@ -7,7 +7,6 @@ import '../../../../core/_config/url_provider.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
 import '../../../users/data/models/user_model.dart';
 import '../../domain/services/auth_service.dart';
-import '../models/signin_params.dart';
 
 class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
   AuthServiceImpl(AbstractRepository<UserModel> repository) : super(repository);
@@ -15,7 +14,7 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
   final URLProviderConfig _urlProviderConfig = sl<URLProviderConfig>();
 
   @override
-  Future<Either> signin(SigninParams signinReq) async {
+  Future<Either> signin(UserModel signinReq) async {
     try {
       final response = await _apiClient.post(
         _urlProviderConfig.login,

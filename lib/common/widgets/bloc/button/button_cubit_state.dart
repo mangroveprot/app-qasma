@@ -10,9 +10,10 @@ class ButtonSuccessState extends ButtonState {}
 
 class ButtonFailureState extends ButtonState {
   final String errorMessage;
+  final List<String> suggestions;
 
-  ButtonFailureState({required this.errorMessage});
+  ButtonFailureState({required this.errorMessage, this.suggestions = const []});
 
   @override
-  List<Object?> get props => [errorMessage];
+  List<Object?> get props => [errorMessage, suggestions];
 }

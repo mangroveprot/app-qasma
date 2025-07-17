@@ -19,6 +19,7 @@ class URLProviderConfig {
 
   // User URLS
   String get getProfile => '${userEndPoint}/getProfile';
+  String get isRegister => '${userEndPoint}/isRegister';
 
   String addPathSegments(String baseUrl, List<String> segments) {
     final String cleanedBase = baseUrl.replaceFirst(RegExp(r'/+$'), '');

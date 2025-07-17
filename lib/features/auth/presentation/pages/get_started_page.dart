@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../common/utils/constant.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/bloc/form/form_cubit.dart';
 import '../../../../common/widgets/button/custom_app_button.dart';
@@ -10,7 +11,7 @@ import '../../../../common/widgets/custom_dropdown_field.dart';
 import '../../../../common/widgets/custom_form_field.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
 import '../../../../theme/theme_extensions.dart';
-import '../../../users/domain/usecases/get_profile_usecase.dart';
+import '../../../users/domain/usecases/is_register_usecase.dart';
 import '../widgets/call_to_action.dart';
 import '../widgets/signup_header.dart';
 
@@ -46,7 +47,17 @@ class _GetStartedPageState extends State<GetStartedPage> {
       body: BlocListener<ButtonCubit, ButtonState>(
         listener: (context, state) {
           if (state is ButtonSuccessState) {
-            context.go('/auth/create-account');
+            context.go(
+              '/auth/create-account',
+              extra: {
+                'idNumber': _idNumberController.text,
+                'password': _passwordController.text,
+                'confirmPassword': _confirmPasswordController.text,
+                'course': _courseController.value,
+                'block': _blockController.value,
+                'yearLevel': _yearLevelController.value,
+              },
+            );
           }
           if (state is ButtonFailureState) {
             final snackBar = SnackBar(content: Text(state.errorMessage));
@@ -74,7 +85,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
                   required: true,
                   name: 'Course',
                   controller: _courseController,
-                  items: ['Male', 'Female'],
+                  items: courseList,
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -85,7 +96,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
                       showErrorText: false,
                       controller: _blockController,
                       hint: 'select...',
-                      items: [],
+                      items: blockList,
                     ),
                     const SizedBox(width: 12),
                     CustomDropdownField(
@@ -94,7 +105,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
                       required: true,
                       showErrorText: false,
                       hint: 'select...',
-                      items: [],
+                      items: yearLevelList,
                     ),
                     const SizedBox(width: 12),
                   ],
@@ -127,12 +138,12 @@ class _GetStartedPageState extends State<GetStartedPage> {
                       'ID Number': _idNumberController.text,
                       'Password': _passwordController.text,
                       'Confirm Password': _confirmPasswordController.text,
-                      // 'Couese': _courseController.value ?? '',
-                      // 'Block': _blockController.value ?? '',
+                      'Couese': _courseController.value ?? '',
+                      'Block': _blockController.value ?? '',
                     });
                     if (isValid) {
                       context.read<ButtonCubit>().execute(
-                        usecase: sl<GetProfileUsecase>(),
+                        usecase: sl<IsRegisterUsecase>(),
                         params: _idNumberController.text,
                       );
                     }
