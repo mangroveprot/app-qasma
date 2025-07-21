@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import '../../../../common/error/app_error.dart';
 import '../../../../common/networks/api_client.dart';
+import '../../../../common/networks/response/api_response.dart';
 import '../../../../core/_base/_repository/base_repository/abstract_repositories.dart';
 import '../../../../core/_base/_services/base_service/base_service.dart';
 import '../../../../core/_config/url_provider.dart';
@@ -21,6 +22,39 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
         data: signinReq.toJson(),
       );
       return Right(response);
+    } catch (e, stack) {
+      final error =
+          e is AppError
+              ? e
+              : AppError.create(
+                message: 'Unexpected error during signin',
+                type: ErrorType.unknown,
+                originalError: e,
+                stackTrace: stack,
+              );
+      return Left(error);
+    }
+  }
+
+  @override
+  Future<Either<AppError, UserModel>> create_account(UserModel model) async {
+    try {
+      final response = await _apiClient.post(
+        _urlProviderConfig.register,
+        data: model.toJson(),
+        requiresAuth: false,
+      );
+
+      final apiResponse = ApiResponse.fromJson(
+        response.data,
+        (json) => UserModel.fromJson,
+      );
+      print({'api', UserModel.fromJson});
+      if (apiResponse.isSuccess && apiResponse.document != null) {
+        return Right(apiResponse.document as UserModel);
+      } else {
+        return Left(apiResponse.error!);
+      }
     } catch (e, stack) {
       final error =
           e is AppError

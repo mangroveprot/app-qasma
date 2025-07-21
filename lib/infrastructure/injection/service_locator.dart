@@ -11,6 +11,7 @@ import '../../core/_config/app_config.dart';
 import '../../core/_config/url_provider.dart';
 import '../../features/auth/domain/services/auth_service.dart';
 import '../../features/auth/domain/usecases/signin_usecase.dart';
+import '../../features/auth/domain/usecases/signup_usecase.dart';
 import '../../features/users/data/models/user_model.dart';
 import '../../features/auth/data/repository/auth_impl_repositories.dart';
 import '../../features/auth/data/services/auth_service_impl.dart';
@@ -86,6 +87,7 @@ void setupServiceLocator() {
 
   // AUTH
   sl.registerLazySingleton<SigninUsecase>(() => SigninUsecase());
+  sl.registerLazySingleton<SignupUsecase>(() => SignupUsecase());
 
   // USER
   sl.registerLazySingleton<IsRegisterUsecase>(() => IsRegisterUsecase());

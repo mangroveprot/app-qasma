@@ -41,9 +41,9 @@ class AppError {
       stackTrace: stackTrace,
     );
 
-    if (kDebugMode) {
-      debugPrint('Error: $message');
-    }
+    // if (kDebugMode) {
+    //   debugPrint('Error: $message');
+    // }
   }
 
   /// Create error from DioException

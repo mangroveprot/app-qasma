@@ -5,6 +5,7 @@ import 'bloc/form/form_cubit.dart';
 
 class CustomDropdownField extends StatelessWidget {
   final String name;
+  final String field_key;
   final ValueNotifier<String?> controller;
   final List<String> items;
   final String hint;
@@ -13,6 +14,7 @@ class CustomDropdownField extends StatelessWidget {
 
   const CustomDropdownField({
     super.key,
+    required this.field_key,
     required this.name,
     required this.controller,
     required this.hint,
@@ -25,14 +27,13 @@ class CustomDropdownField extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasError = context.select<FormCubit, bool>((cubit) {
       final state = cubit.state;
-      return state.hasError(name);
+      return state.hasError(field_key);
     });
 
     final radiusMedium = context.radii.medium;
-    final colorDanger = context.colors.danger;
-    final textColor = context.colors.textColor;
-    final dangerColor = context.colors.danger;
-    final midGroundColor = context.colors.midGroundColor;
+    final colorDanger = context.colors.error;
+    final textColor = context.colors.textPrimary;
+    final midGroundColor = context.colors.surface;
     final weightRegular = context.weight.regular;
     final weightMedium = context.weight.medium;
     final double size = 16;
@@ -60,7 +61,7 @@ class CustomDropdownField extends StatelessWidget {
                       Text(
                         ' *',
                         style: TextStyle(
-                          color: dangerColor,
+                          color: colorDanger,
                           fontSize: 14,
                           fontWeight: weightMedium,
                         ),
@@ -149,7 +150,7 @@ class CustomDropdownField extends StatelessWidget {
                     style: TextStyle(
                       color: colorDanger,
                       fontSize: 12,
-                      fontWeight: weightMedium,
+                      fontWeight: weightRegular,
                     ),
                   ),
                 ),

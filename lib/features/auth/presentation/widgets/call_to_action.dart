@@ -24,7 +24,7 @@ class CallToAction extends StatelessWidget {
           children: [
             TextSpan(
               text: actionText,
-              style: TextStyle(color: context.colors.textColor),
+              style: TextStyle(color: context.colors.textPrimary),
             ),
             TextSpan(
               text: actionLabel,

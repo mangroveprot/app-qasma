@@ -47,7 +47,7 @@ class _ButtonContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color defaultTexColor = context.colors.textColor;
+    final Color defaultTexColor = context.colors.textPrimary;
     final List<Widget> icon =
         (iconData != null)
             ? [

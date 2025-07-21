@@ -7,16 +7,16 @@ class User extends Equatable {
   final String role;
   final bool verified;
   final bool active;
-  final String firstName;
-  final String lastName;
-  final String middleName;
+  final String first_name;
+  final String last_name;
+  final String middle_name;
   final String suffix;
   final String gender;
-  final DateTime dateOfBirth;
+  final DateTime date_of_birth;
   final String address;
-  final String contactNumber;
+  final String contact_number;
   final String facebook;
-  final OtherInfo otherInfo;
+  final OtherInfo other_info;
   final DateTime createdAt;
   final DateTime updatedAt;
   final String? createdBy;
@@ -30,16 +30,16 @@ class User extends Equatable {
     required this.role,
     required this.verified,
     required this.active,
-    required this.firstName,
-    required this.lastName,
-    required this.middleName,
+    required this.first_name,
+    required this.last_name,
+    required this.middle_name,
     required this.suffix,
     required this.gender,
-    required this.dateOfBirth,
+    required this.date_of_birth,
     required this.address,
-    required this.contactNumber,
+    required this.contact_number,
     required this.facebook,
-    required this.otherInfo,
+    required this.other_info,
     required this.createdAt,
     required this.updatedAt,
     this.createdBy,
@@ -49,7 +49,7 @@ class User extends Equatable {
   });
 
   // helper
-  String get fullName => '$firstName $lastName';
+  String get fullName => '$first_name $last_name';
   bool get isDeleted => deletedAt != null;
   bool get canPerformActions => active && verified && !isDeleted;
 
@@ -60,16 +60,16 @@ class User extends Equatable {
     role,
     verified,
     active,
-    firstName,
-    lastName,
-    middleName,
+    first_name,
+    last_name,
+    middle_name,
     suffix,
     gender,
-    dateOfBirth,
+    date_of_birth,
     address,
-    contactNumber,
+    contact_number,
     facebook,
-    otherInfo,
+    other_info,
     createdAt,
     updatedAt,
     createdBy,

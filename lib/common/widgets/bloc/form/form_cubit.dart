@@ -19,14 +19,14 @@ class FormCubit extends BaseCubit<FormValidationState> {
 
   bool validateAll(
     Map<String, String> fieldValues, {
-    List<String>? requiredFields,
+    List<String>? optionalFields,
   }) {
     bool isValid = true;
     final newErrors = <String, bool>{};
 
     for (final entry in fieldValues.entries) {
-      final isRequired = requiredFields?.contains(entry.key) ?? true;
-      final hasError = isRequired && entry.value.trim().isEmpty;
+      final isOptional = optionalFields?.contains(entry.key) ?? false;
+      final hasError = !isOptional && entry.value.trim().isEmpty;
       newErrors[entry.key] = hasError;
       if (hasError) isValid = false;
     }

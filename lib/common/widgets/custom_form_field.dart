@@ -4,6 +4,7 @@ import '../../theme/theme_extensions.dart';
 import 'bloc/form/form_cubit.dart';
 
 class CustomFormField extends StatelessWidget {
+  final String field_key;
   final String name;
   final TextEditingController controller;
   final String hint;
@@ -11,11 +12,12 @@ class CustomFormField extends StatelessWidget {
   final bool showErrorText;
 
   const CustomFormField({
+    super.key,
+    required this.field_key,
     required this.name,
     required this.controller,
     required this.hint,
     this.showErrorText = true,
-    super.key,
     this.required = false,
   });
 
@@ -23,15 +25,15 @@ class CustomFormField extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasError = context.select<FormCubit, bool>((cubit) {
       final state = cubit.state;
-      return state.hasError(name);
+      return state.hasError(field_key);
     });
 
     final radiusMedium = context.radii.medium;
-    final colorDanger = context.colors.danger;
-    final textColor = context.colors.textColor;
-    final dangerColor = context.colors.danger;
+    final colorDanger = context.colors.error;
+    final textColor = context.colors.textPrimary;
+    final dangerColor = context.colors.error;
     final weightRegular = context.weight.regular;
-    final midGroundColor = context.colors.midGroundColor;
+    final midGroundColor = context.colors.surface;
     final weightMedium = context.weight.medium;
     final double size = 16;
 

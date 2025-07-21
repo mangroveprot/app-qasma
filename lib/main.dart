@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'common/error/global_error_handler.dart';
 import 'common/widgets/bloc/button/button_cubit.dart';
 import 'common/widgets/bloc/form/form_cubit.dart';
 import 'core/_base/_services/storage/shared_preference.dart';
@@ -25,6 +26,8 @@ Future<void> mainCommon(Flavor flavor) async {
   setupServiceLocator();
 
   await Future.wait([SharedPrefs().init(), sl<AppConfig>().init()]);
+
+  GlobalErrorHandling();
 
   runApp(const MyApp());
 }

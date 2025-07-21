@@ -51,7 +51,7 @@ class _ButtonContentLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color defaultTextColor = context.colors.textColor;
+    final Color defaultTextColor = context.colors.textPrimary;
     final Color effectiveTextColor = textColor ?? defaultTextColor;
     final Color effectiveLoadingColor =
         loadingIndicatorColor ?? effectiveTextColor;

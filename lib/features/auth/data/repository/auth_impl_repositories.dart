@@ -9,9 +9,17 @@ import '../../domain/services/auth_service.dart';
 class AuthRepositoryImpl extends AuthRepository {
   final AuthService _authService = sl<AuthService>();
   @override
-  Future<Either> signUp(UserModel signupReq) {
-    // TODO: implement signUp
-    throw UnimplementedError();
+  Future<Either> signup(UserModel model) async {
+    final Either result = await _authService.create_account(model);
+    return result.fold(
+      (error) {
+        return Left(error.message);
+      },
+      (data) {
+        final Response response = data;
+        return Right(response);
+      },
+    );
   }
 
   @override
