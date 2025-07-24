@@ -2,45 +2,135 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../common/utils/constant.dart';
 import '../../../../common/utils/form_field_config.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/bloc/form/form_cubit.dart';
-import '../../../../common/widgets/button/custom_app_button.dart';
 import '../../../../common/widgets/custom_app_bar.dart';
-import '../../../../common/widgets/custom_dropdown_field.dart';
-import '../../../../common/widgets/custom_form_field.dart';
 import '../../../../common/widgets/toast/custom_toast.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
-import '../../../../theme/theme_extensions.dart';
+import '../../../../infrastructure/routes/app_routes.dart';
 import '../../../users/domain/usecases/is_register_usecase.dart';
-import '../widgets/call_to_action.dart';
-import '../widgets/signup_header.dart';
-import 'test_page.dart';
+import '../widgets/custom_password_field.dart';
+import '../widgets/get_started_widget/get_started_form.dart';
 
 class GetStartedPage extends StatefulWidget {
-  GetStartedPage({super.key});
+  const GetStartedPage({super.key});
 
   @override
-  State<GetStartedPage> createState() => _GetStartedPageState();
+  State<GetStartedPage> createState() => GetStartedPageState();
 }
 
-class _GetStartedPageState extends State<GetStartedPage> {
-  final _idNumberController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
+class GetStartedPageState extends State<GetStartedPage> {
+  static const _textFields = [
+    field_idNumber,
+    field_password,
+    field_confirm_password,
+  ];
 
-  final _courseController = ValueNotifier<String?>(null);
-  final _blockController = ValueNotifier<String?>(null);
-  final _yearLevelController = ValueNotifier<String?>(null);
+  static const _dropdownFields = [field_course, field_block, field_year_level];
+
+  late final Map<String, TextEditingController> textControllers;
+  late final Map<String, ValueNotifier<String?>> dropdownControllers;
+  late final FormCubit formCubit;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeControllers();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<FormCubit>().clearAll();
+    });
+    formCubit = context.read<FormCubit>();
+  }
+
+  void _initializeControllers() {
+    textControllers = {
+      for (final field in _textFields) field.field_key: TextEditingController(),
+    };
+
+    dropdownControllers = {
+      for (final field in _dropdownFields)
+        field.field_key: ValueNotifier<String?>(null),
+    };
+  }
+
+  Map<String, String> _buildValidationFields() {
+    final values = <String, String>{};
+
+    // add text field values
+    for (final field in _textFields) {
+      values[field.field_key] = textControllers[field.field_key]!.text;
+    }
+
+    // add dropdown field values
+    for (final field in _dropdownFields) {
+      values[field.field_key] =
+          dropdownControllers[field.field_key]!.value ?? '';
+    }
+
+    return values;
+  }
+
+  // helpers
+  String _getTextValue(FormFieldConfig field) {
+    return textControllers[field.field_key]?.text ?? '';
+  }
+
+  String _getDropdownValue(FormFieldConfig field) {
+    return dropdownControllers[field.field_key]?.value ?? '';
+  }
+
+  void handleSubmit() {
+    final isValid = formCubit.validateAll(
+      _buildValidationFields(),
+      // optionalFields: _optionalFields.map((field) => field.field_key).toList(),
+    );
+
+    if (!isValid) return;
+
+    _performValidation();
+  }
+
+  void _performValidation() {
+    final passwordText = _getTextValue(field_password);
+    final confirmPasswordText = _getTextValue(field_confirm_password);
+    final idNumberText = _getTextValue(field_idNumber);
+
+    if (passwordText != confirmPasswordText) {
+      formCubit.setFieldError(
+        field_confirm_password.field_key,
+        'Confirm password must be the same with password',
+      );
+      return;
+    }
+
+    final bool isPasswordValid = CustomPasswordFieldValidation.isValid(
+      passwordText,
+    );
+
+    if (!isPasswordValid) {
+      return;
+    }
+
+    context.read<ButtonCubit>().execute(
+          usecase: sl<IsRegisterUsecase>(),
+          params: idNumberText,
+        );
+  }
 
   @override
   void dispose() {
-    _idNumberController.dispose();
-    _courseController.dispose();
-    _blockController.dispose();
-    _yearLevelController.dispose();
+    _disposeControllers();
     super.dispose();
+  }
+
+  void _disposeControllers() {
+    for (final controller in textControllers.values) {
+      controller.dispose();
+    }
+    for (final notifier in dropdownControllers.values) {
+      notifier.dispose();
+    }
   }
 
   @override
@@ -48,147 +138,43 @@ class _GetStartedPageState extends State<GetStartedPage> {
     return Scaffold(
       appBar: const CustomAppBar(leadingText: 'Back'),
       body: BlocListener<ButtonCubit, ButtonState>(
-        listener: (context, state) {
-          if (state is ButtonSuccessState) {
-            context.push(
-              '/auth/create-account',
-              extra: {
-                'idNumber': _idNumberController.text,
-                'password': _passwordController.text,
-                'course': _courseController.value,
-                'block': _blockController.value,
-                'yearLevel': _yearLevelController.value,
-              },
+        listener: _handleButtonState,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SizedBox(
+              width: constraints.maxWidth,
+              height: constraints.maxHeight,
+              child: GetStartedForm(state: this),
             );
-          }
-          if (state is ButtonFailureState) {
-            //  CustomToast.error(context: context, message: state.errorMessage);
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SignupHeader(headingTitle: 'Get Started!'),
-                const SizedBox(height: 20),
-                CustomFormField(
-                  field_key: field_idNumber.field_key,
-                  name: field_idNumber.name,
-                  required: true,
-                  hint: field_idNumber.name,
-                  controller: _idNumberController,
-                ),
-                const SizedBox(height: 16),
-                CustomDropdownField(
-                  field_key: field_course.field_key,
-                  name: field_course.name,
-                  hint: field_course.hint,
-                  required: true,
-                  controller: _courseController,
-                  items: courseList,
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    CustomDropdownField(
-                      field_key: field_block.field_key,
-                      name: field_block.name,
-                      hint: field_block.hint,
-                      required: true,
-                      showErrorText: false,
-                      controller: _blockController,
-                      items: blockList,
-                    ),
-                    const SizedBox(width: 12),
-                    CustomDropdownField(
-                      field_key: field_year_level.field_key,
-                      name: field_year_level.name,
-                      hint: field_year_level.hint,
-                      controller: _yearLevelController,
-                      required: true,
-                      showErrorText: false,
-                      items: yearLevelList,
-                    ),
-                    const SizedBox(width: 12),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                CustomFormField(
-                  field_key: field_password.field_key,
-                  name: field_password.name,
-                  required: true,
-                  hint: field_password.hint,
-                  controller: _passwordController,
-                ),
-                const SizedBox(height: 16),
-                CustomFormField(
-                  field_key: field_confirm_password.field_key,
-                  name: field_confirm_password.name,
-                  required: true,
-                  hint: field_confirm_password.hint,
-                  controller: _confirmPasswordController,
-                ),
-                const SizedBox(height: 16),
-                CustomAppButton(
-                  buttonText: 'Next',
-                  textDecoration: TextDecoration.underline,
-                  fontWeight: context.weight.medium,
-                  iconData: Icons.arrow_forward,
-                  iconPosition: Position.right,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  onPressed: () {
-                    final formCubit = context.read<FormCubit>();
-                    final isValid = formCubit.validateAll({
-                      field_idNumber.field_key: _idNumberController.text,
-                      field_password.field_key: _passwordController.text,
-                      field_confirm_password.field_key:
-                          _confirmPasswordController.text,
-                      field_course.field_key: _courseController.value ?? '',
-                      field_block.field_key: _blockController.value ?? '',
-                    });
-
-                    if (!isValid) return;
-
-                    if (_passwordController.text !=
-                        _confirmPasswordController.text) {
-                      CustomToast.error(
-                        context: context,
-                        message:
-                            'Password must the same with confirm password!',
-                      );
-                      return;
-                    }
-
-                    context.read<ButtonCubit>().execute(
-                      usecase: sl<IsRegisterUsecase>(),
-                      params: _idNumberController.text,
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
-                const CallToAction(
-                  actionText: 'Already have an acount? ',
-                  actionLabel: 'Login',
-                  directionPath: '/auth/create-account',
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  child: const Text('Go to Second Page'),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const TestPage()),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
+          },
         ),
       ),
     );
+  }
+
+  Future<void> _handleButtonState(
+    BuildContext context,
+    ButtonState state,
+  ) async {
+    if (state is ButtonFailureState) {
+      Future.microtask(() async {
+        for (final message in state.errorMessages) {
+          CustomToast.error(context: context, message: message);
+          await Future.delayed(const Duration(milliseconds: 1500));
+        }
+      });
+    }
+    if (state is ButtonSuccessState) {
+      context.push(
+        Routes.buildPath(Routes.aut_path, Routes.create_account),
+        extra: {
+          field_idNumber.field_key: _getTextValue(field_idNumber),
+          field_password.field_key: _getTextValue(field_password),
+          field_course.field_key: _getDropdownValue(field_course),
+          field_block.field_key: _getDropdownValue(field_block),
+          field_year_level.field_key: _getDropdownValue(field_year_level),
+        },
+      );
+    }
   }
 }

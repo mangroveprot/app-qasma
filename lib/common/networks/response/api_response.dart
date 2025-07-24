@@ -32,20 +32,26 @@ class ApiResponse<T> {
 
     AppError? error;
     if (!success) {
-      final errorData = json['error'];
-      if (errorData != null) {
-        final message =
-            errorData is Map<String, dynamic>
-                ? (errorData['message'] ?? 'Server error occurred')
-                : errorData.toString();
+      final List<String> errorMessages = [];
 
-        error = AppError.create(message: message, type: ErrorType.server);
-      } else {
-        error = AppError.create(
-          message: 'Unknown server error',
-          type: ErrorType.server,
-        );
+      if (json['message'] != null) {
+        errorMessages.add(json['message'].toString());
       }
+
+      if (json['details'] != null && json['details'] is List) {
+        final details = json['details'] as List;
+        errorMessages.addAll(details.map((detail) => detail.toString()));
+      }
+
+      if (errorMessages.isEmpty) {
+        errorMessages.add('Unknown server error');
+      }
+
+      error = AppError.create(
+        message: json['message']?.toString() ?? 'Server error',
+        messages: errorMessages,
+        type: ErrorType.validation,
+      );
     }
 
     return ApiResponse(
@@ -64,7 +70,6 @@ class ApiResponse<T> {
       error: error,
     );
   }
-
   bool get isSuccess => success && error == null;
   bool get hasError => error != null;
   bool get hasData =>

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
-import '../../../../common/helpers/builder_dob.dart';
+import '../../../../common/helpers/helpers.dart';
 import '../../../../common/utils/constant.dart';
 import '../../../../common/utils/form_field_config.dart';
 import '../../../../common/widgets/bloc/form/form_cubit.dart';
@@ -9,6 +10,7 @@ import '../../../../common/widgets/custom_app_bar.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/toast/custom_toast.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
+import '../../../../infrastructure/routes/app_routes.dart';
 import '../../../users/domain/entities/other_info.dart';
 import '../../../users/data/models/user_model.dart';
 import '../../domain/usecases/signup_usecase.dart';
@@ -22,115 +24,178 @@ class CreateAccountPage extends StatefulWidget {
 }
 
 class CreateAccountPageState extends State<CreateAccountPage> {
+  static const _textFields = [
+    field_firstName,
+    field_lastName,
+    field_suffix,
+    field_middle_name,
+    field_address,
+    field_contact_number,
+    field_email,
+    field_facebook,
+  ];
+
+  static const _dropdownFields = [
+    field_gender,
+    field_month,
+    field_day,
+    field_year,
+  ];
+
+  static const _routeFields = [
+    field_idNumber,
+    field_password,
+    field_course,
+    field_block,
+    field_year_level,
+  ];
+
+  static const _optionalFields = [
+    field_suffix,
+    field_middle_name,
+    field_address,
+    field_facebook,
+  ];
+
   late final Map<String, TextEditingController> textControllers;
   late final Map<String, ValueNotifier<String?>> dropdownControllers;
   late final Map<String, dynamic> _routeData;
+  late final FormCubit formCubit;
 
   @override
   void initState() {
     super.initState();
+    _initializeControllers();
+    formCubit = context.read<FormCubit>();
+  }
+
+  void _initializeControllers() {
     textControllers = {
-      field_firstName.field_key: TextEditingController(),
-      field_lastName.field_key: TextEditingController(),
-      field_suffix.field_key: TextEditingController(),
-      field_middle_name.field_key: TextEditingController(),
-      field_address.field_key: TextEditingController(),
-      field_contact_number.field_key: TextEditingController(),
-      field_email.field_key: TextEditingController(),
-      field_facebook.field_key: TextEditingController(),
+      for (final field in _textFields) field.field_key: TextEditingController(),
     };
+
     dropdownControllers = {
-      field_gender.field_key: ValueNotifier<String?>(null),
-      field_month.field_key: ValueNotifier<String?>(null),
-      field_day.field_key: ValueNotifier<String?>(null),
-      field_year.field_key: ValueNotifier<String?>(null),
+      for (final field in _dropdownFields)
+        field.field_key: ValueNotifier<String?>(null),
     };
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _routeData = {
-      'idNumber': 'sample',
-      'password': 'sample',
-      'course': 'CS',
-      'block': 'A',
-      'yearLevel': '1',
-    };
+    _extractRouteData();
+  }
+
+  void _extractRouteData() {
+    final extra = GoRouterState.of(context).extra;
+    if (extra != null && extra is Map<String, dynamic>) {
+      _routeData = {
+        for (final field in _routeFields)
+          field.field_key: extra[field.field_key] ?? '',
+      };
+    } else {
+      _routeData = {for (final field in _routeFields) field.field_key: ''};
+    }
   }
 
   Map<String, String> _buildValidationFields() {
     final values = <String, String>{};
-    for (final entry in textControllers.entries) {
-      values[entry.key] = entry.value.text;
+
+    // add text field values
+    for (final field in _textFields) {
+      values[field.field_key] = textControllers[field.field_key]!.text;
     }
-    for (final entry in dropdownControllers.entries) {
-      values[entry.key] = entry.value.value ?? '';
+
+    // add dropdown field values
+    for (final field in _dropdownFields) {
+      values[field.field_key] =
+          dropdownControllers[field.field_key]!.value ?? '';
     }
+
     return values;
   }
 
+  String _getTextValue(FormFieldConfig field) {
+    return textControllers[field.field_key]?.text ?? '';
+  }
+
+  String _getDropdownValue(FormFieldConfig field) {
+    return dropdownControllers[field.field_key]?.value ?? '';
+  }
+
+  String _getRouteValue(FormFieldConfig field) {
+    return _routeData[field.field_key] ?? '';
+  }
+
   void handleSubmit() {
-    // validate first
-    final formCubit = context.read<FormCubit>();
     final isValid = formCubit.validateAll(
       _buildValidationFields(),
-      optionalFields: [
-        field_suffix.field_key,
-        field_middle_name.field_key,
-        field_address.field_key,
-        field_facebook.field_key,
-      ],
+      optionalFields: _optionalFields.map((field) => field.field_key).toList(),
     );
 
     if (!isValid) return;
 
+    _performSignup();
+  }
+
+  void _performSignup() {
     final dateOfBirth = buildDateOfBirth(
-      year: dropdownControllers[field_year.field_key]!.value ?? '',
-      month: dropdownControllers[field_month.field_key]!.value ?? '',
-      day: dropdownControllers[field_day.field_key]!.value ?? '',
+      year: _getDropdownValue(field_year),
+      month: _getDropdownValue(field_month),
+      day: _getDropdownValue(field_day),
       monthsList: monthsList,
     );
 
     final user = UserModel(
-      idNumber: _routeData['idNumber'],
-      email: textControllers[field_email.field_key]!.text,
-      password: _routeData['password'],
+      idNumber: _getRouteValue(field_idNumber),
+      email: _getTextValue(field_email),
+      password: _getRouteValue(field_password),
       verified: false,
       active: true,
-      first_name: textControllers[field_firstName.field_key]!.text,
-      last_name: textControllers[field_lastName.field_key]!.text,
-      middle_name: textControllers[field_middle_name.field_key]!.text,
-      suffix: textControllers[field_suffix.field_key]!.text,
-      gender: dropdownControllers[field_gender.field_key]!.value ?? '',
+      first_name: _getTextValue(field_firstName),
+      last_name: _getTextValue(field_lastName),
+      middle_name: _getTextValue(field_middle_name),
+      suffix: _getTextValue(field_suffix),
+      gender: _getDropdownValue(field_gender),
       date_of_birth: dateOfBirth,
-      address: textControllers[field_address.field_key]!.text,
-      contact_number: textControllers[field_contact_number.field_key]!.text,
-      facebook: textControllers[field_facebook.field_key]!.text,
+      address: _getTextValue(field_address),
+      contact_number: _getTextValue(field_contact_number),
+      facebook: _getTextValue(field_facebook),
       other_info: OtherInfo(
-        course: _routeData['course'],
-        yearLevel: _routeData['yearLevel'],
-        block: _routeData['block'],
+        course: _getRouteValue(field_course),
+        yearLevel: _getRouteValue(field_year_level),
+        block: _getRouteValue(field_block),
       ),
       updatedAt: DateTime.now(),
       createdAt: DateTime.now(),
     );
 
     context.read<ButtonCubit>().execute(
-      usecase: sl<SignupUsecase>(),
-      params: user,
-    );
+          usecase: sl<SignupUsecase>(),
+          params: user,
+        );
+  }
+
+  @override
+  void deactivate() {
+    // if the page is closed then clear the error from cubit
+    context.read<FormCubit>().clearAll();
+    super.deactivate();
   }
 
   @override
   void dispose() {
+    _disposeControllers();
+    super.dispose();
+  }
+
+  void _disposeControllers() {
     for (final controller in textControllers.values) {
       controller.dispose();
     }
     for (final notifier in dropdownControllers.values) {
       notifier.dispose();
     }
-    super.dispose();
   }
 
   @override
@@ -138,12 +203,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
     return Scaffold(
       appBar: const CustomAppBar(leadingText: 'Back'),
       body: BlocListener<ButtonCubit, ButtonState>(
-        listener: (context, state) {
-          if (state is ButtonFailureState) {
-            CustomToast.error(context: context, message: '2');
-            CustomToast.error(context: context, message: '2');
-          }
-        },
+        listener: _handleButtonState,
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SizedBox(
@@ -155,5 +215,24 @@ class CreateAccountPageState extends State<CreateAccountPage> {
         ),
       ),
     );
+  }
+
+  void _handleButtonState(BuildContext context, ButtonState state) {
+    if (state is ButtonFailureState) {
+      if (state.errorMessages.isNotEmpty) {
+        CustomToast.error(context: context, message: state.errorMessages.first);
+      }
+    }
+
+    if (state is ButtonSuccessState) {
+      final data = state.data;
+
+      if (data is UserModel) {
+        context.push(
+          Routes.buildPath(Routes.aut_path, Routes.otp_verification),
+          extra: {field_email.field_key: data.email},
+        );
+      }
+    }
   }
 }

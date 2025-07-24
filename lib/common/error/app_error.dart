@@ -1,10 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:dio/dio.dart';
 import '../../core/_config/app_config.dart';
 
 class AppError {
-  final String message;
+  final String? message;
+  final List<String>? messages;
   final ErrorType type;
   final Object? originalError;
   final StackTrace? stackTrace;
@@ -12,7 +12,8 @@ class AppError {
   final List<String>? suggestions;
 
   AppError({
-    required this.message,
+    this.message,
+    this.messages,
     required this.type,
     this.originalError,
     this.stackTrace,
@@ -27,18 +28,48 @@ class AppError {
       printer: PrettyPrinter(methodCount: 0, colors: true, printEmojis: true),
     );
 
-    final emoji = switch (type) {
-      ErrorType.network => '🌐',
-      ErrorType.authentication => '🔐',
-      ErrorType.validation => '🧾',
-      ErrorType.server => '⚠️',
-      _ => '❌',
-    };
+    late final String emoji;
+
+    switch (type) {
+      case ErrorType.network:
+        emoji = '🌐';
+        break;
+      case ErrorType.authentication:
+        emoji = '🔐';
+        break;
+      case ErrorType.validation:
+        emoji = '🧾';
+        break;
+      case ErrorType.server:
+        emoji = '⚠️';
+        break;
+      case ErrorType.unknown:
+        emoji = '❌';
+        break;
+      case ErrorType.configuration:
+        emoji = '⚙️';
+        break;
+      case ErrorType.database:
+        emoji = '🗄️';
+        break;
+      case ErrorType.timeout:
+        emoji = '⏱️';
+        break;
+      case ErrorType.canceled:
+        emoji = '🚫';
+        break;
+      case ErrorType.api:
+        emoji = '🔗';
+        break;
+    }
+
+    // determine what type of messages to log
+    final logMessage = messages != null && messages!.isNotEmpty
+        ? '$message\nAdditional details: ${messages!.join(', ')}'
+        : message;
 
     logger.e(
-      '$emoji ${type.name}: $message',
-      error: originalError,
-      stackTrace: stackTrace,
+      '${emoji} ${type.name}: $logMessage. Error: $originalError\nStackTrace: $stackTrace',
     );
 
     // if (kDebugMode) {
@@ -71,6 +102,7 @@ class AppError {
       type: ErrorType.api,
       status: json['status'],
       message: json['message'] ?? 'Unknown API error',
+      messages: (json['messages'] as List?)?.cast<String>(),
       suggestions: (json['suggestions'] as List?)?.cast<String>(),
     );
   }
@@ -80,20 +112,23 @@ class AppError {
       'type': type.toString(),
       'status': status,
       'message': message,
+      'messages': messages,
       'suggestions': suggestions,
     };
   }
 
   // General factory
   factory AppError.create({
-    required String message,
+    String? message,
     ErrorType type = ErrorType.unknown,
     Object? originalError,
+    List<String>? messages,
     StackTrace? stackTrace,
     shouldLog = true,
   }) {
     final error = AppError(
       message: message,
+      messages: messages,
       type: type,
       originalError: originalError,
       stackTrace: stackTrace,
@@ -108,6 +143,24 @@ class AppError {
   @override
   String toString() {
     return toJson().toString();
+  }
+
+  // helpers
+
+  // get all error message
+  /*
+  Usage:
+      error.allMassages
+  */
+  List<String> get allMessages {
+    final result = <String>[];
+    if (message != null) {
+      result.add(message!);
+    }
+    if (messages != null && messages!.isNotEmpty) {
+      result.addAll(messages!);
+    }
+    return result;
   }
 }
 

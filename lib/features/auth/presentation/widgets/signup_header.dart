@@ -14,13 +14,13 @@ class SignupHeader extends StatelessWidget {
           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
-        const Row(
+        Row(
           children: [
-            Text(
+            const Text(
               'Required fields are marked with an asterisk',
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
-            Text(
+            const Text(
               ' *',
               style: TextStyle(
                 color: Colors.red,

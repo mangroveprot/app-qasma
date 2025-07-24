@@ -22,6 +22,7 @@ class _ButtonContent extends StatelessWidget {
   final MainAxisAlignment mainAxisAlignment;
   final BorderRadius? borderRadius;
   final List<BoxShadow>? boxShadow;
+  final Border? border;
 
   const _ButtonContent({
     Key? key,
@@ -43,53 +44,53 @@ class _ButtonContent extends StatelessWidget {
     this.boxShadow,
     this.mainAxisAlignment = MainAxisAlignment.center,
     this.iconPosition,
+    this.border,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final Color defaultTexColor = context.colors.textPrimary;
-    final List<Widget> icon =
-        (iconData != null)
-            ? [
-              Icon(
-                iconData,
-                color: textColor ?? defaultTexColor,
-                size: iconSize,
-              ),
-              const SizedBox(width: 8),
-            ]
-            : [];
+    final defaultTextColor = context.colors.textPrimary;
+    final effectiveTextColor = textColor ?? defaultTextColor;
+    final effectiveBorderRadius = borderRadius ?? context.radii.medium;
 
     return Container(
       width: buttonWidth,
       height: buttonHeight,
-      decoration: BoxDecoration(boxShadow: boxShadow),
+      decoration: BoxDecoration(
+        boxShadow: boxShadow,
+        border: border,
+        borderRadius: effectiveBorderRadius,
+      ),
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: buttonColor,
           padding: EdgeInsets.zero,
           elevation: elevation,
-          shape: RoundedRectangleBorder(
-            borderRadius: borderRadius ?? context.radii.medium,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: effectiveBorderRadius),
         ),
         child: Padding(
           padding: padding,
           child: Row(
             mainAxisAlignment: mainAxisAlignment,
             children: [
-              if (iconPosition == Position.left) ...icon,
+              if (iconPosition == Position.left && iconData != null) ...[
+                Icon(iconData, color: effectiveTextColor, size: iconSize),
+                const SizedBox(width: 8),
+              ],
               Text(
                 buttonText,
                 style: TextStyle(
-                  color: textColor ?? defaultTexColor,
+                  color: effectiveTextColor,
                   fontSize: textSize,
                   fontWeight: fontWeight ?? context.weight.regular,
                   decoration: textDecoration,
                 ),
               ),
-              if (iconPosition == Position.right) ...icon,
+              if (iconPosition == Position.right && iconData != null) ...[
+                const SizedBox(width: 8),
+                Icon(iconData, color: effectiveTextColor, size: iconSize),
+              ],
             ],
           ),
         ),

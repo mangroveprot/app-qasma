@@ -21,16 +21,14 @@ class ContactInfoSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Address - full width
+        // Address
         Row(
           children: [
-            Expanded(
-              child: CustomFormField(
-                field_key: field_address.field_key,
-                name: field_address.name,
-                hint: field_address.hint,
-                controller: addressController,
-              ),
+            CustomFormField(
+              field_key: field_address.field_key,
+              name: field_address.name,
+              hint: field_address.hint,
+              controller: addressController,
             ),
           ],
         ),
@@ -39,39 +37,33 @@ class ContactInfoSection extends StatelessWidget {
         // Contact + Email
         Row(
           children: [
-            Expanded(
-              child: CustomFormField(
-                field_key: field_contact_number.field_key,
-                name: field_contact_number.name,
-                hint: field_contact_number.hint,
-                controller: contactController,
-                required: true,
-              ),
+            CustomFormField(
+              field_key: field_contact_number.field_key,
+              name: field_contact_number.name,
+              hint: field_contact_number.hint,
+              controller: contactController,
+              required: true,
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: CustomFormField(
-                field_key: field_email.field_key,
-                name: field_email.name,
-                hint: field_email.hint,
-                controller: emailController,
-                required: true,
-              ),
+            Spacing.horizontalXSmall,
+            CustomFormField(
+              field_key: field_email.field_key,
+              name: field_email.name,
+              hint: field_email.hint,
+              controller: emailController,
+              required: true,
             ),
           ],
         ),
         Spacing.verticalMedium,
 
-        // Facebook - full width
+        // Facebook
         Row(
           children: [
-            Expanded(
-              child: CustomFormField(
-                field_key: field_facebook.field_key,
-                name: field_facebook.name,
-                hint: field_facebook.hint,
-                controller: facebookController,
-              ),
+            CustomFormField(
+              field_key: field_facebook.field_key,
+              name: field_facebook.name,
+              hint: field_facebook.hint,
+              controller: facebookController,
             ),
           ],
         ),

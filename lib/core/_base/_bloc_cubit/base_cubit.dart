@@ -20,19 +20,27 @@ abstract class BaseCubit<T extends BaseState> extends Cubit<T> {
   }
 
   void emitError({
-    required String message,
+    String? message,
+    List<String>? errorMessages,
     dynamic error,
     StackTrace? stackTrace,
   }) {
     AppError(
       message: message,
+
       originalError: error,
       stackTrace: stackTrace,
       type: ErrorType.unknown,
     );
 
     emit(
-      ErrorState(message: message, error: error, stackTrace: stackTrace) as T,
+      ErrorState(
+            message: message,
+            errorMessages: errorMessages,
+            error: error,
+            stackTrace: stackTrace,
+          )
+          as T,
     );
   }
 

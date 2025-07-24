@@ -13,11 +13,10 @@ class AuthRepositoryImpl extends AuthRepository {
     final Either result = await _authService.create_account(model);
     return result.fold(
       (error) {
-        return Left(error.message);
+        return Left(error);
       },
       (data) {
-        final Response response = data;
-        return Right(response);
+        return Right(data);
       },
     );
   }
@@ -27,7 +26,7 @@ class AuthRepositoryImpl extends AuthRepository {
     final Either result = await _authService.signin(signinReq);
     return result.fold(
       (error) {
-        return Left(error.message);
+        return Left(error);
       },
       (data) {
         final Response response = data;

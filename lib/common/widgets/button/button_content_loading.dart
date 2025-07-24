@@ -100,7 +100,7 @@ class _ButtonContentLoading extends StatelessWidget {
       height: buttonHeight,
       decoration: BoxDecoration(boxShadow: boxShadow),
       child: ElevatedButton(
-        onPressed: null, // always disabled
+        onPressed: null,
         style: ElevatedButton.styleFrom(
           disabledBackgroundColor: disabledBackgroundColor,
           backgroundColor: buttonColor,

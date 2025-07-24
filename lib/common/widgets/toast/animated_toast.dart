@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../theme/theme_extensions.dart';
+import '../../helpers/spacing.dart';
 import 'toast_enums.dart';
 import 'toast_item.dart';
 
@@ -106,7 +107,7 @@ class _AnimatedToastState extends State<AnimatedToast>
                             color: widget.toast.textColor,
                             size: 18,
                           ),
-                          const SizedBox(width: 8),
+                          Spacing.horizontalXSmall,
                         ],
                         Expanded(
                           child: Text(
@@ -125,7 +126,7 @@ class _AnimatedToastState extends State<AnimatedToast>
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             if (widget.toast.actionLabel != null) ...[
-                              const SizedBox(width: 8),
+                              Spacing.horizontalXSmall,
                               TextButton(
                                 onPressed: () {
                                   widget.toast.onAction?.call();

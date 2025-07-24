@@ -21,11 +21,17 @@ class LoadingState extends BaseState {
 }
 
 class ErrorState extends BaseState {
-  final String message;
+  final String? message;
+  final List<String>? errorMessages;
   final dynamic error;
   final StackTrace? stackTrace;
 
-  const ErrorState({required this.message, this.error, this.stackTrace});
+  const ErrorState({
+    this.message,
+    this.errorMessages,
+    this.error,
+    this.stackTrace,
+  });
 
   @override
   List<Object?> get props => [message, error, stackTrace];

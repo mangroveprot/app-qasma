@@ -1,0 +1,69 @@
+import 'package:flutter/material.dart';
+
+import '../../../../../common/helpers/spacing.dart';
+import '../../../../../common/utils/form_field_config.dart';
+import '../../../../../infrastructure/routes/app_routes.dart';
+import '../../pages/get_started_page.dart';
+import '../../pages/login_page.dart';
+import '../call_to_action.dart';
+import '../signup_header.dart';
+import 'basic_info_section.dart';
+import 'next_button.dart';
+import 'password_section.dart';
+
+class GetStartedForm extends StatelessWidget {
+  final GetStartedPageState state;
+  const GetStartedForm({super.key, required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SignupHeader(headingTitle: 'Get Started!'),
+            Spacing.verticalLarge,
+            BasicInfoSection(
+              idNumberController:
+                  state.textControllers[field_idNumber.field_key]!,
+              courseController:
+                  state.dropdownControllers[field_course.field_key]!,
+              blockController:
+                  state.dropdownControllers[field_block.field_key]!,
+              yearLevelController:
+                  state.dropdownControllers[field_year_level.field_key]!,
+            ),
+            Spacing.verticalMedium,
+            PasswordSection(
+              passwordController:
+                  state.textControllers[field_password.field_key]!,
+              confirmPasswordController:
+                  state.textControllers[field_confirm_password.field_key]!,
+            ),
+            Spacing.verticalMedium,
+            NextButton(onPressed: state.handleSubmit),
+            Spacing.verticalMedium,
+            CallToAction(
+              actionText: 'Already have an account?',
+              actionLabel: 'Login',
+              directionPath: Routes.buildPath(Routes.aut_path, Routes.login),
+            ),
+            Spacing.verticalMedium,
+            ElevatedButton(
+              child: const Text('Go to Second Page'),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                );
+                // context.go(Routes.buildPath(Routes.aut_path, Routes.otp_verification));
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

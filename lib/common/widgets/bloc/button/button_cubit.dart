@@ -16,7 +16,8 @@ class ButtonCubit extends BaseCubit<ButtonState> {
 
   @override
   void emitError({
-    required String message,
+    String? message,
+    List<String>? errorMessages,
     dynamic error,
     StackTrace? stackTrace,
     List<String>? suggestions,
@@ -24,8 +25,17 @@ class ButtonCubit extends BaseCubit<ButtonState> {
     final List<String> finalSuggestions =
         error is AppError ? error.suggestions ?? [] : [];
 
+    final List<String> finalErrorMessages =
+        errorMessages ??
+        (error is AppError
+            ? error.allMessages
+            : [message ?? 'Unknown error occurred']);
+
     emit(
-      ButtonFailureState(errorMessage: message, suggestions: finalSuggestions),
+      ButtonFailureState(
+        errorMessages: finalErrorMessages,
+        suggestions: finalSuggestions,
+      ),
     );
   }
 
@@ -38,17 +48,21 @@ class ButtonCubit extends BaseCubit<ButtonState> {
       result.fold(
         (error) {
           emitError(
-            message: error.message,
+            errorMessages: error.messages ?? ['Unknown error occurred'],
             suggestions: error.suggestions,
             error: error,
           );
         },
         (data) {
-          emit(ButtonSuccessState());
+          emit(ButtonSuccessState(data));
         },
       );
-    } catch (e) {
-      emitError(message: e.toString(), error: e);
+    } catch (e, stackTrace) {
+      emitError(
+        errorMessages: [e.toString()],
+        error: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 }

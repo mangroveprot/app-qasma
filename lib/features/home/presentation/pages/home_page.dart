@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../common/helpers/spacing.dart';
+
 void main() {
   runApp(const HomePage());
 }
@@ -57,8 +59,11 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
                 if (showQRCode)
-                  const Column(
-                    children: [Icon(Icons.qr_code, size: 40), Text('QR Code')],
+                  Column(
+                    children: [
+                      const Icon(Icons.qr_code, size: 40),
+                      const Text('QR Code')
+                    ],
                   ),
               ],
             ),
@@ -70,7 +75,7 @@ class HomeScreen extends StatelessWidget {
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                   child: const Text('Cancel'),
                 ),
-                const SizedBox(width: 8),
+                Spacing.horizontalXSmall,
                 ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
@@ -108,15 +113,15 @@ class HomeScreen extends StatelessWidget {
             width: double.infinity,
             color: Colors.grey.shade200,
             padding: const EdgeInsets.all(16),
-            child: const Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Good Morning Gemma 👋',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 4),
-                Text(
+                const SizedBox(height: 4),
+                const Text(
                   'Hope you\'re having a great day! How can we assist you today?',
                 ),
               ],

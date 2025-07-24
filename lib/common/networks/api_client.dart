@@ -34,6 +34,10 @@ class ApiClient {
       milliseconds: AppConfig.sendTimeout,
     );
 
+    _dio.options.validateStatus = (status) {
+      return status != null && status < 500;
+    };
+
     _dio.interceptors.addAll([
       HeadersInterceptor(),
       LoggerInterceptor(_logger),
@@ -141,12 +145,17 @@ class ApiClient {
     bool requiresAuth = true,
   }) async {
     try {
-      return await _dio.post<T>(
+      final response = await _dio.post<T>(
         endpoint,
         data: data,
         queryParameters: queryParameters,
-        options: _mergeOptions(options, requiresAuth),
+        options: Options(
+          validateStatus: (status) => status != null && status < 500,
+          extra: {'requiresAuth': requiresAuth},
+        ),
       );
+
+      return response;
     } on DioException catch (e) {
       _handleDioError('POST', endpoint, e);
     }
@@ -210,8 +219,11 @@ class ApiClient {
   }
 
   Options _mergeOptions(Options? options, bool requiresAuth) {
-    return (options ?? Options()).copyWith(
-      extra: {...?options?.extra, 'requiresAuth': requiresAuth},
+    final baseOptions = options ?? Options();
+
+    return baseOptions.copyWith(
+      extra: {...?baseOptions.extra, 'requiresAuth': requiresAuth},
+      validateStatus: baseOptions.validateStatus ?? _dio.options.validateStatus,
     );
   }
 }

@@ -110,3 +110,9 @@ const FormFieldConfig field_facebook = FormFieldConfig(
   name: 'Facebook',
   hint: 'Enter your Facebook profile link... (optional)',
 );
+
+const FormFieldConfig field_otp_verification = FormFieldConfig(
+  field_key: 'otp-verfication',
+  name: 'OTP Verification',
+  hint: 'Please enter the 6-digit code sent to your email ',
+);

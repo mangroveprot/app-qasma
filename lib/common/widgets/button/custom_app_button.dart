@@ -9,6 +9,8 @@ part 'button_content_loading.dart';
 
 enum Position { left, right }
 
+enum BorderSide { top, bottom, left, right, all }
+
 class CustomAppButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final String buttonText;
@@ -31,31 +33,33 @@ class CustomAppButton extends StatelessWidget {
   final Color? loadingIndicatorColor;
   final double loadingIndicatorSize;
   final Color? disabledBackgroundColor;
+  final Border? border;
 
-  const CustomAppButton({
-    Key? key,
-    required this.onPressed,
-    required this.buttonText,
-    this.iconData,
-    this.buttonColor = Colors.transparent,
-    this.fontWeight,
-    this.iconSize = 22,
-    this.textColor,
-    this.textSize = 16,
-    this.shadowColor,
-    this.textDecoration = TextDecoration.none,
-    this.elevation = 0,
-    this.borderRadius,
-    this.buttonWidth = double.infinity,
-    this.buttonHeight = 48,
-    this.padding = const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-    this.boxShadow = const [],
-    this.mainAxisAlignment = MainAxisAlignment.center,
-    this.iconPosition,
-    this.loadingIndicatorColor,
-    this.loadingIndicatorSize = 20,
-    this.disabledBackgroundColor = Colors.transparent,
-  }) : super(key: key);
+  const CustomAppButton(
+      {Key? key,
+      required this.onPressed,
+      required this.buttonText,
+      this.iconData,
+      this.buttonColor = Colors.transparent,
+      this.fontWeight,
+      this.iconSize = 22,
+      this.textColor,
+      this.textSize = 16,
+      this.shadowColor,
+      this.textDecoration = TextDecoration.none,
+      this.elevation = 0,
+      this.borderRadius,
+      this.buttonWidth = double.infinity,
+      this.buttonHeight = 48,
+      this.padding = const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      this.boxShadow = const [],
+      this.mainAxisAlignment = MainAxisAlignment.center,
+      this.iconPosition,
+      this.loadingIndicatorColor,
+      this.loadingIndicatorSize = 20,
+      this.disabledBackgroundColor = Colors.transparent,
+      this.border})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -104,6 +108,7 @@ class CustomAppButton extends StatelessWidget {
           boxShadow: boxShadow,
           mainAxisAlignment: mainAxisAlignment,
           iconPosition: iconPosition,
+          border: border,
         );
       },
     );

@@ -39,18 +39,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Builder(
-      builder:
-          (context) => MultiBlocProvider(
-            providers: [
-              BlocProvider(create: (_) => FormCubit()),
-              BlocProvider(create: (_) => ButtonCubit()),
-            ],
-            child: MaterialApp.router(
-              title: AppConfig.appTitle,
-              theme: lightTheme,
-              routerConfig: AppRouter.router,
-            ),
-          ),
+      builder: (context) => MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => FormCubit()),
+          BlocProvider(create: (_) => ButtonCubit()),
+        ],
+        child: MaterialApp.router(
+          title: AppConfig.appTitle,
+          theme: lightTheme,
+          routerConfig: AppRouter.router,
+        ),
+      ),
     );
   }
 }

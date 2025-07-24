@@ -44,12 +44,11 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
         data: model.toJson(),
         requiresAuth: false,
       );
-
       final apiResponse = ApiResponse.fromJson(
         response.data,
-        (json) => UserModel.fromJson,
+        (json) => UserModel.fromJson(json),
       );
-      print({'api', UserModel.fromJson});
+
       if (apiResponse.isSuccess && apiResponse.document != null) {
         return Right(apiResponse.document as UserModel);
       } else {
@@ -60,7 +59,7 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
           e is AppError
               ? e
               : AppError.create(
-                message: 'Unexpected error during signin',
+                message: 'Unexpected error during signup',
                 type: ErrorType.unknown,
                 originalError: e,
                 stackTrace: stack,

@@ -14,9 +14,9 @@ abstract class BaseRepository {
     ApiClient? apiClient,
     DatabaseService? databaseService,
     Logger? logger,
-  }) : _apiClient = apiClient ?? sl<ApiClient>(),
-       _databaseService = databaseService ?? sl<DatabaseService>(),
-       _logger = logger ?? sl<Logger>();
+  })  : _apiClient = apiClient ?? sl<ApiClient>(),
+        _databaseService = databaseService ?? sl<DatabaseService>(),
+        _logger = logger ?? sl<Logger>();
 
   ApiClient get apiClient => _apiClient;
   DatabaseService get databaseService => _databaseService;
@@ -79,10 +79,9 @@ abstract class BaseRepository {
       if (result != null) return result;
       return await fallbackOperation();
     } catch (error, stackTrace) {
+      // Fixed: Use positional parameters instead of named parameters
       _logger.w(
-        'Cache operation failed in ${runtimeType.toString()}, falling back',
-        error: error,
-        stackTrace: stackTrace,
+        'Cache operation failed in ${runtimeType.toString()}, falling back. Error: $error\nStackTrace: $stackTrace',
       );
       try {
         return await fallbackOperation();
@@ -108,10 +107,9 @@ abstract class BaseRepository {
       if (onComplete != null) await onComplete();
     } catch (error, stackTrace) {
       if (error is ConflictException && onConflict != null) {
+        // Fixed: Use positional parameters instead of named parameters
         _logger.w(
-          'Sync conflict detected in ${runtimeType.toString()}, attempting resolution',
-          error: error,
-          stackTrace: stackTrace,
+          'Sync conflict detected in ${runtimeType.toString()}, attempting resolution. Error: $error\nStackTrace: $stackTrace',
         );
         try {
           await onConflict();
