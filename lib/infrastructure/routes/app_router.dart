@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/pages/create_account_page.dart';
+import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/get_started_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/otp_verification_page.dart';
@@ -38,6 +39,10 @@ class AppRouter {
           GoRoute(
             path: Routes.otp_verification,
             builder: (context, state) => const OtpVerificationPage(),
+          ),
+          GoRoute(
+            path: Routes.forgot_password,
+            builder: (context, state) => const ForgotPasswordPage(),
           ),
           GoRoute(path: 'test', builder: (context, state) => const TestPage()),
         ],

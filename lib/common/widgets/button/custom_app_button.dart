@@ -12,102 +12,105 @@ enum Position { left, right }
 enum BorderSide { top, bottom, left, right, all }
 
 class CustomAppButton extends StatelessWidget {
-  final VoidCallback? onPressed;
-  final String buttonText;
-  final IconData? iconData;
+  final VoidCallback? onPressedCallback;
+  final String labelText;
+  final IconData? icon;
   final Position? iconPosition;
   final double? iconSize;
-  final Color? buttonColor;
-  final Color? textColor;
-  final TextDecoration? textDecoration;
-  final double? textSize;
-  final FontWeight? fontWeight;
+  final Color? backgroundColor;
+  final Color? labelTextColor;
+  final TextDecoration? labelTextDecoration;
+  final double? labelFontSize;
+  final FontWeight? labelFontWeight;
   final Color? shadowColor;
   final double? elevation;
-  final double? buttonWidth;
-  final double? buttonHeight;
+  final double? width;
+  final double? height;
   final EdgeInsetsGeometry padding;
-  final MainAxisAlignment mainAxisAlignment;
+  final MainAxisAlignment contentAlignment;
   final BorderRadius? borderRadius;
-  final List<BoxShadow>? boxShadow;
-  final Color? loadingIndicatorColor;
-  final double loadingIndicatorSize;
+  final List<BoxShadow>? boxShadows;
+  final Color? loadingSpinnerColor;
+  final double loadingSpinnerSize;
   final Color? disabledBackgroundColor;
   final Border? border;
 
-  const CustomAppButton(
-      {Key? key,
-      required this.onPressed,
-      required this.buttonText,
-      this.iconData,
-      this.buttonColor = Colors.transparent,
-      this.fontWeight,
-      this.iconSize = 22,
-      this.textColor,
-      this.textSize = 16,
-      this.shadowColor,
-      this.textDecoration = TextDecoration.none,
-      this.elevation = 0,
-      this.borderRadius,
-      this.buttonWidth = double.infinity,
-      this.buttonHeight = 48,
-      this.padding = const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      this.boxShadow = const [],
-      this.mainAxisAlignment = MainAxisAlignment.center,
-      this.iconPosition,
-      this.loadingIndicatorColor,
-      this.loadingIndicatorSize = 20,
-      this.disabledBackgroundColor = Colors.transparent,
-      this.border})
-      : super(key: key);
+  const CustomAppButton({
+    Key? key,
+    required this.onPressedCallback,
+    required this.labelText,
+    this.icon,
+    this.iconPosition,
+    this.iconSize = 22,
+    this.backgroundColor = Colors.transparent,
+    this.labelTextColor,
+    this.labelTextDecoration = TextDecoration.none,
+    this.labelFontSize = 16,
+    this.labelFontWeight,
+    this.shadowColor,
+    this.elevation = 0,
+    this.width = double.infinity,
+    this.height = 48,
+    this.padding = const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+    this.contentAlignment = MainAxisAlignment.center,
+    this.borderRadius,
+    this.boxShadows = const [],
+    this.loadingSpinnerColor,
+    this.loadingSpinnerSize = 20,
+    this.disabledBackgroundColor = Colors.transparent,
+    this.border,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ButtonCubit, ButtonState>(
       builder: (context, state) {
-        if (state is ButtonLoadingState) {
+        final isButtonLoading = state is ButtonLoadingState;
+
+        if (isButtonLoading) {
           return _ButtonContentLoading(
-            buttonText: buttonText,
-            iconData: iconData,
-            buttonColor: buttonColor,
-            fontWeight: fontWeight,
-            iconSize: iconSize,
-            textColor: textColor,
-            textSize: textSize,
-            shadowColor: shadowColor,
-            textDecoration: textDecoration,
-            elevation: elevation,
-            borderRadius: borderRadius,
-            buttonWidth: buttonWidth,
-            buttonHeight: buttonHeight,
-            padding: padding,
-            boxShadow: boxShadow,
-            mainAxisAlignment: mainAxisAlignment,
+            buttonText: labelText,
+            iconData: icon,
             iconPosition: iconPosition,
-            loadingIndicatorColor: loadingIndicatorColor,
-            loadingIndicatorSize: loadingIndicatorSize,
+            iconSize: iconSize,
+            buttonColor: backgroundColor,
+            textColor: labelTextColor,
+            textDecoration: labelTextDecoration,
+            textSize: labelFontSize,
+            fontWeight: labelFontWeight,
+            shadowColor: shadowColor,
+            elevation: elevation,
+            buttonWidth: width,
+            buttonHeight: height,
+            padding: padding,
+            mainAxisAlignment: contentAlignment,
+            borderRadius: borderRadius,
+            boxShadow: boxShadows,
+            loadingIndicatorColor: loadingSpinnerColor,
+            loadingIndicatorSize: loadingSpinnerSize,
             disabledBackgroundColor: disabledBackgroundColor,
           );
         }
+
         return _ButtonContent(
-          onPressed: onPressed,
-          buttonText: buttonText,
-          iconData: iconData,
-          buttonColor: buttonColor,
-          fontWeight: fontWeight,
-          iconSize: iconSize,
-          textColor: textColor,
-          textSize: textSize,
-          shadowColor: shadowColor,
-          textDecoration: textDecoration,
-          elevation: elevation,
-          borderRadius: borderRadius,
-          buttonWidth: buttonWidth,
-          buttonHeight: buttonHeight,
-          padding: padding,
-          boxShadow: boxShadow,
-          mainAxisAlignment: mainAxisAlignment,
+          onPressed: onPressedCallback,
+          buttonText: labelText,
+          iconData: icon,
           iconPosition: iconPosition,
+          iconSize: iconSize,
+          buttonColor: backgroundColor,
+          textColor: labelTextColor,
+          textDecoration: labelTextDecoration,
+          textSize: labelFontSize,
+          fontWeight: labelFontWeight,
+          shadowColor: shadowColor,
+          elevation: elevation,
+          buttonWidth: width,
+          buttonHeight: height,
+          padding: padding,
+          mainAxisAlignment: contentAlignment,
+          borderRadius: borderRadius,
+          boxShadow: boxShadows,
           border: border,
         );
       },

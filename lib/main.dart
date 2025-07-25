@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'common/error/global_error_handler.dart';
-import 'common/widgets/bloc/button/button_cubit.dart';
 import 'common/widgets/bloc/form/form_cubit.dart';
 import 'core/_base/_services/storage/shared_preference.dart';
 import 'core/_config/app_config.dart';
@@ -42,7 +41,6 @@ class MyApp extends StatelessWidget {
       builder: (context) => MultiBlocProvider(
         providers: [
           BlocProvider(create: (_) => FormCubit()),
-          BlocProvider(create: (_) => ButtonCubit()),
         ],
         child: MaterialApp.router(
           title: AppConfig.appTitle,

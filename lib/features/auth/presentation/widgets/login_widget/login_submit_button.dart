@@ -11,16 +11,20 @@ class LoginSubmitButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
-      child: CustomAppButton(
-        buttonText: 'Login',
-        textColor: context.colors.white,
-        buttonColor: context.colors.primary,
-        textDecoration: TextDecoration.none,
-        fontWeight: context.weight.medium,
-        borderRadius: context.radii.medium,
-        disabledBackgroundColor: context.colors.textPrimary,
-        mainAxisAlignment: MainAxisAlignment.center,
-        onPressed: onPressed,
+      child: Builder(
+        builder: (context) {
+          return CustomAppButton(
+            labelText: 'Login',
+            labelTextColor: context.colors.white,
+            backgroundColor: context.colors.primary,
+            labelTextDecoration: TextDecoration.none,
+            labelFontWeight: context.weight.medium,
+            borderRadius: context.radii.medium,
+            disabledBackgroundColor: context.colors.textPrimary,
+            contentAlignment: MainAxisAlignment.center,
+            onPressedCallback: onPressed,
+          );
+        },
       ),
     );
   }

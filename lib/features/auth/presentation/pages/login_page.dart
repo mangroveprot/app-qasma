@@ -59,13 +59,6 @@ class LoginPageState extends State<LoginPage> {
   void _performLogin() {}
 
   @override
-  void deactivate() {
-    // if the page is closed then clear the error from cubit
-    context.read<FormCubit>().clearAll();
-    super.deactivate();
-  }
-
-  @override
   void dispose() {
     _disposeControllers();
     super.dispose();
@@ -79,20 +72,22 @@ class LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      //appBar: CustomAppBar(leadingText: ,),
-      body: BlocListener<ButtonCubit, ButtonState>(
-        listener: _handleButtonState,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SafeArea(
-              child: SizedBox(
-                width: constraints.maxWidth,
-                height: constraints.maxHeight,
-                child: LoginForm(state: this),
-              ),
-            );
-          },
+    return BlocProvider(
+      create: (context) => ButtonCubit(),
+      child: Scaffold(
+        body: BlocListener<ButtonCubit, ButtonState>(
+          listener: _handleButtonState,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SafeArea(
+                child: SizedBox(
+                  width: constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  child: LoginForm(state: this),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

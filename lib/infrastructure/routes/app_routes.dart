@@ -8,6 +8,7 @@ class Routes {
   static const String get_started = 'get-started';
   static const String otp_verification = 'otp-verification';
   static const String login = 'login';
+  static const String forgot_password = 'forgot-password';
 
   static String buildPath(String basePath, String routeName) {
     if (basePath.isEmpty || routeName.isEmpty) {

@@ -16,6 +16,11 @@ const FormFieldConfig field_idNumber = FormFieldConfig(
   name: 'ID Number',
   hint: 'Enter your id number...',
 );
+const FormFieldConfig field_idNumber_email = FormFieldConfig(
+  field_key: 'idNumber-email',
+  name: 'ID Number or Email',
+  hint: 'Enter your id number or email...',
+);
 const FormFieldConfig field_course = FormFieldConfig(
   field_key: 'course',
   name: 'Course',

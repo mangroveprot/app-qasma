@@ -10,16 +10,16 @@ class OtpVerifyButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomAppButton(
-      buttonText: 'Verify Account',
-      textColor: context.colors.white,
-      buttonColor: context.colors.primary,
-      textDecoration: TextDecoration.none,
-      fontWeight: context.weight.medium,
+      labelText: 'Verify Account',
+      labelTextColor: context.colors.white,
+      backgroundColor: context.colors.primary,
+      labelTextDecoration: TextDecoration.none,
+      labelFontWeight: context.weight.medium,
       borderRadius: context.radii.large,
       disabledBackgroundColor: context.colors.textPrimary,
-      mainAxisAlignment: MainAxisAlignment.center,
-      buttonHeight: 50,
-      onPressed: onPressed,
+      contentAlignment: MainAxisAlignment.center,
+      height: 50,
+      onPressedCallback: onPressed,
     );
   }
 }

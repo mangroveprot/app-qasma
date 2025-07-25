@@ -15,6 +15,11 @@ class ButtonCubit extends BaseCubit<ButtonState> {
   }
 
   @override
+  void emitInitial({bool isRefreshing = false}) {
+    emit(ButtonInitialState());
+  }
+
+  @override
   void emitError({
     String? message,
     List<String>? errorMessages,
@@ -25,8 +30,7 @@ class ButtonCubit extends BaseCubit<ButtonState> {
     final List<String> finalSuggestions =
         error is AppError ? error.suggestions ?? [] : [];
 
-    final List<String> finalErrorMessages =
-        errorMessages ??
+    final List<String> finalErrorMessages = errorMessages ??
         (error is AppError
             ? error.allMessages
             : [message ?? 'Unknown error occurred']);

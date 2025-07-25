@@ -15,7 +15,7 @@ abstract class BaseCubit<T extends BaseState> extends Cubit<T> {
     emit(LoadingState(isRefreshing: isRefreshing) as T);
   }
 
-  void emitInital() {
+  void emitInitial() {
     emit(const InitialState() as T);
   }
 
@@ -27,7 +27,6 @@ abstract class BaseCubit<T extends BaseState> extends Cubit<T> {
   }) {
     AppError(
       message: message,
-
       originalError: error,
       stackTrace: stackTrace,
       type: ErrorType.unknown,
@@ -35,12 +34,11 @@ abstract class BaseCubit<T extends BaseState> extends Cubit<T> {
 
     emit(
       ErrorState(
-            message: message,
-            errorMessages: errorMessages,
-            error: error,
-            stackTrace: stackTrace,
-          )
-          as T,
+        message: message,
+        errorMessages: errorMessages,
+        error: error,
+        stackTrace: stackTrace,
+      ) as T,
     );
   }
 

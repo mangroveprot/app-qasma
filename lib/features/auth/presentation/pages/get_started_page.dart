@@ -135,18 +135,21 @@ class GetStartedPageState extends State<GetStartedPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CustomAppBar(leadingText: 'Back'),
-      body: BlocListener<ButtonCubit, ButtonState>(
-        listener: _handleButtonState,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SizedBox(
-              width: constraints.maxWidth,
-              height: constraints.maxHeight,
-              child: GetStartedForm(state: this),
-            );
-          },
+    return BlocProvider(
+      create: (context) => ButtonCubit(),
+      child: Scaffold(
+        appBar: const CustomAppBar(leadingText: 'Back'),
+        body: BlocListener<ButtonCubit, ButtonState>(
+          listener: _handleButtonState,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SizedBox(
+                width: constraints.maxWidth,
+                height: constraints.maxHeight,
+                child: GetStartedForm(state: this),
+              );
+            },
+          ),
         ),
       ),
     );

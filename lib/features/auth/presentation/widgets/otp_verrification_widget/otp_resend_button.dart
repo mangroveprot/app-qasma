@@ -10,10 +10,10 @@ class OtpResendButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomAppButton(
-      buttonText: 'Resend Code',
-      textColor: context.colors.textPrimary,
-      textDecoration: TextDecoration.underline,
-      onPressed: onPressedResend,
+      labelText: 'Resend Code',
+      labelTextColor: context.colors.textPrimary,
+      labelTextDecoration: TextDecoration.underline,
+      onPressedCallback: onPressedResend,
     );
   }
 }
