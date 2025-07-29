@@ -16,7 +16,7 @@ final ThemeData lightTheme = ThemeData(
     systemOverlayStyle: SystemUiOverlayStyle.dark,
   ),
   textTheme: const TextTheme(), // use default system font
-  extensions: const [
+  extensions: [
     AppColors.lightColors,
     AppRadii.lightRadii,
     AppBoxShadow.lightShadows,

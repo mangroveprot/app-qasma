@@ -1,3 +1,7 @@
+import 'package:flutter/material.dart';
+
+import '../widgets/models/modal_option.dart';
+
 int YEARS_TO_GENERATE = 50;
 
 const Map<String, dynamic> name = {
@@ -37,7 +41,7 @@ const List<String> genderList = ['Male', 'Female', 'LGBTQ+ ultra'];
 
 final currentYear = DateTime.now().year;
 final yearsList = List.generate(
-  YEARS_TO_GENERATE, // years to generate start from current date
+  YEARS_TO_GENERATE, // years to generate start from current year
   (index) => (currentYear - index).toString(),
 );
 
@@ -59,4 +63,27 @@ const List<String> monthsList = [
   'October',
   'November',
   'December',
+];
+
+class AppointmentSelection {
+  static const key = 'new-appointment-selection';
+  static const title = 'Select Your Appointment Category';
+  static const description = 'Choose from the list of available services.';
+}
+
+final List<ModalOption> newAppointmentOptions = [
+  const ModalOption(
+    value: 'counseling',
+    title: 'Counseling',
+    subtitle:
+        'Get support through emotional, mental, or personal challenges with our counseling staff',
+    icon: Icon(Icons.psychology, size: 40, color: Colors.blue),
+  ),
+  const ModalOption(
+    value: 'testing',
+    title: 'Testing',
+    subtitle:
+        'Take psychological tests to better understand your mental health and create personalized plans',
+    icon: Icon(Icons.assignment, size: 40, color: Colors.green),
+  ),
 ];

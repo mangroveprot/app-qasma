@@ -20,35 +20,44 @@ class GetStartedForm extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: SingleChildScrollView(
+        clipBehavior: Clip.none,
+        physics: const ClampingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SignupHeader(headingTitle: 'Get Started!'),
+            const RepaintBoundary(
+                child: SignupHeader(headingTitle: 'Get Started!')),
             Spacing.verticalLarge,
-            BasicInfoSection(
-              idNumberController:
-                  state.textControllers[field_idNumber.field_key]!,
-              courseController:
-                  state.dropdownControllers[field_course.field_key]!,
-              blockController:
-                  state.dropdownControllers[field_block.field_key]!,
-              yearLevelController:
-                  state.dropdownControllers[field_year_level.field_key]!,
+            RepaintBoundary(
+              child: BasicInfoSection(
+                idNumberController:
+                    state.textControllers[field_idNumber.field_key]!,
+                courseController:
+                    state.dropdownControllers[field_course.field_key]!,
+                blockController:
+                    state.dropdownControllers[field_block.field_key]!,
+                yearLevelController:
+                    state.dropdownControllers[field_year_level.field_key]!,
+              ),
             ),
             Spacing.verticalMedium,
-            PasswordSection(
-              passwordController:
-                  state.textControllers[field_password.field_key]!,
-              confirmPasswordController:
-                  state.textControllers[field_confirm_password.field_key]!,
+            RepaintBoundary(
+              child: PasswordSection(
+                passwordController:
+                    state.textControllers[field_password.field_key]!,
+                confirmPasswordController:
+                    state.textControllers[field_confirm_password.field_key]!,
+              ),
             ),
             Spacing.verticalMedium,
-            NextButton(onPressed: state.handleSubmit),
+            RepaintBoundary(child: NextButton(onPressed: state.handleSubmit)),
             Spacing.verticalMedium,
-            CallToAction(
-              actionText: 'Already have an account?',
-              actionLabel: 'Login',
-              directionPath: Routes.buildPath(Routes.aut_path, Routes.login),
+            RepaintBoundary(
+              child: CallToAction(
+                actionText: 'Already have an account?',
+                actionLabel: 'Login',
+                directionPath: Routes.buildPath(Routes.aut_path, Routes.login),
+              ),
             ),
             Spacing.verticalMedium,
             ElevatedButton(

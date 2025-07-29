@@ -12,18 +12,19 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color surface; // midground
   final Color textPrimary;
   final Color white;
+  final Color black;
 
-  const AppColors({
-    required this.primary,
-    required this.secondary,
-    required this.accent,
-    required this.error,
-    required this.warning,
-    required this.background,
-    required this.surface,
-    required this.textPrimary,
-    required this.white,
-  });
+  const AppColors(
+      {required this.primary,
+      required this.secondary,
+      required this.accent,
+      required this.error,
+      required this.warning,
+      required this.background,
+      required this.surface,
+      required this.textPrimary,
+      required this.white,
+      required this.black});
 
   @override
   AppColors copyWith({
@@ -36,6 +37,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? surface,
     Color? textPrimary,
     Color? white,
+    Color? black,
   }) {
     return AppColors(
       primary: primary ?? this.primary,
@@ -47,6 +49,7 @@ class AppColors extends ThemeExtension<AppColors> {
       surface: surface ?? this.surface,
       textPrimary: textPrimary ?? this.textPrimary,
       white: white ?? this.white,
+      black: black ?? this.black,
     );
   }
 
@@ -63,18 +66,19 @@ class AppColors extends ThemeExtension<AppColors> {
       surface: Color.lerp(surface, other.surface, t)!,
       textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
       white: Color.lerp(white, other.white, t)!,
+      black: Color.lerp(black, other.black, t)!,
     );
   }
 
   static const lightColors = AppColors(
-    primary: Color(0xFF32A616),
-    secondary: Color(0xFF0F65B3),
-    accent: Color(0xFF484848),
-    error: Color(0xFFE8322B),
-    warning: Color(0xFFF57C00),
-    background: Color(0xFFE6E6E6),
-    surface: Color(0xFFD9D9D9),
-    textPrimary: Color(0xFF616161),
-    white: Color(0xFFFEFEFE),
-  );
+      primary: Color(0xFF32A616),
+      secondary: Color(0xFF0F65B3),
+      accent: Color(0xFF484848),
+      error: Color(0xFFE8322B),
+      warning: Color(0xFFF57C00),
+      background: Color(0xFFE6E6E6),
+      surface: Color(0xFFD9D9D9),
+      textPrimary: Color(0xFF616161),
+      white: Color(0xFFFEFEFE),
+      black: Colors.black87);
 }

@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'common/error/global_error_handler.dart';
@@ -28,6 +30,10 @@ Future<void> mainCommon(Flavor flavor) async {
 
   GlobalErrorHandling();
 
+  if (kDebugMode) {
+    debugPaintSizeEnabled = false;
+  }
+
   runApp(const MyApp());
 }
 
@@ -46,6 +52,11 @@ class MyApp extends StatelessWidget {
           title: AppConfig.appTitle,
           theme: lightTheme,
           routerConfig: AppRouter.router,
+          scrollBehavior: const MaterialScrollBehavior().copyWith(
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            ),
+          ),
         ),
       ),
     );

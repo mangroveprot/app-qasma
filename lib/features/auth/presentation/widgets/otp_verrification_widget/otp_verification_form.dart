@@ -24,8 +24,7 @@ class OtpVerificationForm extends StatelessWidget {
           physics: const ClampingScrollPhysics(),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight:
-                  MediaQuery.of(context).size.height -
+              minHeight: MediaQuery.of(context).size.height -
                   MediaQuery.of(context).padding.top -
                   kToolbarHeight,
             ),

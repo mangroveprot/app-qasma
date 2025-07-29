@@ -19,6 +19,7 @@ class LoginForm extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: SingleChildScrollView(
+        clipBehavior: Clip.none,
         physics: const ClampingScrollPhysics(),
         child: Center(
           child: Column(
@@ -27,17 +28,21 @@ class LoginForm extends StatelessWidget {
               Spacing.horizontalLarge,
               const RepaintBoundary(child: LoginLogo()),
               Spacing.verticalSmall,
-              const LoginHeader(),
+              const RepaintBoundary(child: LoginHeader()),
               Spacing.verticalLarge,
-              LoginField(
-                idNumberController:
-                    state.textControllers[field_idNumber.field_key]!,
-                passwordController:
-                    state.textControllers[field_password.field_key]!,
+              RepaintBoundary(
+                child: LoginField(
+                  idNumberController:
+                      state.textControllers[field_idNumber.field_key]!,
+                  passwordController:
+                      state.textControllers[field_password.field_key]!,
+                ),
               ),
-              LoginSubmitButton(onPressed: state.handleSubmit),
-              const LoginForgotPasswordBtn(),
-              const LoginCreateAccountButton()
+              RepaintBoundary(
+                child: LoginSubmitButton(onPressed: state.handleSubmit),
+              ),
+              const RepaintBoundary(child: LoginForgotPasswordBtn()),
+              const RepaintBoundary(child: LoginCreateAccountButton()),
             ],
           ),
         ),

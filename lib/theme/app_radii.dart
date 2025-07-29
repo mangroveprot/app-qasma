@@ -37,6 +37,6 @@ class AppRadii extends ThemeExtension<AppRadii> {
   static const lightRadii = AppRadii(
     small: BorderRadius.all(Radius.circular(6)),
     medium: BorderRadius.all(Radius.circular(12)),
-    large: BorderRadius.all(Radius.circular(18)),
+    large: BorderRadius.all(Radius.circular(20)),
   );
 }
