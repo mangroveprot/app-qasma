@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'dart:async';
 
 import '../../../../common/utils/constant.dart';
 import '../../../../common/utils/menu_items_config.dart';
@@ -9,8 +10,10 @@ import '../../../../common/widgets/button_text/custom_text_button.dart';
 import '../../../../common/widgets/custom_modal/custom_modal.dart';
 import '../../../../common/widgets/modal.dart';
 import '../../../../common/widgets/toast/custom_toast.dart';
+import '../../../../infrastructure/injection/service_locator.dart';
 import '../../../../theme/theme_extensions.dart';
-import '../../data/models/appointment_model.dart';
+import '../../../appointment/domain/usecases/getall_appointments_usecase.dart';
+import '../../../appointment/presentation/bloc/appointments_cubit.dart';
 import '../widgets/home_widget/home_fab.dart';
 import '../widgets/home_widget/home_form.dart';
 import '../widgets/main_appbar.dart';
@@ -23,51 +26,70 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => HomePageState();
 }
 
-class HomePageState extends State<HomePage> {
-  // Sample appointment data - replace with your actual data source
-  final List<AppointmentData> appointments = [
-    const AppointmentData(
-        id: '1',
-        date: 'December 25, 20204',
-        time: '10:30 am',
-        type: 'Counselling',
-        appointmentType: 'Unknown',
-        status: AppointmentStatus.approved,
-        qrCode: 'QR_CODE_DATA_1',
-        description: 'dkkjihuibkjnlkmjhuighbjknljgyuhjbkjohuighb'),
-    const AppointmentData(
-        id: '2',
-        date: 'December 25, 20204',
-        time: '10:30 am',
-        type: 'Counselling',
-        appointmentType: 'Unknown',
-        status: AppointmentStatus.approved,
-        qrCode: 'QR_CODE_DATA_2',
-        description: 'dkkjihuibkjnlkmjhuighbjknljgyuhjbkjohuighb'),
-    const AppointmentData(
-        id: '3',
-        date: 'December 25, 20204',
-        time: '10:30 am',
-        type: 'Counselling',
-        appointmentType: 'Unknown',
-        status: AppointmentStatus.approved,
-        qrCode: 'QR_CODE_DATA_3',
-        description: 'dkkjihuibkjnlkmjhuighbjknljgyuhjbkjohuighb'),
-    const AppointmentData(
-        id: '4',
-        date: 'December 25, 20204',
-        time: '10:30 am',
-        type: 'Counselling',
-        appointmentType: 'Unknown',
-        status: AppointmentStatus.approved,
-        qrCode: 'QR_CODE_DATA_4',
-        description: 'dkkjihuibkjnlkmjhuighbjknljgyuhjbkjohuighb'),
-  ];
+class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
+  // Cubits
+  late AppointmentsCubit _appointmentsCubit;
+  late ButtonCubit _buttonCubit;
+
+  // Use cases
+  late GetAllAppointmentUsecase _getAllAppointmentsUseCase;
+
+  // Stream subscriptions for manual disposal if needed
+  StreamSubscription<AppointmentCubitState>? _appointmentsSubscription;
+
+  // Loading state for initial data
+  bool _isInitialLoading = true;
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeDependencies();
+    _loadInitialData();
+  }
+
+  void _initializeDependencies() {
+    _getAllAppointmentsUseCase = sl<GetAllAppointmentUsecase>();
+    _appointmentsCubit = AppointmentsCubit();
+    _buttonCubit = ButtonCubit();
+  }
+
+  void _loadInitialData() {
+    _appointmentsCubit.loadAppointments(
+      usecase: _getAllAppointmentsUseCase,
+    );
+  }
+
+  // Refresh method for pull-to-refresh
+  Future<void> refreshData() async {
+    await _appointmentsCubit.refreshAppointments(
+      usecase: _getAllAppointmentsUseCase,
+    );
+  }
+
+  // Filter appointments by status
+  void filterAppointmentsByStatus(String status) {
+    _appointmentsCubit.loadAppointmentsByStatus(
+      status: status,
+      usecase: _getAllAppointmentsUseCase,
+    );
+  }
+
+  // Search appointments
+  void searchAppointments(String query) {
+    if (query.isEmpty) {
+      _appointmentsCubit.clearFilters();
+    } else {
+      _appointmentsCubit.searchAppointments(query);
+    }
+  }
 
   Future<void> handleCancelAppointment(String appointmentId) async {
     final result = await CustomModal.showCenteredModal<bool>(
       context,
-      title: 'Are you sure to cancel this appointment ${appointmentId}?',
+      title: 'Are you sure to cancel this appointment $appointmentId?',
       subtitle: 'Date: December 24, 2025 - 10:30am',
       icon: CustomModal.warningIcon(
           iconColor: Colors.red,
@@ -89,7 +111,6 @@ class HomePageState extends State<HomePage> {
           width: 100,
           height: 44,
         ),
-        // Secondary button (No) - simple text button
         ModalUI.secondaryButton(
             text: 'No',
             onPressed: () {
@@ -109,7 +130,17 @@ class HomePageState extends State<HomePage> {
         },
       );
 
-      print('Selected cancellation reason: $selectedReason');
+      if (selectedReason != null) {
+        // Here you would call your cancel appointment use case
+        // _buttonCubit.execute(
+        //   params: {'appointmentId': appointmentId, 'reason': selectedReason},
+        //   usecase: cancelAppointmentUseCase,
+        // );
+        debugPrint('Selected cancellation reason: $selectedReason');
+
+        // Refresh appointments after cancellation
+        refreshData();
+      }
     }
   }
 
@@ -124,34 +155,26 @@ class HomePageState extends State<HomePage> {
   }
 
   void _handleMenuItemTap(String menuItem) {
-    // Handle navigation based on menu item
     switch (menuItem) {
       case MenuKeys.appointments:
-        // Navigate to appointments page
         debugPrint('Navigating to Appointments');
         break;
       case MenuKeys.myProfile:
-        // Navigate to profile page
         debugPrint('Navigating to Profile');
         break;
       case MenuKeys.history:
-        // Navigate to history page
         debugPrint('Navigating to History');
         break;
-      case MenuKeys.history:
-        // Navigate to privacy policy page
+      case MenuKeys.privacyPolicy:
         debugPrint('Navigating to Privacy Policy');
         break;
       case MenuKeys.termsAndCondition:
-        // Navigate to terms page
         debugPrint('Navigating to Terms');
         break;
       case MenuKeys.settings:
-        // Navigate to settings page
         debugPrint('Navigating to Settings');
         break;
       case MenuKeys.logout:
-        // Handle logout
         _handleLogout();
         break;
     }
@@ -174,7 +197,6 @@ class HomePageState extends State<HomePage> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // Add your actual logout logic here
                 debugPrint('User logged out');
               },
               child: const Text('Logout', style: TextStyle(color: Colors.red)),
@@ -186,15 +208,18 @@ class HomePageState extends State<HomePage> {
   }
 
   void _handleNotificationTap() {
-    // Handle notification bell tap
     debugPrint('Notification bell tapped');
-    // Add your notification logic here
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ButtonCubit(),
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _buttonCubit),
+        BlocProvider.value(value: _appointmentsCubit),
+      ],
       child: Scaffold(
         drawerEnableOpenDragGesture: true,
         drawerScrimColor: Colors.black54,
@@ -207,11 +232,19 @@ class HomePageState extends State<HomePage> {
           userName: 'Jane Doe',
           onMenuItemTap: _handleMenuItemTap,
         ),
-        body: BlocListener<ButtonCubit, ButtonState>(
-          listener: _handleButtonState,
+        body: MultiBlocListener(
+          listeners: [
+            BlocListener<ButtonCubit, ButtonState>(
+              listener: _handleButtonState,
+            ),
+            BlocListener<AppointmentsCubit, AppointmentCubitState>(
+              listener: _handleAppointmentsState,
+            ),
+          ],
           child: SafeArea(
             child: HomeForm(
               state: this,
+              //onRefresh: refreshData,
             ),
           ),
         ),
@@ -227,6 +260,43 @@ class HomePageState extends State<HomePage> {
       }
     }
 
-    if (state is ButtonSuccessState) {}
+    if (state is ButtonSuccessState) {
+      // Handle success - maybe refresh appointments
+      CustomToast.success(
+          context: context, message: 'Action completed successfully');
+      refreshData();
+    }
+  }
+
+  void _handleAppointmentsState(
+      BuildContext context, AppointmentCubitState state) {
+    if (state is AppointmentsFailureState) {
+      CustomToast.error(
+        context: context,
+        message: state.primaryError,
+      );
+    }
+
+    if (state is AppointmentsLoadedState) {
+      if (_isInitialLoading) {
+        _isInitialLoading = false;
+        // Optional: Show success message for initial load
+        if (state.appointments.isEmpty) {
+          CustomToast.info(context: context, message: 'No appointments found');
+        }
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    // Cancel any active subscriptions
+    _appointmentsSubscription?.cancel();
+
+    // Close cubits
+    _appointmentsCubit.close();
+    _buttonCubit.close();
+
+    super.dispose();
   }
 }

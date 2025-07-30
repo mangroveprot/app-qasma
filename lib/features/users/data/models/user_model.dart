@@ -64,7 +64,10 @@ class UserModel extends User {
     String key1, [
     String? key2,
   ]) {
-    final value = map[key1]?.toString() ?? map[key2]?.toString();
+    final raw = map.containsKey(key1)
+        ? map[key1]
+        : (key2 != null && map.containsKey(key2) ? map[key2] : null);
+    final value = raw?.toString();
     if (value != null && value.isNotEmpty) {
       return DateTime.tryParse(value);
     }

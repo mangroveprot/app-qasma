@@ -106,8 +106,7 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
   }
 
   void handleVerifyOTP() {
-    // TODO:
-    print('verifyinhg');
+    // TODO: Implement OTP verification logic
     if (!isOtpComplete) {
       // Set error for incomplete OTP
       context.read<FormCubit>().setFieldError(
@@ -117,7 +116,8 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
       return;
     }
 
-    print(getRouteValue(field_email));
+    // Get email from route parameters for verification
+    final email = getRouteValue(field_email);
   }
 
   void handleResendOTP() {
@@ -133,8 +133,7 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
       focusNodes[0].requestFocus();
     }
 
-    // TODO: Handle a button cubit
-    print('RESENDING');
+    // TODO: Handle resend OTP logic
   }
 
   @override
@@ -164,7 +163,7 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
     }
 
     if (state is ButtonSuccessState) {
-      print('Success OTP');
+      // OTP verification successful - handle navigation or other success logic
     }
   }
 }

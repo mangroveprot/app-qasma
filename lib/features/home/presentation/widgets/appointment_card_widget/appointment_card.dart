@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../../../../common/helpers/spacing.dart';
 import '../../../../../theme/theme_extensions.dart';
-import '../../../data/models/appointment_model.dart';
+import '../../../../appointment/data/models/appointment_model.dart';
 import 'card_cancel_button.dart';
 import 'card_qrcode_section.dart';
 import 'card_reschedule_button.dart';
 import 'status_chip.dart';
 
 class AppointmentCard extends StatelessWidget {
-  final AppointmentData appointment;
+  final AppointmentModel appointment;
   final VoidCallback onCancel;
   final VoidCallback onReschedule;
   const AppointmentCard(
@@ -30,8 +30,7 @@ class AppointmentCard extends StatelessWidget {
       color: textPrimay,
     );
 
-    final _bodyTextStyle =
-        TextStyle(fontSize: 14, color: colors.black, fontWeight: weight.medium);
+
 
     final _labelTextStyle =
         TextStyle(fontSize: 14, color: colors.black, fontWeight: weight.medium);
@@ -70,12 +69,12 @@ class AppointmentCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        appointment.date,
+                        appointment.scheduledStartAt.toString(),
                         style: _titleTextStyle,
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        appointment.time,
+                        appointment.scheduledEndAt.toString(),
                         style: _subtitleTextStyle,
                       ),
                     ],
@@ -104,7 +103,7 @@ class AppointmentCard extends StatelessWidget {
                         style: _labelTextStyle,
                       ),
                       Text(
-                        appointment.type,
+                        appointment.appointmentType,
                         style: _subtitleTextStyle,
                       ),
                       Spacing.verticalSmall,

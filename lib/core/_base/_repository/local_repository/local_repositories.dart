@@ -1,13 +1,12 @@
 import 'package:sqflite/sqflite.dart';
 
 import '../../../../common/error/app_error.dart';
-import '../base_repository/abstract_repositories.dart';
 import '../base_repository/base_repositories.dart';
 
 typedef FromJson<T> = T Function(Map<String, dynamic> map);
 typedef ToJson<T> = Map<String, dynamic> Function(T model);
 
-class LocalRepository<T> extends BaseRepository implements AbstractRepository {
+class LocalRepository<T> extends BaseRepository {
   final String tableName;
   final String keyField;
   final FromJson<T> fromDb;
@@ -22,7 +21,6 @@ class LocalRepository<T> extends BaseRepository implements AbstractRepository {
   });
 
   // getById(idNumber: 1)
-  @override
   Future<T?> getItemById(dynamic id) async {
     return handleDatabaseOperation(() async {
       final db = await databaseService.database;
@@ -38,7 +36,6 @@ class LocalRepository<T> extends BaseRepository implements AbstractRepository {
   }
 
   // getAll()
-  @override
   Future<List<T>> getAllItems() async {
     return handleDatabaseOperation(() async {
       final db = await databaseService.database;
@@ -48,7 +45,6 @@ class LocalRepository<T> extends BaseRepository implements AbstractRepository {
   }
 
   // save(user)
-  @override
   Future<void> saveItem(model) async {
     await handleDatabaseOperation(() async {
       final db = await databaseService.database;
@@ -61,7 +57,6 @@ class LocalRepository<T> extends BaseRepository implements AbstractRepository {
   }
 
   // saveAll(items: [UserModel(...), UserModel(...)])
-  @override
   Future<void> saveAllItems(items) async {
     await handleDatabaseOperation(() async {
       final db = await databaseService.database;
@@ -78,7 +73,6 @@ class LocalRepository<T> extends BaseRepository implements AbstractRepository {
   }
 
   // deleteById(idNumber: 1)
-  @override
   Future<void> deleteItemById(dynamic id) async {
     await handleDatabaseOperation(() async {
       final db = await databaseService.database;
@@ -87,7 +81,6 @@ class LocalRepository<T> extends BaseRepository implements AbstractRepository {
   }
 
   // search(query: 'john', fields: ['name', 'email'])
-  @override
   Future<List<T>> search(String keyword, List<String> fields) async {
     return handleDatabaseOperation(() async {
       final db = await databaseService.database;
@@ -100,7 +93,6 @@ class LocalRepository<T> extends BaseRepository implements AbstractRepository {
     });
   }
 
-  @override
   Future<int> count() async {
     return handleDatabaseOperation(() async {
       final db = await databaseService.database;
@@ -111,7 +103,6 @@ class LocalRepository<T> extends BaseRepository implements AbstractRepository {
     });
   }
 
-  @override
   Future<void> syncItems() {
     AppError.create(
       message: 'Sync is not supported in local repository',

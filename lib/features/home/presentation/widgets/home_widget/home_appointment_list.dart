@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../../theme/theme_extensions.dart';
-import '../../../data/models/appointment_model.dart';
+import '../../../../appointment/data/models/appointment_model.dart';
 import '../appointment_card_widget/appointment_card.dart';
 
 class HomeAppointmentList extends StatelessWidget {
-  final List<AppointmentData> appointments;
+  final List<AppointmentModel> appointments;
   final Function(String) onCancel;
   final Function(String) onReschedule;
 
@@ -49,8 +49,9 @@ class HomeAppointmentList extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: AppointmentCard(
                     appointment: appointments[index],
-                    onCancel: () => onCancel(appointments[index].id),
-                    onReschedule: () => onReschedule(appointments[index].id),
+                    onCancel: () => onCancel(appointments[index].appointmentId),
+                    onReschedule: () =>
+                        onReschedule(appointments[index].appointmentId),
                   ),
                 ),
               );

@@ -25,7 +25,7 @@ class HomeGreetingCard extends StatelessWidget {
         borderRadius: radius.medium,
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -36,7 +36,7 @@ class HomeGreetingCard extends StatelessWidget {
                   TextSpan(
                     text: 'Good Morning $userName',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 18,
                       fontWeight: weight.bold,
                       color: colors.textPrimary,
                       fontFamily: 'System',
@@ -45,7 +45,7 @@ class HomeGreetingCard extends StatelessWidget {
                   const TextSpan(
                     text: ' 👋',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 16,
                     ),
                   ),
                 ],
@@ -55,7 +55,7 @@ class HomeGreetingCard extends StatelessWidget {
             Text(
               'Hope you\'re having a great day! How can we assist you today?',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 12,
                 color: colors.textPrimary,
                 height: 1.3,
                 fontWeight: weight.regular,

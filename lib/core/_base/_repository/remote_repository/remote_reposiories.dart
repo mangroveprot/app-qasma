@@ -1,3 +1,5 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../../_config/url_provider.dart';
 import '../../_models/sync_model.dart';
 import '../base_repository/abstract_repositories.dart';
@@ -76,7 +78,8 @@ class RemoteRepository<T> extends BaseRepository
       () => _localRepository.getAllItems(),
       () async {
         final response = await handleApiCall(
-          () => apiClient.get(endpoint, queryParameters: queryParams),
+          () => apiClient.get(endpoint,
+              requiresAuth: true, queryParameters: queryParams),
         );
         final data = response.data as List;
         final items =
@@ -119,55 +122,52 @@ class RemoteRepository<T> extends BaseRepository
 
     await handleSyncOperation(
       () async {
-        final lastSyncedItem = await _getLastSyncedItem();
+        final prefs = await SharedPreferences.getInstance();
+
+        final lastSyncStr = prefs.getString('${endpoint}_lastSyncTime');
         final lastSyncTime =
-            lastSyncedItem != null ? syncField!.accessor(lastSyncedItem) : null;
+            lastSyncStr != null ? DateTime.parse(lastSyncStr) : DateTime(2000);
 
-        final queryParams =
-            lastSyncTime != null
-                ? {syncField!.name: lastSyncTime.toIso8601String()}
-                : null;
+        final response = await handleApiCall(() {
+          final uri =
+              '$endpoint/sync/${lastSyncTime.toUtc().toIso8601String()}';
+          return apiClient.get(uri);
+        });
 
-        final response = await handleApiCall(
-          () => apiClient.get(
-            endpoint,
-            queryParameters: lastSyncTime != null ? queryParams : null,
-          ),
-        );
+        final responseData = response.data as Map<String, dynamic>;
+        final List<dynamic> rawList = responseData['documents'] ?? [];
 
-        final data = response.data as List;
-        final items =
-            data.map((e) => fromJson(Map<String, dynamic>.from(e))).toList();
+        final updatedItems =
+            rawList.map((e) => fromJson(Map<String, dynamic>.from(e))).toList();
 
-        await handleDatabaseOperation(
-          () => _localRepository.saveAllItems(items),
-        );
+        for (final item in updatedItems) {
+          await _localRepository.saveItem(item);
+          //  final id = getId(item);
+        }
+
+        if (updatedItems.isNotEmpty) {
+          final newSyncTime = DateTime.now().toIso8601String();
+          await prefs.setString('${endpoint}_lastSyncTime', newSyncTime);
+        }
       },
       onConflict: () async {
         final response = await handleApiCall(() => apiClient.get(endpoint));
-        final data = response.data as List;
+
+        final responseData = response.data as Map<String, dynamic>;
+        final List<dynamic> rawList = responseData['documents'] ?? [];
+
         final items =
-            data.map((e) => fromJson(Map<String, dynamic>.from(e))).toList();
-        await handleDatabaseOperation(
-          () => _localRepository.saveAllItems(items),
-        );
+            rawList.map((e) => fromJson(Map<String, dynamic>.from(e))).toList();
+
+        for (final item in items) {
+          await _localRepository.saveItem(item);
+          final id = getId(item);
+        }
       },
       onComplete: () {
-        logger.i('Sync completed successfully');
         return Future.value();
       },
     );
-  }
-
-  @override
-  Future<List<T>> search(String keyword, List<String> fields) async {
-    await getAllItems(); // sync to api
-    return _localRepository.search(keyword, fields);
-  }
-
-  @override
-  Future<int> count() {
-    return _localRepository.count();
   }
 
   Future<T?> _getLastSyncedItem() async {
@@ -181,6 +181,17 @@ class RemoteRepository<T> extends BaseRepository
       if (bSync == null) return a;
       return aSync.isAfter(bSync) ? a : b;
     });
+  }
+
+  @override
+  Future<List<T>> search(String keyword, List<String> fields) async {
+    await getAllItems(); // sync to api
+    return _localRepository.search(keyword, fields);
+  }
+
+  @override
+  Future<int> count() {
+    return _localRepository.count();
   }
 
   @override

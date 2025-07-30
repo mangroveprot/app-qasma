@@ -157,7 +157,9 @@ class _TestPageState extends State<TestPage> {
           TextField(
             controller: controller,
             focusNode: focusNode,
-            onChanged: (val) => print('$label: $val'),
+            onChanged: (val) {
+              // Handle text field changes
+            },
             textInputAction:
                 isLast ? TextInputAction.done : TextInputAction.next,
             textCapitalization: textCapitalization,

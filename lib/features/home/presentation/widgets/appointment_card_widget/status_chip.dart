@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../theme/theme_extensions.dart';
-import '../../../data/models/appointment_model.dart';
 
 class StatusChip extends StatelessWidget {
-  final AppointmentStatus status;
+  final String status;
 
   const StatusChip({super.key, required this.status});
 
@@ -12,8 +11,8 @@ class StatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final weight = context.weight;
-    final isApproved = status == AppointmentStatus.approved;
-    final isPending = status == AppointmentStatus.pending;
+    final isApproved = status.toLowerCase() == 'approved';
+    final isPending = status.toLowerCase() == 'pending';
 
     Color textColor;
     String statusText;

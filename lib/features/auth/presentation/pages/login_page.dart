@@ -101,7 +101,7 @@ class LoginPageState extends State<LoginPage> {
     }
 
     if (state is ButtonSuccessState) {
-      print('Success login');
+      // Login successful - handle navigation or other success logic
     }
   }
 }

@@ -31,8 +31,6 @@ class CustomSidebar extends StatelessWidget {
 
   Widget _buildMenuItem(BuildContext context, MenuItemConfig item) {
     final colors = context.colors;
-    final fontWeight = context.weight;
-    final radius = context.radii;
 
     return RepaintBoundary(
       child: Container(
