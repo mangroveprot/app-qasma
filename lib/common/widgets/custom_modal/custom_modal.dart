@@ -284,14 +284,17 @@ class CustomModal {
           borderRadius ?? const BorderRadius.vertical(top: Radius.circular(20)),
       padding: padding ?? EdgeInsets.zero,
       maxHeight: maxHeight ?? MediaQuery.of(context).size.height * 0.8,
-      child: AnimatedRadioContent<T>(
-        options: options,
-        title: title,
-        subtitle: subtitle,
-        confirmButtonText: confirmButtonText,
-        cancelButtonText: cancelButtonText,
-        othersPlaceholder: othersPlaceholder,
-        onConfirm: onConfirm,
+      child: BlocProvider(
+        create: (context) => ButtonCubit(),
+        child: AnimatedRadioContent<T>(
+          options: options,
+          title: title,
+          subtitle: subtitle,
+          confirmButtonText: confirmButtonText,
+          cancelButtonText: cancelButtonText,
+          othersPlaceholder: othersPlaceholder,
+          onConfirm: onConfirm,
+        ),
       ),
     );
   }

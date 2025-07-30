@@ -97,21 +97,19 @@ class HomePageState extends State<HomePage> {
             }),
       ],
     );
+
     if (result == true) {
       final selectedReason = await CustomModal.showRadioSelectionModal<String>(
         context,
         options: reasonOptionList,
+        title: 'Select Cancellation Reason',
         onConfirm: (String reason) async {
-          final cubit = context.read<ButtonCubit>();
-          cubit.emitInitial();
-          await Future.delayed(const Duration(milliseconds: 100));
+          await Future.delayed(const Duration(milliseconds: 500));
           return reason;
         },
       );
 
-      if (selectedReason != null) {
-        print(selectedReason);
-      }
+      print('Selected cancellation reason: $selectedReason');
     }
   }
 

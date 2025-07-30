@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../theme/theme_extensions.dart';
 import '../../../utils/form_field_config.dart';
 import '../../bloc/form/form_cubit.dart';
+import '../../bloc/button/button_cubit.dart';
 import '../../custom_form_field.dart';
 import '../../modal.dart';
 import '../../models/modal_option.dart';
@@ -40,6 +40,9 @@ class _AnimatedRadioContentState<T> extends State<AnimatedRadioContent<T>> {
   final TextEditingController _othersController = TextEditingController();
   final FocusNode _othersFocusNode = FocusNode();
 
+  // Cache the selected option to avoid repeated firstWhere calls
+  ModalOption? _cachedSelectedOption;
+
   @override
   void dispose() {
     _othersController.dispose();
@@ -48,17 +51,19 @@ class _AnimatedRadioContentState<T> extends State<AnimatedRadioContent<T>> {
   }
 
   void _handleOptionTap(ModalOption option) {
+    // Prevent unnecessary rebuilds if same option selected
+    if (_selectedValue == option.value) return;
+
     setState(() {
       _selectedValue = option.value;
+      _cachedSelectedOption = option; // Cache to avoid lookup
     });
 
-    // Focus on text field if "Others" is selected
     if (option.requiresInput) {
       Future.delayed(const Duration(milliseconds: 100), () {
         _othersFocusNode.requestFocus();
       });
     } else {
-      // Clear others text if different option is selected
       _othersController.clear();
     }
   }
@@ -66,9 +71,18 @@ class _AnimatedRadioContentState<T> extends State<AnimatedRadioContent<T>> {
   Future<void> _handleConfirm() async {
     if (_selectedValue == null) return;
 
-    final selectedOption = widget.options.firstWhere(
-      (option) => option.value == _selectedValue,
-    );
+    // Use cached option instead of firstWhere lookup
+    final selectedOption = _cachedSelectedOption ??
+        widget.options.firstWhere((option) => option.value == _selectedValue);
+
+    if (selectedOption.requiresInput) {
+      final formCubit = context.read<FormCubit>();
+      final isValid = formCubit.validateAll({
+        field_other_option.field_key: _othersController.text,
+      });
+
+      if (!isValid) return;
+    }
 
     String result;
 
@@ -85,72 +99,48 @@ class _AnimatedRadioContentState<T> extends State<AnimatedRadioContent<T>> {
     if (mounted) Navigator.pop(context, result);
   }
 
-  bool get _canConfirm {
-    final formCubit = context.read<FormCubit>();
-    debugPrint('Checking if can confirm');
-
-    if (_selectedValue == null) return false;
-
-    print({'_selectedValue', _selectedValue});
-
-    final isValid = formCubit.validateAll({
-      field_other_option.field_key: _othersController.text,
-    });
-
-    if (!isValid) return false;
-
-    return true;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: Colors.transparent,
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Header
-          Container(
-            padding: const EdgeInsets.all(20),
-            child: ModalUI.header(
-              widget.title,
-              subtitle: widget.subtitle,
-              onClose: () => Navigator.pop(context),
-            ),
-          ),
-
-          // Content
-          Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.only(
-                left: 20,
-                right: 20,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildAnimatedOptionsList(context),
-
-                  // Others text field (show when others is selected)
-                  if (_selectedValue != null &&
-                      widget.options.any((opt) =>
-                          opt.value == _selectedValue && opt.requiresInput))
-                    _buildOthersTextField(context),
-
-                  const SizedBox(height: 30),
-
-                  ConfirmationButton(
-                      onPressed: _handleConfirm,
-                      labelText: widget.confirmButtonText),
-                  const SizedBox(height: 20),
-                ],
+    return BlocProvider(
+      create: (context) => ButtonCubit(),
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        backgroundColor: Colors.transparent,
+        body: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              child: ModalUI.header(
+                widget.title,
+                subtitle: widget.subtitle,
+                onClose: () => Navigator.pop(context),
               ),
             ),
-          ),
-        ],
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildAnimatedOptionsList(context),
+                    if (_selectedValue != null &&
+                        (_cachedSelectedOption?.requiresInput == true))
+                      _buildOthersTextField(context),
+                    const SizedBox(height: 30),
+                    ConfirmationButton(
+                        onPressedAsync: _handleConfirm,
+                        labelText: widget.confirmButtonText),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -196,12 +186,11 @@ class _AnimatedRadioContentState<T> extends State<AnimatedRadioContent<T>> {
       margin: const EdgeInsets.only(top: 16),
       child: Row(
         children: [
-          RepaintBoundary(
-            child: CustomFormField(
-                field_key: field_other_option.field_key,
-                name: field_other_option.name,
-                controller: _othersController,
-                hint: field_other_option.hint),
+          CustomFormField(
+            field_key: field_other_option.field_key,
+            name: field_other_option.name,
+            controller: _othersController,
+            hint: field_other_option.hint,
           ),
         ],
       ),

@@ -26,49 +26,44 @@ class ConfirmationButton extends StatelessWidget {
     final colors = context.colors;
     final radius = context.radii;
 
-    return BlocProvider(
-      create: (context) => ButtonCubit(),
-      child: Builder(
-        builder: (context) {
-          return Column(
-            children: [
-              Container(
-                width: double.infinity,
-                child: CustomAppButton(
-                  onPressedCallback: (!enabled)
-                      ? null
-                      : () async {
-                          final cubit = context.read<ButtonCubit>();
-                          cubit.emitLoading();
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          child: CustomAppButton(
+            onPressedCallback: !enabled
+                ? null
+                : () async {
+                    final cubit = context.read<ButtonCubit>();
 
-                          try {
-                            if (onPressedAsync != null) {
-                              await onPressedAsync!();
-                            } else if (onPressed != null) {
-                              onPressed!();
-                            } else {
-                              await Future.delayed(const Duration(seconds: 2));
-                            }
-                          } catch (e) {
-                          } finally {
-                            if (context.mounted) {
-                              cubit.emitInitial();
-                            }
-                          }
-                        },
-                  width: double.infinity,
-                  labelText: labelText,
-                  backgroundColor: backgroundColor ??
-                      (enabled ? colors.primary : colors.textPrimary),
-                  borderRadius: radius.large,
-                  labelTextColor: colors.white,
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
-          );
-        },
-      ),
+                    cubit.emitLoading();
+
+                    try {
+                      if (onPressedAsync != null) {
+                        await onPressedAsync!();
+                      } else if (onPressed != null) {
+                        onPressed!();
+                      } else {
+                        await Future.delayed(const Duration(seconds: 2));
+                      }
+                    } catch (e) {
+                    } finally {
+                      if (context.mounted) {
+                        cubit.emitInitial();
+                      }
+                    }
+                  },
+            width: double.infinity,
+            labelText: labelText,
+            backgroundColor: backgroundColor ??
+                (enabled ? colors.primary : colors.textPrimary),
+            borderRadius: radius.large,
+            labelTextColor: colors.white,
+            loadingSpinnerColor: colors.white,
+          ),
+        ),
+        const SizedBox(height: 12),
+      ],
     );
   }
 }

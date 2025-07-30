@@ -90,45 +90,34 @@ final List<ModalOption> newAppointmentOptions = [
 
 final List<ModalOption> reasonOptionList = [
   const ModalOption(
-    value: 'counseling',
+    value: 'personal',
     title: '',
-    subtitle:
-        'Get support through emotional, mental, or personal challenges with our counseling staff',
-    icon: Icon(Icons.psychology, size: 40, color: Colors.blue),
+    subtitle: 'Personal Issues or Mental Health Concerns',
   ),
   const ModalOption(
-    value: 'testings',
+    value: 'scheduling',
     title: '',
-    subtitle:
-        'Take psychological tests to better understand your mental health and create personalized plans',
-    icon: Icon(Icons.assignment, size: 40, color: Colors.green),
+    subtitle: 'Class or Study Conflicts',
   ),
   const ModalOption(
-    value: 'counseling',
+    value: 'emergency',
     title: '',
-    subtitle:
-        'Get support through emotional, mental, or personal challenges with our counseling staff',
-    icon: Icon(Icons.psychology, size: 40, color: Colors.blue),
+    subtitle: 'Emergencies or Unexpected Events',
   ),
   const ModalOption(
-    value: 'testingq',
+    value: 'completion',
     title: '',
-    subtitle:
-        'Take psychological tests to better understand your mental health and create personalized plans',
-    icon: Icon(Icons.assignment, size: 40, color: Colors.green),
+    subtitle: 'No Longer Needing Counseling',
   ),
   const ModalOption(
-    value: 'counselinga',
+    value: 'rescheduling',
     title: '',
-    subtitle:
-        'Get support through emotional, mental, or personal challenges with our counseling staff',
-    icon: Icon(Icons.psychology, size: 40, color: Colors.blue),
+    subtitle: 'Availability of a Better Time Slot',
   ),
   const ModalOption(
-      value: 'testingc',
-      title: '',
-      subtitle:
-          'Take psychological tests to better understand your mental health and create personalized plans',
-      icon: Icon(Icons.assignment, size: 40, color: Colors.green),
-      requiresInput: true),
+    value: 'miscellaneous',
+    title: '',
+    subtitle: 'Others',
+    requiresInput: true,
+  ),
 ];
