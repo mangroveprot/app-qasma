@@ -121,3 +121,8 @@ const FormFieldConfig field_otp_verification = FormFieldConfig(
   name: 'OTP Verification',
   hint: 'Please enter the 6-digit code sent to your email ',
 );
+const FormFieldConfig field_other_option = FormFieldConfig(
+  field_key: 'other-option',
+  name: 'Others',
+  hint: 'Please specify...',
+);

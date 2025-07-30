@@ -7,6 +7,7 @@ import '../bloc/button/button_cubit.dart';
 import '../button_text/custom_text_button.dart';
 import '../modal.dart';
 import '../models/modal_option.dart';
+import '_radio/animated_radio_content.dart';
 import 'animated_selection_content.dart';
 import 'single_selection_content.dart';
 import 'multi_selection_content.dart';
@@ -256,6 +257,41 @@ class CustomModal {
         subtitle: subtitle,
         backButtonText: backButtonText,
         showBackButton: showBackButton,
+      ),
+    );
+  }
+
+  static Future<T?> showRadioSelectionModal<T>(
+    BuildContext context, {
+    required List<ModalOption> options,
+    String title = 'Select an Option',
+    String? subtitle,
+    bool isBottomSheet = true,
+    Color? backgroundColor,
+    BorderRadius? borderRadius,
+    EdgeInsets? padding,
+    double? maxHeight,
+    String confirmButtonText = 'Confirm',
+    String cancelButtonText = 'Cancel',
+    String othersPlaceholder = 'Please specify...',
+    Future<T> Function(String selectedReason)? onConfirm,
+  }) {
+    return Modal.show<T>(
+      context: context,
+      isBottomSheet: isBottomSheet,
+      backgroundColor: backgroundColor ?? context.colors.white,
+      borderRadius:
+          borderRadius ?? const BorderRadius.vertical(top: Radius.circular(20)),
+      padding: padding ?? EdgeInsets.zero,
+      maxHeight: maxHeight ?? MediaQuery.of(context).size.height * 0.8,
+      child: AnimatedRadioContent<T>(
+        options: options,
+        title: title,
+        subtitle: subtitle,
+        confirmButtonText: confirmButtonText,
+        cancelButtonText: cancelButtonText,
+        othersPlaceholder: othersPlaceholder,
+        onConfirm: onConfirm,
       ),
     );
   }

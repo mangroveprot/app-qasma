@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../common/utils/constant.dart';
 import '../../../../common/utils/menu_items_config.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/button_text/custom_text_button.dart';
@@ -66,7 +67,7 @@ class HomePageState extends State<HomePage> {
   Future<void> handleCancelAppointment(String appointmentId) async {
     final result = await CustomModal.showCenteredModal<bool>(
       context,
-      title: 'Are you sure to cancel this appointment?',
+      title: 'Are you sure to cancel this appointment ${appointmentId}?',
       subtitle: 'Date: December 24, 2025 - 10:30am',
       icon: CustomModal.warningIcon(
           iconColor: Colors.red,
@@ -74,14 +75,9 @@ class HomePageState extends State<HomePage> {
           size: 58,
           iconSize: 28),
       actions: [
-        // Primary button (Yes) - uses ButtonCubit
         CustomTextButton(
           onPressed: () async {
-            final cubit = context.read<ButtonCubit>();
-            cubit.emitLoading();
-            await Future.delayed(const Duration(milliseconds: 500));
-            cubit.emitInitial();
-            Navigator.of(context).pop(true);
+            context.pop(true);
           },
           text: 'Yes',
           textColor: context.colors.white,
@@ -101,6 +97,22 @@ class HomePageState extends State<HomePage> {
             }),
       ],
     );
+    if (result == true) {
+      final selectedReason = await CustomModal.showRadioSelectionModal<String>(
+        context,
+        options: reasonOptionList,
+        onConfirm: (String reason) async {
+          final cubit = context.read<ButtonCubit>();
+          cubit.emitInitial();
+          await Future.delayed(const Duration(milliseconds: 100));
+          return reason;
+        },
+      );
+
+      if (selectedReason != null) {
+        print(selectedReason);
+      }
+    }
   }
 
   void handleRescheduleAppointment(String appointmentId) {

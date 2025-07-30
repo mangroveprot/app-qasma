@@ -6,12 +6,14 @@ class ModalOption {
     required this.title,
     this.subtitle,
     this.icon,
+    this.requiresInput = false,
   });
 
   final String value;
   final String title;
   final String? subtitle;
   final Widget? icon;
+  final bool requiresInput;
 
   @override
   bool operator ==(Object other) =>
@@ -20,14 +22,19 @@ class ModalOption {
           runtimeType == other.runtimeType &&
           value == other.value &&
           title == other.title &&
-          subtitle == other.subtitle;
+          subtitle == other.subtitle &&
+          requiresInput == other.requiresInput;
 
   @override
-  int get hashCode => value.hashCode ^ title.hashCode ^ subtitle.hashCode;
+  int get hashCode =>
+      value.hashCode ^
+      title.hashCode ^
+      subtitle.hashCode ^
+      requiresInput.hashCode;
 
   @override
   String toString() {
-    return 'ModalOption{value: $value, title: $title, subtitle: $subtitle}';
+    return 'ModalOption{value: $value, title: $title, subtitle: $subtitle, requiresInput: $requiresInput}';
   }
 
   ModalOption copyWith({
@@ -35,12 +42,14 @@ class ModalOption {
     String? title,
     String? subtitle,
     Widget? icon,
+    bool? requiresInput,
   }) {
     return ModalOption(
       value: value ?? this.value,
       title: title ?? this.title,
       subtitle: subtitle ?? this.subtitle,
       icon: icon ?? this.icon,
+      requiresInput: requiresInput ?? this.requiresInput,
     );
   }
 }

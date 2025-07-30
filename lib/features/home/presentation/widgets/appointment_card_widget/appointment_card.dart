@@ -156,7 +156,7 @@ class AppointmentCard extends StatelessWidget {
               children: [
                 CardRescheduleButton(onPressed: onReschedule),
                 Spacing.verticalSmall,
-                CardCancelButton(onPressed: onCancel)
+                RepaintBoundary(child: CardCancelButton(onPressed: onCancel))
               ],
             ),
           ],

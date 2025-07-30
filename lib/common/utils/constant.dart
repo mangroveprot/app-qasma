@@ -87,3 +87,48 @@ final List<ModalOption> newAppointmentOptions = [
     icon: Icon(Icons.assignment, size: 40, color: Colors.green),
   ),
 ];
+
+final List<ModalOption> reasonOptionList = [
+  const ModalOption(
+    value: 'counseling',
+    title: '',
+    subtitle:
+        'Get support through emotional, mental, or personal challenges with our counseling staff',
+    icon: Icon(Icons.psychology, size: 40, color: Colors.blue),
+  ),
+  const ModalOption(
+    value: 'testings',
+    title: '',
+    subtitle:
+        'Take psychological tests to better understand your mental health and create personalized plans',
+    icon: Icon(Icons.assignment, size: 40, color: Colors.green),
+  ),
+  const ModalOption(
+    value: 'counseling',
+    title: '',
+    subtitle:
+        'Get support through emotional, mental, or personal challenges with our counseling staff',
+    icon: Icon(Icons.psychology, size: 40, color: Colors.blue),
+  ),
+  const ModalOption(
+    value: 'testingq',
+    title: '',
+    subtitle:
+        'Take psychological tests to better understand your mental health and create personalized plans',
+    icon: Icon(Icons.assignment, size: 40, color: Colors.green),
+  ),
+  const ModalOption(
+    value: 'counselinga',
+    title: '',
+    subtitle:
+        'Get support through emotional, mental, or personal challenges with our counseling staff',
+    icon: Icon(Icons.psychology, size: 40, color: Colors.blue),
+  ),
+  const ModalOption(
+      value: 'testingc',
+      title: '',
+      subtitle:
+          'Take psychological tests to better understand your mental health and create personalized plans',
+      icon: Icon(Icons.assignment, size: 40, color: Colors.green),
+      requiresInput: true),
+];
