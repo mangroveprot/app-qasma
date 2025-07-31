@@ -5,6 +5,7 @@ import '../../../../infrastructure/injection/service_locator.dart';
 import '../../../users/data/models/user_model.dart';
 import '../../domain/repository/auth_repositories.dart';
 import '../../domain/services/auth_service.dart';
+import '../models/signin_params.dart';
 
 class AuthRepositoryImpl extends AuthRepository {
   final AuthService _authService = sl<AuthService>();
@@ -22,7 +23,7 @@ class AuthRepositoryImpl extends AuthRepository {
   }
 
   @override
-  Future<Either> signin(UserModel signinReq) async {
+  Future<Either> signin(SigninParams signinReq) async {
     final Either result = await _authService.signin(signinReq);
     return result.fold(
       (error) {

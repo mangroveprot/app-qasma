@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../_config/url_provider.dart';
@@ -16,6 +17,7 @@ class RemoteRepository<T> extends BaseRepository
   final String Function(dynamic id)? getItemPath;
   final String Function(dynamic id)? deletePath;
   final String Function()? savePath;
+  final String Function()? getAllByUser;
 
   final LocalRepository<T> _localRepository;
   final SyncField<T>? syncField;
@@ -30,6 +32,7 @@ class RemoteRepository<T> extends BaseRepository
     this.deletePath,
     this.savePath,
     this.syncField,
+    this.getAllByUser,
     required this.endpoint,
     required this.fromJson,
     required this.toJson,
@@ -122,16 +125,29 @@ class RemoteRepository<T> extends BaseRepository
 
     await handleSyncOperation(
       () async {
+        final relativePath = getAllByUser?.call();
+
+        final fullPath =
+            '${endpoint.trim().replaceAll(RegExp(r'/+$'), '')}/${relativePath?.trim().replaceAll(RegExp(r'^/+'), '')}';
+
         final prefs = await SharedPreferences.getInstance();
 
         final lastSyncStr = prefs.getString('${endpoint}_lastSyncTime');
+        final currentUserId = prefs.getString('currentUserId');
         final lastSyncTime =
             lastSyncStr != null ? DateTime.parse(lastSyncStr) : DateTime(2000);
 
+        final data = {
+          'userId': currentUserId,
+          'lastSynced': lastSyncTime.toUtc().toIso8601String()
+        };
+
         final response = await handleApiCall(() {
-          final uri =
-              '$endpoint/sync/${lastSyncTime.toUtc().toIso8601String()}';
-          return apiClient.get(uri);
+          return apiClient.post(
+            fullPath,
+            data: data,
+            requiresAuth: true,
+          );
         });
 
         final responseData = response.data as Map<String, dynamic>;
@@ -140,47 +156,82 @@ class RemoteRepository<T> extends BaseRepository
         final updatedItems =
             rawList.map((e) => fromJson(Map<String, dynamic>.from(e))).toList();
 
+        DateTime? latestUpdatedAt;
+
         for (final item in updatedItems) {
-          await _localRepository.saveItem(item);
-          //  final id = getId(item);
+          try {
+            final itemId = getId(item);
+            final itemUpdatedAt = syncField!.accessor(item);
+
+            if (itemUpdatedAt == null) continue;
+
+            if (latestUpdatedAt == null ||
+                itemUpdatedAt.isAfter(latestUpdatedAt)) {
+              latestUpdatedAt = itemUpdatedAt;
+            }
+
+            final existingItem = await getItemById(itemId);
+            bool shouldSave = false;
+
+            if (existingItem == null) {
+              shouldSave = true;
+            } else {
+              final existingUpdatedAt = syncField!.accessor(existingItem);
+              if (existingUpdatedAt == null ||
+                  itemUpdatedAt.isAfter(existingUpdatedAt)) {
+                shouldSave = true;
+              }
+            }
+
+            if (shouldSave) {
+              await _localRepository.saveItem(item);
+            }
+          } catch (e) {
+            debugPrint('Failed to sync item ${getId(item)}: $e');
+          }
         }
 
-        if (updatedItems.isNotEmpty) {
-          final newSyncTime = DateTime.now().toIso8601String();
-          await prefs.setString('${endpoint}_lastSyncTime', newSyncTime);
+        // Update sync timestamp
+        if (latestUpdatedAt != null) {
+          await prefs.setString(
+              '${endpoint}_lastSyncTime', latestUpdatedAt.toIso8601String());
+        } else if (updatedItems.isNotEmpty) {
+          await prefs.setString(
+              '${endpoint}_lastSyncTime', DateTime.now().toIso8601String());
         }
       },
       onConflict: () async {
         final response = await handleApiCall(() => apiClient.get(endpoint));
-
         final responseData = response.data as Map<String, dynamic>;
         final List<dynamic> rawList = responseData['documents'] ?? [];
 
         final items =
             rawList.map((e) => fromJson(Map<String, dynamic>.from(e))).toList();
+        DateTime? latestUpdatedAt;
 
         for (final item in items) {
-          await _localRepository.saveItem(item);
-          final id = getId(item);
+          try {
+            await _localRepository.saveItem(item);
+
+            final itemUpdatedAt = syncField!.accessor(item);
+            if (itemUpdatedAt != null) {
+              if (latestUpdatedAt == null ||
+                  itemUpdatedAt.isAfter(latestUpdatedAt)) {
+                latestUpdatedAt = itemUpdatedAt;
+              }
+            }
+          } catch (e) {
+            debugPrint('Failed to save item during conflict resolution: $e');
+          }
         }
+
+        final prefs = await SharedPreferences.getInstance();
+        final syncTime = latestUpdatedAt?.toIso8601String() ??
+            DateTime.now().toIso8601String();
+        await prefs.setString('${endpoint}_lastSyncTime', syncTime);
       },
-      onComplete: () {
-        return Future.value();
-      },
+      onComplete: () => Future.value(),
     );
-  }
-
-  Future<T?> _getLastSyncedItem() async {
-    final items = await _localRepository.getAllItems();
-    if (items.isEmpty || syncField == null) return null;
-
-    return items.reduce((a, b) {
-      final aSync = syncField!.accessor(a);
-      final bSync = syncField!.accessor(b);
-      if (aSync == null) return b;
-      if (bSync == null) return a;
-      return aSync.isAfter(bSync) ? a : b;
-    });
   }
 
   @override

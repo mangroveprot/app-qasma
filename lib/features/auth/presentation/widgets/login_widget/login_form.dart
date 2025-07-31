@@ -39,7 +39,8 @@ class LoginForm extends StatelessWidget {
                 ),
               ),
               RepaintBoundary(
-                child: LoginSubmitButton(onPressed: state.handleSubmit),
+                child: LoginSubmitButton(
+                    onPressed: () => state.handleSubmit(context)),
               ),
               const RepaintBoundary(child: LoginForgotPasswordBtn()),
               const RepaintBoundary(child: LoginCreateAccountButton()),

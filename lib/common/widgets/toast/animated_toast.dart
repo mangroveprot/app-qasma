@@ -79,104 +79,102 @@ class _AnimatedToastState extends State<AnimatedToast>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder:
-          (context, child) => Transform.scale(
-            scale: _scaleAnimation.value,
-            child: Opacity(
-              opacity: _fadeAnimation.value,
-              child: _getConstrainedContainer(
-                Container(
-                  margin: const EdgeInsets.symmetric(vertical: 3),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: widget.toast.backgroundColor,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [context.shadows.light],
-                  ),
-                  child: IntrinsicHeight(
-                    child: Row(
+      builder: (context, child) => Transform.scale(
+        scale: _scaleAnimation.value,
+        child: Opacity(
+          opacity: _fadeAnimation.value,
+          child: _getConstrainedContainer(
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 3),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
+              decoration: BoxDecoration(
+                color: widget.toast.backgroundColor,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [context.shadows.light],
+              ),
+              child: IntrinsicHeight(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (widget.toast.icon != null) ...[
+                      Icon(
+                        widget.toast.icon,
+                        color: widget.toast.textColor,
+                        size: 18,
+                      ),
+                      Spacing.horizontalXSmall,
+                    ],
+                    Expanded(
+                      child: Text(
+                        widget.toast.message,
+                        style: TextStyle(
+                          color: widget.toast.textColor,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          decoration: TextDecoration.none,
+                        ),
+                        maxLines: 4,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Row(
                       mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        if (widget.toast.icon != null) ...[
-                          Icon(
-                            widget.toast.icon,
-                            color: widget.toast.textColor,
-                            size: 18,
-                          ),
+                        if (widget.toast.actionLabel != null) ...[
                           Spacing.horizontalXSmall,
-                        ],
-                        Expanded(
-                          child: Text(
-                            widget.toast.message,
-                            style: TextStyle(
-                              color: widget.toast.textColor,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              decoration: TextDecoration.none,
+                          TextButton(
+                            onPressed: () {
+                              widget.toast.onAction?.call();
+                              widget.onDismiss();
+                            },
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 3,
+                              ),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                            child: Text(
+                              widget.toast.actionLabel!,
+                              style: TextStyle(
+                                color: context.colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (widget.toast.actionLabel != null) ...[
-                              Spacing.horizontalXSmall,
-                              TextButton(
-                                onPressed: () {
-                                  widget.toast.onAction?.call();
-                                  widget.onDismiss();
-                                },
-                                style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 3,
-                                  ),
-                                  minimumSize: Size.zero,
-                                  tapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                child: Text(
-                                  widget.toast.actionLabel!,
-                                  style: TextStyle(
-                                    color: context.colors.white,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                        ],
+                        if (widget.toast.showCloseButton) ...[
+                          const SizedBox(width: 4),
+                          GestureDetector(
+                            onTap: widget.onDismiss,
+                            child: Container(
+                              padding: const EdgeInsets.all(3),
+                              child: Icon(
+                                Icons.close,
+                                size: 14,
+                                // ignore: deprecated_member_use
+                                color: widget.toast.textColor.withOpacity(
+                                  0.7,
                                 ),
                               ),
-                            ],
-                            if (widget.toast.showCloseButton) ...[
-                              const SizedBox(width: 4),
-                              GestureDetector(
-                                onTap: widget.onDismiss,
-                                child: Container(
-                                  padding: const EdgeInsets.all(3),
-                                  child: Icon(
-                                    Icons.close,
-                                    size: 14,
-                                    // ignore: deprecated_member_use
-                                    color: widget.toast.textColor.withOpacity(
-                                      0.7,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
           ),
+        ),
+      ),
     );
   }
 }

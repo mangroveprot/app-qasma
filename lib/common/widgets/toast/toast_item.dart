@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'toast_enums.dart';
 
 class ToastItem {
+  final String? id;
   final String message;
   final IconData? icon;
   final Color backgroundColor;
@@ -13,6 +14,7 @@ class ToastItem {
   final bool showCloseButton;
 
   const ToastItem({
+    this.id,
     required this.message,
     this.icon,
     required this.backgroundColor,

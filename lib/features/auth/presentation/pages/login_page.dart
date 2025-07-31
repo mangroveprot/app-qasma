@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../common/helpers/helpers.dart';
 import '../../../../common/utils/form_field_config.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/bloc/form/form_cubit.dart';
 import '../../../../common/widgets/toast/custom_toast.dart';
+import '../../../../infrastructure/injection/service_locator.dart';
+import '../../data/models/signin_params.dart';
+import '../../domain/usecases/signin_usecase.dart';
 import '../widgets/login_widget/login_form.dart';
 
 class LoginPage extends StatefulWidget {
@@ -24,13 +28,18 @@ class LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     _initializeControllers();
-    formCubit = context.read<FormCubit>();
   }
 
   void _initializeControllers() {
     textControllers = {
       for (final field in _textFields) field.field_key: TextEditingController(),
     };
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    formCubit = context.read<FormCubit>();
   }
 
   Map<String, String> _buildValidationFields() {
@@ -48,15 +57,23 @@ class LoginPageState extends State<LoginPage> {
     return textControllers[field.field_key]?.text ?? '';
   }
 
-  void handleSubmit() {
+  void handleSubmit(BuildContext context) {
     final isValid = formCubit.validateAll(_buildValidationFields());
 
     if (!isValid) return;
 
-    _performLogin();
+    _performLogin(context);
   }
 
-  void _performLogin() {}
+  void _performLogin(BuildContext context) {
+    final user_credentials = SigninParams(
+        idNumber: _getTextValue(field_idNumber),
+        password: _getTextValue(field_password));
+
+    context
+        .read<ButtonCubit>()
+        .execute(usecase: sl<SigninUsecase>(), params: user_credentials);
+  }
 
   @override
   void dispose() {
@@ -72,10 +89,10 @@ class LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ButtonCubit(),
-      child: Scaffold(
-        body: BlocListener<ButtonCubit, ButtonState>(
+    return Scaffold(
+      body: BlocProvider(
+        create: (_) => ButtonCubit(),
+        child: BlocListener<ButtonCubit, ButtonState>(
           listener: _handleButtonState,
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -96,12 +113,19 @@ class LoginPageState extends State<LoginPage> {
   void _handleButtonState(BuildContext context, ButtonState state) {
     if (state is ButtonFailureState) {
       if (state.errorMessages.isNotEmpty) {
-        CustomToast.error(context: context, message: state.errorMessages.first);
+        Future.microtask(() async {
+          for (final message in state.errorMessages) {
+            CustomToast.error(
+              context: context,
+              message: message,
+              id: generateToastId('login-error'),
+            );
+            await Future.delayed(const Duration(milliseconds: 1500));
+          }
+        });
       }
     }
 
-    if (state is ButtonSuccessState) {
-      // Login successful - handle navigation or other success logic
-    }
+    if (state is ButtonSuccessState) {}
   }
 }

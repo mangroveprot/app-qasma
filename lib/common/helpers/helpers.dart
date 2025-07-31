@@ -19,6 +19,13 @@ DateTime buildDateOfBirth({
   return DateTime(yearInt, monthInt, dayInt);
 }
 
+String generateToastId(String prefix) {
+  final now = DateTime.now();
+  return '$prefix-${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_'
+      '${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}_'
+      '${now.millisecond}';
+}
+
 // TODO: Make this functional
 Map<String, String> buildValidationFields(
   List<Field> fields,

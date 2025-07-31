@@ -35,6 +35,7 @@ class ToastContainerState extends State<ToastContainer> {
   }
 
   void addToast(ToastItem toast) {
+    print('Adding toast with id: ${toast.id}');
     if (!mounted) return;
 
     setState(() {
@@ -43,6 +44,10 @@ class ToastContainerState extends State<ToastContainer> {
       // Limit to 4 toasts per position, remove oldest if exceeding
       while (toasts.length >= MAX) {
         toasts.removeAt(0);
+      }
+
+      if (toast.id != null) {
+        toasts.removeWhere((t) => t.id == toast.id);
       }
 
       toasts.add(toast);
@@ -159,16 +164,15 @@ class ToastContainerState extends State<ToastContainer> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end, // align to right all toast
-      children:
-          toasts
-              .map(
-                (toast) => AnimatedToast(
-                  key: ValueKey(toast.hashCode),
-                  toast: toast,
-                  onDismiss: () => _removeToast(toast),
-                ),
-              )
-              .toList(),
+      children: toasts
+          .map(
+            (toast) => AnimatedToast(
+              key: ValueKey(toast.hashCode),
+              toast: toast,
+              onDismiss: () => _removeToast(toast),
+            ),
+          )
+          .toList(),
     );
   }
 }

@@ -8,6 +8,7 @@ import '../../../../core/_config/url_provider.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
 import '../../../users/data/models/user_model.dart';
 import '../../domain/services/auth_service.dart';
+import '../models/signin_params.dart';
 
 class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
   AuthServiceImpl(AbstractRepository<UserModel> repository) : super(repository);
@@ -15,23 +16,32 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
   final URLProviderConfig _urlProviderConfig = sl<URLProviderConfig>();
 
   @override
-  Future<Either> signin(UserModel signinReq) async {
+  Future<Either<AppError, UserModel>> signin(SigninParams signinReq) async {
     try {
       final response = await _apiClient.post(
         _urlProviderConfig.login,
         data: signinReq.toJson(),
       );
-      return Right(response);
+
+      final apiResponse = ApiResponse.fromJson(
+        response.data,
+        (json) => UserModel.fromJson(json),
+      );
+
+      if (apiResponse.isSuccess && apiResponse.document != null) {
+        return Right(apiResponse.document as UserModel);
+      } else {
+        return Left(apiResponse.error!);
+      }
     } catch (e, stack) {
-      final error =
-          e is AppError
-              ? e
-              : AppError.create(
-                message: 'Unexpected error during signin',
-                type: ErrorType.unknown,
-                originalError: e,
-                stackTrace: stack,
-              );
+      final error = e is AppError
+          ? e
+          : AppError.create(
+              message: 'Unexpected error during signin',
+              type: ErrorType.unknown,
+              originalError: e,
+              stackTrace: stack,
+            );
       return Left(error);
     }
   }
@@ -55,15 +65,14 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
         return Left(apiResponse.error!);
       }
     } catch (e, stack) {
-      final error =
-          e is AppError
-              ? e
-              : AppError.create(
-                message: 'Unexpected error during signup',
-                type: ErrorType.unknown,
-                originalError: e,
-                stackTrace: stack,
-              );
+      final error = e is AppError
+          ? e
+          : AppError.create(
+              message: 'Unexpected error during signup',
+              type: ErrorType.unknown,
+              originalError: e,
+              stackTrace: stack,
+            );
       return Left(error);
     }
   }

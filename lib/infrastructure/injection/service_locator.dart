@@ -128,7 +128,8 @@ void _registerAppointmentRepositories() {
       toJson: (appointment) => appointment.toJson(),
       getId: (model) => model.appointmentId,
       getItemPath: (id) => '/getAppointmentById/$id',
-      deletePath: (id) => '/cancel/$id',
+      deletePath: (id) => '/cancel/',
+      getAllByUser: () => '/getAllByUser',
       syncField: SyncField<AppointmentModel>(
         name: 'updatedAt',
         accessor: (appointment) => appointment.updatedAt,

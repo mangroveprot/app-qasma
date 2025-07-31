@@ -20,6 +20,7 @@ class CustomToast {
     String? actionLabel,
     VoidCallback? onAction,
     bool showCloseButton = true,
+    String? id,
   }) {
     final config = ToastConfig.getToastConfig(context, type, icon);
 
@@ -29,6 +30,7 @@ class CustomToast {
 
     _containerKey.currentState?.addToast(
       ToastItem(
+        id: id,
         message: message,
         icon: config.icon,
         backgroundColor: config.backgroundColor,
@@ -72,16 +74,19 @@ class CustomToast {
     String? actionLabel,
     VoidCallback? onAction,
     bool showCloseButton = true,
-  }) => show(
-    context,
-    message: message,
-    type: ToastType.info,
-    position: position,
-    duration: duration,
-    actionLabel: actionLabel,
-    onAction: onAction,
-    showCloseButton: showCloseButton,
-  );
+    String? id,
+  }) =>
+      show(
+        context,
+        message: message,
+        type: ToastType.info,
+        position: position,
+        duration: duration,
+        actionLabel: actionLabel,
+        onAction: onAction,
+        showCloseButton: showCloseButton,
+        id: id,
+      );
 
   static void success({
     required BuildContext context,
@@ -91,16 +96,19 @@ class CustomToast {
     String? actionLabel,
     VoidCallback? onAction,
     bool showCloseButton = true,
-  }) => show(
-    context,
-    message: message,
-    type: ToastType.success,
-    position: position,
-    duration: duration,
-    actionLabel: actionLabel,
-    onAction: onAction,
-    showCloseButton: showCloseButton,
-  );
+    String? id,
+  }) =>
+      show(
+        context,
+        message: message,
+        type: ToastType.success,
+        position: position,
+        duration: duration,
+        actionLabel: actionLabel,
+        onAction: onAction,
+        showCloseButton: showCloseButton,
+        id: id,
+      );
 
   static void warning({
     required BuildContext context,
@@ -110,16 +118,19 @@ class CustomToast {
     String? actionLabel,
     VoidCallback? onAction,
     bool showCloseButton = true,
-  }) => show(
-    context,
-    message: message,
-    type: ToastType.warning,
-    position: position,
-    duration: duration,
-    actionLabel: actionLabel,
-    onAction: onAction,
-    showCloseButton: showCloseButton,
-  );
+    String? id,
+  }) =>
+      show(
+        context,
+        message: message,
+        type: ToastType.warning,
+        position: position,
+        duration: duration,
+        actionLabel: actionLabel,
+        onAction: onAction,
+        showCloseButton: showCloseButton,
+        id: id,
+      );
 
   static void error({
     required BuildContext context,
@@ -129,14 +140,17 @@ class CustomToast {
     String? actionLabel,
     VoidCallback? onAction,
     bool showCloseButton = true,
-  }) => show(
-    context,
-    message: message,
-    type: ToastType.error,
-    position: position,
-    duration: duration,
-    actionLabel: actionLabel,
-    onAction: onAction,
-    showCloseButton: showCloseButton,
-  );
+    String? id,
+  }) =>
+      show(
+        context,
+        message: message,
+        type: ToastType.error,
+        position: position,
+        duration: duration,
+        actionLabel: actionLabel,
+        onAction: onAction,
+        showCloseButton: showCloseButton,
+        id: id,
+      );
 }

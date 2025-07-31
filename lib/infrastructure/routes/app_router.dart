@@ -7,7 +7,6 @@ import '../../features/auth/presentation/pages/get_started_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/otp_verification_page.dart';
 import '../../features/auth/presentation/pages/test_page.dart';
-import '../../features/home/presentation/pages/home_page.dart';
 import 'app_routes.dart';
 
 class AppRouter {
@@ -19,7 +18,8 @@ class AppRouter {
     debugLogDiagnostics: true,
     initialLocation: Routes.root,
     routes: [
-      GoRoute(path: Routes.root, builder: (context, state) => const HomePage()),
+      GoRoute(
+          path: Routes.root, builder: (context, state) => const LoginPage()),
       GoRoute(
         path: Routes.aut_path, // '/auth'
         builder: (context, state) => const LoginPage(),
