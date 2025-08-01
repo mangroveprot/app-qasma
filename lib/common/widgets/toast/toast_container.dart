@@ -35,7 +35,6 @@ class ToastContainerState extends State<ToastContainer> {
   }
 
   void addToast(ToastItem toast) {
-    print('Adding toast with id: ${toast.id}');
     if (!mounted) return;
 
     setState(() {
@@ -63,20 +62,16 @@ class ToastContainerState extends State<ToastContainer> {
   }
 
   void _removeToast(ToastItem toast) {
-    if (!mounted) return; // Check if widget is still mounted
-
     setState(() {
       _toastsByPosition[toast.position]?.remove(toast);
     });
 
-    // Check if all positions are empty - this will be used by CustomToast
     final bool isEmpty = _toastsByPosition.values.every((list) => list.isEmpty);
     if (isEmpty) {
       Timer? overlayTimer;
       overlayTimer = Timer(const Duration(milliseconds: 300), () {
-        _activeTimers.remove(overlayTimer); // Remove from tracking
+        _activeTimers.remove(overlayTimer);
         if (mounted) {
-          // The CustomToast class will handle overlay removal
           _onAllToastsEmpty?.call();
         }
       });

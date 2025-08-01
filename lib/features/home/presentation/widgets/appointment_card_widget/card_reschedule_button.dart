@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../../../common/widgets/button/custom_app_button.dart';
 import '../../../../../theme/theme_extensions.dart';
 
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../../common/widgets/bloc/button/button_cubit.dart';
+
 class CardRescheduleButton extends StatelessWidget {
   final VoidCallback onPressed;
   const CardRescheduleButton({super.key, required this.onPressed});
@@ -16,21 +19,24 @@ class CardRescheduleButton extends StatelessWidget {
     return Align(
       alignment: Alignment.centerRight,
       child: IntrinsicWidth(
-        child: CustomAppButton(
-          height: 44,
-          labelText: 'Reschedule',
-          labelFontSize: 12,
-          labelTextColor: colors.white,
-          backgroundColor: colors.secondary,
-          labelTextDecoration: TextDecoration.none,
-          labelFontWeight: weight.medium,
-          borderRadius: radii.medium,
-          disabledBackgroundColor: colors.textPrimary,
-          icon: Icons.edit_calendar,
-          iconSize: 12,
-          iconPosition: Position.left,
-          contentAlignment: MainAxisAlignment.center,
-          onPressedCallback: onPressed,
+        child: BlocProvider<ButtonCubit>(
+          create: (context) => ButtonCubit(),
+          child: CustomAppButton(
+            height: 44,
+            labelText: 'Reschedule',
+            labelFontSize: 12,
+            labelTextColor: colors.white,
+            backgroundColor: colors.secondary,
+            labelTextDecoration: TextDecoration.none,
+            labelFontWeight: weight.medium,
+            borderRadius: radii.medium,
+            disabledBackgroundColor: colors.textPrimary,
+            icon: Icons.edit_calendar,
+            iconSize: 12,
+            iconPosition: Position.left,
+            contentAlignment: MainAxisAlignment.center,
+            onPressedCallback: onPressed,
+          ),
         ),
       ),
     );

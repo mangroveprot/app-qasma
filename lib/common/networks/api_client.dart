@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
+import 'dart:async';
 
 import '../../core/_config/app_config.dart';
 import '../error/app_error.dart';
@@ -16,9 +17,9 @@ class ApiClient {
   final URLProviderConfig _urlProvider;
 
   ApiClient({this.maxRetries = AppConfig.maxRetries})
-    : _dio = Dio(),
-      _logger = Logger(),
-      _urlProvider = URLProviderConfig() {
+      : _dio = Dio(),
+        _logger = Logger(),
+        _urlProvider = URLProviderConfig() {
     _initializeDio();
   }
 
@@ -54,31 +55,54 @@ class ApiClient {
 
   String getBaseUrl() => _urlProvider.baseURL + _urlProvider.apiPath;
 
+  Completer<bool>? _refreshCompleter;
+
   Future<bool> _refreshToken() async {
+    if (_refreshCompleter != null) {
+      return _refreshCompleter!.future;
+    }
+
+    _refreshCompleter = Completer();
+
     try {
       final refreshToken = SharedPrefs().getString('refreshToken');
-      if (refreshToken == null) return false;
+      if (refreshToken == null) {
+        _refreshCompleter!.complete(false);
+        _refreshCompleter = null;
+        return false;
+      }
 
       final response = await _dio.post(
         _urlProvider.refreshTokenUrl,
         data: {'refreshToken': refreshToken},
       );
 
-      if (response.statusCode == 200) {
-        final newAccessToken = response.data['access_token'];
+      if (response.statusCode == 200 &&
+          response.data['success'] == true &&
+          response.data['document'] != null &&
+          response.data['document']['token'] != null) {
+        final tokens = response.data['document']['token'];
+        final newAccessToken = tokens['access'];
+        final newRefreshToken = tokens['refresh'];
+
         await SharedPrefs().setString('accessToken', newAccessToken);
+        await SharedPrefs().setString('refreshToken', newRefreshToken);
+
+        _refreshCompleter!.complete(true);
         return true;
+      } else {
+        _refreshCompleter!.complete(false);
+        return false;
       }
-    } catch (e, stack) {
-      AppError.create(
-        message: 'Failed to refresh token',
-        type: ErrorType.authentication,
-        originalError: e,
-        stackTrace: stack,
-      );
+    } catch (e) {
+      _refreshCompleter!.complete(false);
+      return false;
+    } finally {
+      _refreshCompleter = null;
     }
-    return false;
   }
+
+  Future<bool> get refreshToken => _refreshToken();
 
   void _retryRequest(
     RequestOptions requestOptions,
@@ -89,9 +113,7 @@ class ApiClient {
       requestOptions.extra['retries'] = retries + 1;
       Future.delayed(
         const Duration(milliseconds: AppConfig.retryDelay),
-        () => _dio
-            .fetch(requestOptions)
-            .then(
+        () => _dio.fetch(requestOptions).then(
               (response) => handler.resolve(response),
               onError: (e) => handler.reject(e),
             ),

@@ -6,6 +6,7 @@ import '../../pages/login_page.dart';
 import 'login_create_account.dart';
 import 'login_field.dart';
 import 'login_forgot_password_btn.dart';
+import 'login_form_error.dart';
 import 'login_header.dart';
 import 'login_logo.dart';
 import 'login_submit_button.dart';
@@ -30,6 +31,7 @@ class LoginForm extends StatelessWidget {
               Spacing.verticalSmall,
               const RepaintBoundary(child: LoginHeader()),
               Spacing.verticalLarge,
+              const RepaintBoundary(child: LoginFormError()),
               RepaintBoundary(
                 child: LoginField(
                   idNumberController:

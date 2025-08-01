@@ -28,6 +28,7 @@ import '../../features/users/data/repository/user_repositories_impl.dart';
 import '../../features/users/data/services/user_service_impl.dart';
 import '../../features/users/domain/repository/auth_repositories.dart';
 import '../../features/users/domain/services/user_service.dart';
+import '../../features/users/domain/usecases/get_user_usecase.dart';
 import '../../features/users/domain/usecases/is_register_usecase.dart';
 
 final sl = GetIt.instance;
@@ -98,7 +99,7 @@ void _registerUserRepositories() {
       fromJson: UserModel.fromJson,
       toJson: (user) => user.toJson(),
       getId: (model) => model.idNumber,
-      getItemPath: (id) => '/getUserById/$id',
+      getItemPath: (id) => '/getProfile',
       deletePath: (id) => '/delete/$id',
       syncField: SyncField<UserModel>(
         name: 'updateAt',
@@ -127,7 +128,7 @@ void _registerAppointmentRepositories() {
       fromJson: AppointmentModel.fromJson,
       toJson: (appointment) => appointment.toJson(),
       getId: (model) => model.appointmentId,
-      getItemPath: (id) => '/getAppointmentById/$id',
+      getItemPath: (id) => '/getAppointmentById',
       deletePath: (id) => '/cancel/',
       getAllByUser: () => '/getAllByUser',
       syncField: SyncField<AppointmentModel>(
@@ -159,6 +160,7 @@ void _registerUseCases() {
 
   // User use cases
   sl.registerLazySingleton<IsRegisterUsecase>(() => IsRegisterUsecase());
+  sl.registerLazySingleton<GetUserUsecase>(() => GetUserUsecase());
 
   // Appointment usecases
   sl.registerLazySingleton<GetAllAppointmentUsecase>(

@@ -2,13 +2,16 @@ class Routes {
   // paths
   static const String root = '/';
   static const String aut_path = '/auth';
+  static const String home_path = '/home';
 
-  // route names
+  // auth route names
   static const String create_account = 'create-account';
   static const String get_started = 'get-started';
   static const String otp_verification = 'otp-verification';
   static const String login = 'login';
   static const String forgot_password = 'forgot-password';
+
+  // home route names
 
   static String buildPath(String basePath, String routeName) {
     if (basePath.isEmpty || routeName.isEmpty) {

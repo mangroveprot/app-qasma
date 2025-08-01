@@ -32,15 +32,40 @@ class UserServiceImpl extends BaseService<UserModel> implements UserService {
         return Left(apiResponse.error!);
       }
     } catch (e, stack) {
-      final error =
-          e is AppError
-              ? e
-              : AppError.create(
-                message: 'Unexpected error during getUser',
-                type: ErrorType.unknown,
-                originalError: e,
-                stackTrace: stack,
-              );
+      final error = e is AppError
+          ? e
+          : AppError.create(
+              message: 'Unexpected error during getUser',
+              type: ErrorType.unknown,
+              originalError: e,
+              stackTrace: stack,
+            );
+      return Left(error);
+    }
+  }
+
+  @override
+  Future<Either<AppError, UserModel>> getUser(String idNumber) async {
+    try {
+      final user = await repository.getItemById(idNumber);
+
+      if (user == null) {
+        return Left(AppError.create(
+          message: 'User not found',
+          type: ErrorType.notFound,
+        ));
+      }
+
+      return Right(user);
+    } catch (e, stack) {
+      final error = e is AppError
+          ? e
+          : AppError.create(
+              message: 'Unexpected error during getUser',
+              type: ErrorType.unknown,
+              originalError: e,
+              stackTrace: stack,
+            );
       return Left(error);
     }
   }

@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
 
 import '../../../../infrastructure/injection/service_locator.dart';
 import '../../../users/data/models/user_model.dart';
@@ -30,8 +29,7 @@ class AuthRepositoryImpl extends AuthRepository {
         return Left(error);
       },
       (data) {
-        final Response response = data;
-        return Right(response);
+        return Right(data);
       },
     );
   }

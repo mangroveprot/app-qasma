@@ -16,7 +16,7 @@ abstract class BaseRepository {
     Logger? logger,
   })  : _apiClient = apiClient ?? sl<ApiClient>(),
         _databaseService = databaseService ?? sl<DatabaseService>(),
-        _logger = logger ?? sl<Logger>();
+        _logger = logger ?? Logger();
 
   ApiClient get apiClient => _apiClient;
   DatabaseService get databaseService => _databaseService;

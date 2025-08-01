@@ -61,6 +61,9 @@ class AppError {
       case ErrorType.api:
         emoji = '🔗';
         break;
+      case ErrorType.notFound:
+        emoji = '🔍';
+        break;
     }
 
     // determine what type of messages to log
@@ -175,4 +178,5 @@ enum ErrorType {
   timeout,
   canceled,
   api,
+  notFound
 }

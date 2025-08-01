@@ -31,12 +31,24 @@ class UserModel extends User {
   });
 
   // helpers for value safety
+  // helpers for value safety
   static String _getString(
     Map<String, dynamic> map,
     String key1, [
     String? key2,
   ]) {
-    return map[key1]?.toString() ?? map[key2]?.toString() ?? '';
+    // Check if the key exists first to avoid QueryResultSet null check error
+    if (map.containsKey(key1)) {
+      final value = map[key1];
+      if (value != null) return value.toString();
+    }
+
+    if (key2 != null && map.containsKey(key2)) {
+      final value = map[key2];
+      if (value != null) return value.toString();
+    }
+
+    return '';
   }
 
   static bool _getBool(Map<String, dynamic> map, String key) {
@@ -64,9 +76,16 @@ class UserModel extends User {
     String key1, [
     String? key2,
   ]) {
-    final raw = map.containsKey(key1)
-        ? map[key1]
-        : (key2 != null && map.containsKey(key2) ? map[key2] : null);
+    dynamic raw;
+
+    if (map.containsKey(key1)) {
+      raw = map[key1];
+    } else if (key2 != null && map.containsKey(key2)) {
+      raw = map[key2];
+    } else {
+      return null;
+    }
+
     final value = raw?.toString();
     if (value != null && value.isNotEmpty) {
       return DateTime.tryParse(value);
@@ -79,7 +98,6 @@ class UserModel extends User {
     return {
       'idNumber': idNumber,
       'email': email,
-      'password': password,
       'role': role,
       'verified': verified ? 1 : 0,
       'active': active ? 1 : 0,
@@ -107,7 +125,7 @@ class UserModel extends User {
     return UserModel(
       idNumber: _getString(map, 'idNumber'),
       email: _getString(map, 'email'),
-      password: _getString(map, 'password'),
+      password: '',
       role: _getString(map, 'role'),
       verified: _getBool(map, 'verified'),
       active: _getBool(map, 'active'),

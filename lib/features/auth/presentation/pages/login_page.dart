@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../common/helpers/helpers.dart';
 import '../../../../common/utils/form_field_config.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/bloc/form/form_cubit.dart';
-import '../../../../common/widgets/toast/custom_toast.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
 import '../../data/models/signin_params.dart';
 import '../../domain/usecases/signin_usecase.dart';
@@ -110,22 +108,10 @@ class LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _handleButtonState(BuildContext context, ButtonState state) {
-    if (state is ButtonFailureState) {
-      if (state.errorMessages.isNotEmpty) {
-        Future.microtask(() async {
-          for (final message in state.errorMessages) {
-            CustomToast.error(
-              context: context,
-              message: message,
-              id: generateToastId('login-error'),
-            );
-            await Future.delayed(const Duration(milliseconds: 1500));
-          }
-        });
-      }
+  Future<void> _handleButtonState(
+      BuildContext context, ButtonState state) async {
+    if (state is ButtonSuccessState) {
+      print({state.data});
     }
-
-    if (state is ButtonSuccessState) {}
   }
 }

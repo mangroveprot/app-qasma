@@ -7,6 +7,8 @@ import '../../features/auth/presentation/pages/get_started_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/otp_verification_page.dart';
 import '../../features/auth/presentation/pages/test_page.dart';
+import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/spash/splash_screen.dart';
 import 'app_routes.dart';
 
 class AppRouter {
@@ -19,7 +21,9 @@ class AppRouter {
     initialLocation: Routes.root,
     routes: [
       GoRoute(
-          path: Routes.root, builder: (context, state) => const LoginPage()),
+        path: Routes.root,
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: Routes.aut_path, // '/auth'
         builder: (context, state) => const LoginPage(),
@@ -47,6 +51,12 @@ class AppRouter {
           GoRoute(path: 'test', builder: (context, state) => const TestPage()),
         ],
       ),
+      // home
+      GoRoute(
+        path: Routes.home_path, // '/home'
+        builder: (context, state) => const HomePage(),
+        routes: [],
+      )
     ],
   );
 

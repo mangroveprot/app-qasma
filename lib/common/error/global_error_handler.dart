@@ -2,10 +2,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 
-import '../../infrastructure/injection/service_locator.dart';
-
 void GlobalErrorHandling() {
-  final _logger = sl<Logger>();
+  final _logger = Logger();
 
   FlutterError.onError = (FlutterErrorDetails details) {
     if (details.toString().contains('mouse_tracker.dart')) {

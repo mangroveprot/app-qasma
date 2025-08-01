@@ -52,7 +52,7 @@ class ButtonCubit extends BaseCubit<ButtonState> {
       result.fold(
         (error) {
           emitError(
-            errorMessages: error.messages ?? ['Unknown error occurred'],
+            errorMessages: error.messages,
             suggestions: error.suggestions,
             error: error,
           );

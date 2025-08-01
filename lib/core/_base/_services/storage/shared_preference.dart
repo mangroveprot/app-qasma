@@ -76,4 +76,18 @@ class SharedPrefs {
   Future<void> clear() async {
     await _preferences?.clear();
   }
+
+  /// Check if user is authenticated
+  bool isAuthenticated() {
+    final accessToken = getString('accessToken');
+    final refreshToken = getString('refreshToken');
+    return accessToken != null || refreshToken != null;
+  }
+
+  /// Clear all authentication data
+  Future<void> clearAuthData() async {
+    await remove('accessToken');
+    await remove('refreshToken');
+    await remove('currentUserId');
+  }
 }
