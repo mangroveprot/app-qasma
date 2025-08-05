@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../common/helpers/spacing.dart';
-import '../../../../../common/widgets/toast/custom_toast.dart';
-import '../../../../../common/widgets/toast/toast_enums.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
 import '../../../../appointment/presentation/bloc/appointments_cubit.dart';
 
+import '../../../../appointment/presentation/pages/book_appointment_page.dart';
 import '../../pages/home_page.dart';
 import 'home_appointment_list.dart';
 import 'home_greeting.dart';
@@ -25,187 +24,254 @@ class _HomeFormState extends State<HomeForm> {
   bool _isRefreshing = false;
   static const Duration _refreshCooldown = Duration(seconds: 30);
 
+  List<AppointmentModel>? _cachedFilteredAppointments;
+  AppointmentsLoadedState? _lastProcessedState;
+
   List<AppointmentModel> _getFilteredAppointments(
-      List<AppointmentModel> appointments) {
-    return appointments.where((appointment) {
-      final status = appointment.status.toLowerCase();
-      return status == 'pending' || status == 'approved';
-    }).toList();
+      AppointmentsLoadedState state) {
+    if (_lastProcessedState != state) {
+      _cachedFilteredAppointments = state.appointments.where((appointment) {
+        final status = appointment.status.toLowerCase();
+        return status == 'pending' || status == 'approved';
+      }).toList();
+      _lastProcessedState = state;
+    }
+    return _cachedFilteredAppointments!;
   }
 
   Future<void> _onRefresh() async {
-    final now = DateTime.now();
+    if (_isRefreshing || _shouldThrottle) return;
 
-    if (_isRefreshing) {
-      return;
-    }
-
-    if (_lastRefreshTime != null &&
-        now.difference(_lastRefreshTime!) < _refreshCooldown) {
-      if (mounted) {
-        CustomToast.info(
-            position: ToastPosition.topRight,
-            context: context,
-            message:
-                'Please wait ${_refreshCooldown.inSeconds - now.difference(_lastRefreshTime!).inSeconds} seconds before refreshing again');
-      }
-      return;
-    }
-
-    setState(() {
-      _isRefreshing = true;
-    });
+    setState(() => _isRefreshing = true);
 
     try {
-      await widget.state.controller.refreshData();
-      _lastRefreshTime = now;
+      await widget.state.controller.appoitnmentRefreshData();
+      _lastRefreshTime = DateTime.now();
     } finally {
-      if (mounted) {
-        setState(() {
-          _isRefreshing = false;
-        });
-      }
+      if (mounted) setState(() => _isRefreshing = false);
     }
+  }
+
+  bool get _shouldThrottle {
+    return _lastRefreshTime != null &&
+        DateTime.now().difference(_lastRefreshTime!) < _refreshCooldown;
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          const HomeGreetingCard(),
-          Spacing.verticalSmall,
-          Expanded(
-            child: RepaintBoundary(
-              child: BlocBuilder<AppointmentsCubit, AppointmentCubitState>(
-                builder: (context, appointmentState) {
-                  if (appointmentState is AppointmentsLoadingState) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
+      child: BlocBuilder<AppointmentsCubit, AppointmentCubitState>(
+        buildWhen: (previous, current) {
+          return previous.runtimeType != current.runtimeType ||
+              previous is AppointmentsLoadingState ||
+              current is AppointmentsLoadingState;
+        },
+        builder: (context, state) {
+          if (state is AppointmentsLoadingState) {
+            return const _LoadingContent();
+          }
 
-                  if (appointmentState is AppointmentsLoadedState) {
-                    final filteredAppointments = _getFilteredAppointments(
-                      appointmentState.appointments,
-                    );
+          if (state is AppointmentsLoadedState) {
+            return _LoadedContent(
+              key: ValueKey(state.appointments.length),
+              appointments: _getFilteredAppointments(state),
+              onRefresh: _onRefresh,
+              onCancel: (id) =>
+                  widget.state.controller.handleCancelAppointment(id, context),
+              onReschedule: widget.state.controller.handleRescheduleAppointment,
+            );
+          }
 
-                    return RefreshIndicator(
-                      onRefresh: _onRefresh,
-                      child: filteredAppointments.isEmpty
-                          ? _buildEmptyState()
-                          : HomeAppointmentList(
-                              appointments: filteredAppointments,
-                              onCancel: (appointmentId) => widget
-                                  .state.controller
-                                  .handleCancelAppointment(
-                                      appointmentId, context),
-                              onReschedule: (appointmentId) => widget
-                                  .state.controller
-                                  .handleRescheduleAppointment(appointmentId),
-                            ),
-                    );
-                  }
+          if (state is AppointmentsFailureState) {
+            return _ErrorContent(
+              error: state.primaryError,
+              onRefresh: _onRefresh,
+              onRetry: widget.state.controller.appoitnmentRefreshData,
+              isRefreshing: _isRefreshing,
+            );
+          }
 
-                  if (appointmentState is AppointmentsFailureState) {
-                    return _buildErrorState(appointmentState);
-                  }
-
-                  // Initial state
-                  return _buildEmptyState();
-                },
-              ),
-            ),
-          ),
-        ],
+          return _EmptyContent(onRefresh: _onRefresh);
+        },
       ),
     );
   }
+}
 
-  Widget _buildEmptyState() {
-    return RefreshIndicator(
-      onRefresh: _onRefresh,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.5,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.calendar_today_outlined,
-                    size: 48,
-                    color: Colors.grey,
+// stateless widgets to prevent unnecessary rebuilds, !!! maybe break down this to different files !!!!
+class _LoadingContent extends StatelessWidget {
+  const _LoadingContent({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: CircularProgressIndicator());
+  }
+}
+
+class _LoadedContent extends StatelessWidget {
+  final List<AppointmentModel> appointments;
+  final Future<void> Function() onRefresh;
+  final void Function(String) onCancel;
+  final void Function(String) onReschedule;
+
+  const _LoadedContent({
+    Key? key,
+    required this.appointments,
+    required this.onRefresh,
+    required this.onCancel,
+    required this.onReschedule,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ElevatedButton(
+          child: const Text('Go to Second Page'),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const BookAppointmentPage()),
+            );
+            // context.go(Routes.buildPath(Routes.aut_path, Routes.otp_verification));
+          },
+        ),
+        const HomeGreetingCard(),
+        Spacing.verticalSmall,
+        Expanded(
+          child: appointments.isEmpty
+              ? _EmptyContent(onRefresh: onRefresh)
+              : RefreshIndicator(
+                  onRefresh: onRefresh,
+                  child: HomeAppointmentList(
+                    appointments: appointments,
+                    onCancel: onCancel,
+                    onReschedule: onReschedule,
                   ),
-                  const SizedBox(height: 16),
-                  const Text('No appointments to display'),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Pull down to refresh',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ErrorContent extends StatelessWidget {
+  final String error;
+  final Future<void> Function() onRefresh;
+  final VoidCallback onRetry;
+  final bool isRefreshing;
+
+  const _ErrorContent({
+    Key? key,
+    required this.error,
+    required this.onRefresh,
+    required this.onRetry,
+    required this.isRefreshing,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const HomeGreetingCard(),
+        Spacing.verticalSmall,
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: onRefresh,
+            child: _ScrollableContent(
+              icon: Icons.error_outline,
+              title: 'Failed to load appointments',
+              subtitle: error,
+              action: ElevatedButton(
+                onPressed: isRefreshing ? null : onRetry,
+                child: isRefreshing
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Retry'),
               ),
             ),
           ),
-        ],
+        ),
+      ],
+    );
+  }
+}
+
+class _EmptyContent extends StatelessWidget {
+  final Future<void> Function() onRefresh;
+
+  const _EmptyContent({
+    Key? key,
+    required this.onRefresh,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: const _ScrollableContent(
+        icon: Icons.calendar_today_outlined,
+        title: 'No appointments to display',
+        subtitle: 'Pull down to refresh',
       ),
     );
   }
+}
 
-  Widget _buildErrorState(AppointmentsFailureState appointmentState) {
-    return RefreshIndicator(
-      onRefresh: _onRefresh,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.5,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 48,
-                    color: Colors.grey,
-                  ),
+class _ScrollableContent extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Widget? action;
+
+  const _ScrollableContent({
+    Key? key,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.action,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.5,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 48, color: Colors.grey),
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                if (action != null) ...[
                   const SizedBox(height: 16),
-                  Text(
-                    'Failed to load appointments',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    appointmentState.primaryError,
-                    style: Theme.of(context).textTheme.bodySmall,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _isRefreshing
-                        ? null
-                        : () => widget.state.controller.refreshData(),
-                    child: _isRefreshing
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Retry'),
-                  ),
+                  action!,
                 ],
-              ),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

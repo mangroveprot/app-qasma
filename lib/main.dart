@@ -4,6 +4,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'common/error/global_error_handler.dart';
+import 'common/manager/auth_manager.dart';
 import 'common/widgets/bloc/form/form_cubit.dart';
 import 'core/_base/_services/storage/shared_preference.dart';
 import 'core/_config/app_config.dart';
@@ -12,6 +13,7 @@ import 'core/_config/flavor_config.dart';
 import 'infrastructure/injection/service_locator.dart';
 import 'infrastructure/routes/app_router.dart';
 import 'theme/light_theme.dart';
+import 'features/auth/presentation/bloc/auth/auth_cubit.dart';
 
 Future<void> mainCommon(Flavor flavor) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,27 +39,40 @@ Future<void> mainCommon(Flavor flavor) async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return Builder(
-      builder: (context) => MultiBlocProvider(
-        providers: [
-          BlocProvider(create: (_) => FormCubit()),
-        ],
-        child: MaterialApp.router(
-          title: AppConfig.appTitle,
-          theme: lightTheme,
-          routerConfig: AppRouter.router,
-          scrollBehavior: const MaterialScrollBehavior().copyWith(
-            physics: const BouncingScrollPhysics(
-              parent: AlwaysScrollableScrollPhysics(),
-            ),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => FormCubit()),
+        BlocProvider.value(value: AuthCubit.instance),
+      ],
+      child: MaterialApp.router(
+        title: AppConfig.appTitle,
+        theme: lightTheme,
+        routerConfig: AppRouter.router,
+        scrollBehavior: const MaterialScrollBehavior().copyWith(
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
           ),
         ),
+        builder: (context, child) {
+          return BlocListener<AuthCubit, AuthState>(
+            listener: (context, state) {
+              if (mounted && context.mounted) {
+                AuthManager.handleAuthStateChanges(context, state);
+              }
+            },
+            child: child ?? const SizedBox.shrink(),
+          );
+        },
       ),
     );
   }

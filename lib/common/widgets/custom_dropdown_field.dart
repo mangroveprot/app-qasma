@@ -8,7 +8,7 @@ import 'bloc/form/form_cubit.dart';
 
 class CustomDropdownField extends StatefulWidget {
   final String field_key;
-  final String name;
+  final String? name;
   final ValueNotifier<String?> controller;
   final List<String> items;
   final String hint;
@@ -19,7 +19,7 @@ class CustomDropdownField extends StatefulWidget {
   const CustomDropdownField({
     super.key,
     required this.field_key,
-    required this.name,
+    this.name,
     required this.controller,
     required this.hint,
     required this.items,
@@ -78,7 +78,7 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildLabel(),
+          if (widget.name != null) _buildLabel(),
           BlocSelector<FormCubit, FormValidationState, FieldState>(
             selector: (state) {
               final hasError = state.hasError(widget.field_key);
@@ -115,7 +115,7 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
       child: Row(
         children: [
           Text(
-            widget.name,
+            widget.name!,
             style: TextStyle(
               color: textColor,
               fontSize: 14,

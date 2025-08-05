@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../common/helpers/helpers.dart';
 import '../../../../../common/helpers/spacing.dart';
 import '../../../../../theme/theme_extensions.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
@@ -29,8 +30,6 @@ class AppointmentCard extends StatelessWidget {
       height: 1,
       color: textPrimay,
     );
-
-
 
     final _labelTextStyle =
         TextStyle(fontSize: 14, color: colors.black, fontWeight: weight.medium);
@@ -69,12 +68,15 @@ class AppointmentCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        appointment.scheduledStartAt.toString(),
+                        formatUtcToLocal(
+                            utcTime: appointment.scheduledStartAt.toString(),
+                            style: DateTimeFormatStyle.dateOnly),
                         style: _titleTextStyle,
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        appointment.scheduledEndAt.toString(),
+                        '${formatUtcToLocal(utcTime: appointment.scheduledStartAt.toString(), style: DateTimeFormatStyle.timeOnly)} - '
+                        '${formatUtcToLocal(utcTime: appointment.scheduledEndAt.toString(), style: DateTimeFormatStyle.timeOnly)}',
                         style: _subtitleTextStyle,
                       ),
                     ],
@@ -103,7 +105,7 @@ class AppointmentCard extends StatelessWidget {
                         style: _labelTextStyle,
                       ),
                       Text(
-                        appointment.appointmentType,
+                        appointment.appointmentCategory,
                         style: _subtitleTextStyle,
                       ),
                       Spacing.verticalSmall,

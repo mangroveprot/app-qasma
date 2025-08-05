@@ -3,6 +3,7 @@ import 'package:logger/logger.dart';
 import 'dart:async';
 
 import '../../core/_config/app_config.dart';
+import '../../features/auth/presentation/bloc/auth/auth_cubit.dart';
 import '../error/app_error.dart';
 import '../../core/_base/_services/storage/shared_preference.dart';
 import 'interceptors/auth_interceptor.dart';
@@ -15,6 +16,10 @@ class ApiClient {
   final Logger _logger;
   final int maxRetries;
   final URLProviderConfig _urlProvider;
+
+  // Add flags to prevent multiple logout attempts
+  static bool _isLoggingOut = false;
+  Completer<bool>? _refreshCompleter;
 
   ApiClient({this.maxRetries = AppConfig.maxRetries})
       : _dio = Dio(),
@@ -35,10 +40,6 @@ class ApiClient {
       milliseconds: AppConfig.sendTimeout,
     );
 
-    _dio.options.validateStatus = (status) {
-      return status != null && status < 500;
-    };
-
     _dio.interceptors.addAll([
       HeadersInterceptor(),
       LoggerInterceptor(_logger),
@@ -49,17 +50,23 @@ class ApiClient {
         maxRetries: maxRetries,
         onRefreshToken: _refreshToken,
         retryRequest: _retryRequest,
+        onLogout: _performAutoLogout,
       ),
     ]);
   }
 
   String getBaseUrl() => _urlProvider.baseURL + _urlProvider.apiPath;
 
-  Completer<bool>? _refreshCompleter;
-
   Future<bool> _refreshToken() async {
+    // Prevent multiple refresh attempts
     if (_refreshCompleter != null) {
       return _refreshCompleter!.future;
+    }
+
+    // If already logging out, don't attempt refresh
+    if (_isLoggingOut) {
+      _logger.w('Already logging out, skipping token refresh');
+      return false;
     }
 
     _refreshCompleter = Completer();
@@ -67,14 +74,18 @@ class ApiClient {
     try {
       final refreshToken = SharedPrefs().getString('refreshToken');
       if (refreshToken == null) {
+        _logger.w('No refresh token found');
         _refreshCompleter!.complete(false);
-        _refreshCompleter = null;
+        await _performAutoLogout('No refresh token available');
         return false;
       }
 
       final response = await _dio.post(
         _urlProvider.refreshTokenUrl,
         data: {'refreshToken': refreshToken},
+        options: Options(
+          extra: {'requiresAuth': false},
+        ),
       );
 
       if (response.statusCode == 200 &&
@@ -88,14 +99,30 @@ class ApiClient {
         await SharedPrefs().setString('accessToken', newAccessToken);
         await SharedPrefs().setString('refreshToken', newRefreshToken);
 
+        _logger.i('Tokens refreshed successfully');
         _refreshCompleter!.complete(true);
         return true;
       } else {
+        _logger.w('Token refresh failed: Invalid response');
         _refreshCompleter!.complete(false);
+        await _performAutoLogout('Token refresh failed');
         return false;
       }
     } catch (e) {
+      _logger.e('Token refresh failed: $e');
       _refreshCompleter!.complete(false);
+
+      // Only perform logout if we're not already logging out
+      if (!_isLoggingOut) {
+        if (e is DioException && e.response?.statusCode == 401) {
+          _logger.w('Refresh token expired, performing auto logout');
+          await _performAutoLogout('Refresh token expired');
+        } else {
+          _logger.w(
+              'Token refresh failed due to network/server error, not logging out');
+        }
+      }
+
       return false;
     } finally {
       _refreshCompleter = null;
@@ -133,8 +160,18 @@ class ApiClient {
     }
   }
 
-  // shared error handling logic
   Never _handleDioError(String action, String endpoint, DioException e) {
+    final requiresAuth = e.requestOptions.extra['requiresAuth'] ?? true;
+
+    if (e.response?.statusCode == 401 && !requiresAuth) {
+      final appError = AppError.fromDio(e);
+      throw appError;
+    }
+
+    if (e.response?.statusCode == 401) {
+      throw e;
+    }
+
     final appError =
         e.error is AppError ? e.error as AppError : AppError.fromDio(e);
 
@@ -167,15 +204,10 @@ class ApiClient {
     bool requiresAuth = true,
   }) async {
     try {
-      final response = await _dio.post<T>(
-        endpoint,
-        data: data,
-        queryParameters: queryParameters,
-        options: Options(
-          validateStatus: (status) => status != null && status < 500,
-          extra: {'requiresAuth': requiresAuth},
-        ),
-      );
+      final response = await _dio.post<T>(endpoint,
+          data: data,
+          queryParameters: queryParameters,
+          options: _mergeOptions(options, requiresAuth));
 
       return response;
     } on DioException catch (e) {
@@ -247,5 +279,34 @@ class ApiClient {
       extra: {...?baseOptions.extra, 'requiresAuth': requiresAuth},
       validateStatus: baseOptions.validateStatus ?? _dio.options.validateStatus,
     );
+  }
+
+  Future<void> _performAutoLogout([String? reason]) async {
+    if (_isLoggingOut) {
+      _logger.w('Auto logout already in progress, skipping');
+      return;
+    }
+
+    _isLoggingOut = true;
+
+    try {
+      _logger.i('Performing auto logout: ${reason ?? 'Session expired'}');
+      await AuthCubit.instance.performAutoLogout(reason: reason);
+    } catch (e) {
+      _logger.e('Error during auto logout: $e');
+      try {
+        await AuthCubit.instance.logout(isAutoLogout: true);
+      } catch (fallbackError) {
+        _logger.e('Fallback logout also failed: $fallbackError');
+      }
+    } finally {
+      Future.delayed(const Duration(seconds: 2), () {
+        _isLoggingOut = false;
+      });
+    }
+  }
+
+  static void resetLogoutFlag() {
+    _isLoggingOut = false;
   }
 }

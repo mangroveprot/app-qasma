@@ -1,7 +1,4 @@
-import 'package:dartz/dartz.dart';
-
 import '../../error/app_error.dart';
-part 'api_response_extension.dart';
 
 class ApiResponse<T> {
   final bool success;

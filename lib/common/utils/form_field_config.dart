@@ -121,8 +121,21 @@ const FormFieldConfig field_otp_verification = FormFieldConfig(
   name: 'OTP Verification',
   hint: 'Please enter the 6-digit code sent to your email ',
 );
+
 const FormFieldConfig field_other_option = FormFieldConfig(
   field_key: 'other-option',
   name: 'Others',
   hint: 'Please specify...',
+);
+
+const FormFieldConfig field_appointmentType = FormFieldConfig(
+  field_key: 'appointment-type',
+  name: 'Appointment Type',
+  hint: 'Select an appointment type...',
+);
+
+const FormFieldConfig field_appointmentDateTime = FormFieldConfig(
+  field_key: 'appointment-dateTime',
+  name: 'Data & Timr',
+  hint: 'Select an date time...',
 );

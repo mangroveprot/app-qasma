@@ -17,7 +17,7 @@ class RemoteRepository<T> extends BaseRepository
   final String Function(dynamic id)? getItemPath;
   final String Function(dynamic id)? deletePath;
   final String Function()? savePath;
-  final String Function()? getAllByUser;
+  final bool includeId;
 
   final LocalRepository<T> _localRepository;
   final SyncField<T>? syncField;
@@ -32,7 +32,7 @@ class RemoteRepository<T> extends BaseRepository
     this.deletePath,
     this.savePath,
     this.syncField,
-    this.getAllByUser,
+    this.includeId = true,
     required this.endpoint,
     required this.fromJson,
     required this.toJson,
@@ -125,11 +125,6 @@ class RemoteRepository<T> extends BaseRepository
 
     await handleSyncOperation(
       () async {
-        final relativePath = getAllByUser?.call();
-
-        final fullPath =
-            '${endpoint.trim().replaceAll(RegExp(r'/+$'), '')}/${relativePath?.trim().replaceAll(RegExp(r'^/+'), '')}';
-
         final prefs = await SharedPreferences.getInstance();
 
         final lastSyncStr = prefs.getString('${endpoint}_lastSyncTime');
@@ -137,15 +132,13 @@ class RemoteRepository<T> extends BaseRepository
         final lastSyncTime =
             lastSyncStr != null ? DateTime.parse(lastSyncStr) : DateTime(2000);
 
-        final data = {
-          'userId': currentUserId,
-          'lastSynced': lastSyncTime.toUtc().toIso8601String()
-        };
+        final fullPath = '${endpoint.trim().replaceAll(RegExp(r'/+$'), '')}'
+            '/sync/${lastSyncTime}/'
+            '${includeId ? '$currentUserId' : ''}';
 
         final response = await handleApiCall(() {
-          return apiClient.post(
+          return apiClient.get(
             fullPath,
-            data: data,
             requiresAuth: true,
           );
         });

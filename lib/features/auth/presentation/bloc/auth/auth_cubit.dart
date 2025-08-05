@@ -1,14 +1,22 @@
-import '../../../../../common/networks/api_client.dart';
 import '../../../../../core/_base/_bloc_cubit/base_cubit.dart';
 import '../../../../../common/error/app_error.dart';
+import '../../../../../core/_base/_services/db/database_service.dart';
 import '../../../../../core/_base/_services/storage/shared_preference.dart';
+import '../../../../../infrastructure/injection/service_locator.dart';
 
 part 'auth_cubit_state.dart';
 
 class AuthCubit extends BaseCubit<AuthState> {
-  final ApiClient apiClient;
+  static AuthCubit? _instance;
+  static bool _isAutoLoggingOut = false;
 
-  AuthCubit({required this.apiClient}) : super(const AuthInitialState());
+  AuthCubit() : super(const AuthInitialState());
+
+  // Singleton pattern to access from anywhere (especially ApiClient)
+  static AuthCubit get instance {
+    _instance ??= AuthCubit();
+    return _instance!;
+  }
 
   @override
   void emitLoading({bool isRefreshing = false}) {
@@ -48,16 +56,16 @@ class AuthCubit extends BaseCubit<AuthState> {
     emitLoading();
     try {
       final refreshToken = SharedPrefs().getString('refreshToken');
+      final currentUserId = SharedPrefs().getString('currentUserId');
 
-      if (refreshToken != null) {
-        final success = await apiClient.refreshToken;
-        if (success) {
-          emit(const AuthSuccessState());
-          return;
-        }
+      if (refreshToken != null && currentUserId != null) {
+        emit(const AuthSuccessState(operation: 'checkAuth'));
+      } else {
+        emit(const AuthFailureState(
+          errorMessages: ['Not authenticated'],
+          operation: 'checkAuth',
+        ));
       }
-
-      emit(const AuthFailureState(errorMessages: ['Not authenticated']));
     } catch (e, stackTrace) {
       emitError(
         message: 'Authentication check failed',
@@ -67,13 +75,70 @@ class AuthCubit extends BaseCubit<AuthState> {
     }
   }
 
-  Future<void> logout() async {
-    emit(const LogoutLoadingState());
+  Future<void> logout({bool isAutoLogout = false}) async {
+    emit(LogoutLoadingState(isAutoLogout: isAutoLogout));
     try {
-      await SharedPrefs().clear(); // Clear tokens
-      emit(const LogoutSuccessState());
+      // Clear all stored data
+      await _clearAuthData();
+
+      emit(LogoutSuccessState(isAutoLogout: isAutoLogout));
     } catch (e) {
-      emit(LogoutFailureState(errorMessages: [e.toString()]));
+      emit(LogoutFailureState(
+        errorMessages: [e.toString()],
+        isAutoLogout: isAutoLogout,
+      ));
     }
+  }
+
+  // Auto logout method called by ApiClient
+  Future<void> performAutoLogout({String? reason}) async {
+    if (_isAutoLoggingOut || state is AutoLogoutState) {
+      return;
+    }
+
+    _isAutoLoggingOut = true;
+    try {
+      // Clear stored data immediately
+      await _clearAuthData();
+
+      // Emit auto logout state
+      emit(AutoLogoutState(
+        reason: reason ?? 'Session expired',
+        errorMessages: [reason ?? 'Session expired'],
+      ));
+    } catch (e) {
+      emit(LogoutFailureState(
+        errorMessages: ['Auto logout failed: ${e.toString()}'],
+        isAutoLogout: true,
+      ));
+    }
+  }
+
+  Future<void> _clearAuthData() async {
+    await SharedPrefs().clear();
+
+    await sl<DatabaseService>().dropDatabase();
+  }
+
+  // Method to check if user is authenticated
+  bool get isAuthenticated {
+    final refreshToken = SharedPrefs().getString('refreshToken');
+    final currentUserId = SharedPrefs().getString('currentUserId');
+    return refreshToken != null && currentUserId != null;
+  }
+
+  // Reset to initial state (useful after handling auto logout)
+  void resetToInitial() {
+    emit(const AuthInitialState());
+  }
+
+  // Override close to prevent singleton from being closed
+  @override
+  Future<void> close() {
+    // Don't close the singleton instance
+    if (_instance == this) {
+      return Future.value();
+    }
+    return super.close();
   }
 }

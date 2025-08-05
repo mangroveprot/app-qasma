@@ -42,6 +42,7 @@ class LoginField extends StatelessWidget {
                 name: 'Password',
                 hint: 'Enter Password',
                 controller: passwordController,
+                showErrorText: false,
                 showPasswordRule: false,
                 required: true,
               ),

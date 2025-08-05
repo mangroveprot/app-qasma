@@ -20,8 +20,8 @@ class LoginLogo extends StatelessWidget {
         child: Image.asset(
           'assets/images/logo.webp',
           fit: BoxFit.cover,
-          cacheWidth: 98, // ← Add this for performance
-          cacheHeight: 98, // ← Add this for performance
+          cacheWidth: 98,
+          cacheHeight: 98,
         ),
       ),
     );

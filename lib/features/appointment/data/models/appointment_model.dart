@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../../../../common/utils/model_utils.dart';
 import '../../domain/entities/appointment.dart';
 import 'qrcode_model.dart';
 import 'cancellation_model.dart';
@@ -24,49 +25,6 @@ class AppointmentModel extends Appointment {
     required super.createdAt,
     required super.updatedAt,
   });
-
-  // helpers for value safety
-  static String _getString(
-    Map<String, dynamic> map,
-    String key1, [
-    String? key2,
-  ]) {
-    return map[key1]?.toString() ?? map[key2]?.toString() ?? '';
-  }
-
-  static int _getInt(Map<String, dynamic> map, String key) {
-    final value = map[key];
-    if (value is int) return value;
-    if (value is String) return int.tryParse(value) ?? 0;
-    return 0;
-  }
-
-  static DateTime _getDateTime(
-    Map<String, dynamic> map,
-    String key1, [
-    String? key2,
-  ]) {
-    final value = map[key1]?.toString() ?? map[key2]?.toString();
-    if (value != null && value.isNotEmpty) {
-      return DateTime.parse(value);
-    }
-    return DateTime.now();
-  }
-
-  static DateTime? _getNullableDateTime(
-    Map<String, dynamic> map,
-    String key1, [
-    String? key2,
-  ]) {
-    final raw = map.containsKey(key1)
-        ? map[key1]
-        : (key2 != null && map.containsKey(key2) ? map[key2] : null);
-    final value = raw?.toString();
-    if (value != null && value.isNotEmpty) {
-      return DateTime.tryParse(value);
-    }
-    return null;
-  }
 
   // to db (sqlite)
   Map<String, dynamic> toDb() {
@@ -95,14 +53,14 @@ class AppointmentModel extends Appointment {
   // from localdb (sqlite)
   factory AppointmentModel.fromDb(Map<String, dynamic> map) {
     return AppointmentModel(
-      studentId: _getString(map, 'studentId'),
-      scheduledStartAt: _getDateTime(map, 'scheduledStartAt'),
-      scheduledEndAt: _getDateTime(map, 'scheduledEndAt'),
-      appointmentCategory: _getString(map, 'appointmentCategory'),
-      appointmentType: _getString(map, 'appointmentType'),
-      description: _getString(map, 'description'),
-      status: _getString(map, 'status'),
-      checkInStatus: _getString(map, 'checkInStatus'),
+      studentId: ModelUtils.getString(map, 'studentId'),
+      scheduledStartAt: ModelUtils.getDateTime(map, 'scheduledStartAt'),
+      scheduledEndAt: ModelUtils.getDateTime(map, 'scheduledEndAt'),
+      appointmentCategory: ModelUtils.getString(map, 'appointmentCategory'),
+      appointmentType: ModelUtils.getString(map, 'appointmentType'),
+      description: ModelUtils.getString(map, 'description'),
+      status: ModelUtils.getString(map, 'status'),
+      checkInStatus: ModelUtils.getString(map, 'checkInStatus'),
       qrCode: QRCodeModel.fromMap(
         map['qrCode'] != null ? jsonDecode(map['qrCode']) : <String, dynamic>{},
       ),
@@ -111,14 +69,14 @@ class AppointmentModel extends Appointment {
             ? jsonDecode(map['cancellation'])
             : <String, dynamic>{},
       ),
-      deletedAt: _getNullableDateTime(map, 'deletedAt'),
-      deletedBy: _getString(map, 'deletedBy'),
-      createdBy: _getString(map, 'createdBy'),
-      updatedBy: _getString(map, 'updatedBy'),
-      version: _getInt(map, 'version'),
-      appointmentId: _getString(map, 'appointmentId'),
-      createdAt: _getDateTime(map, 'createdAt'),
-      updatedAt: _getDateTime(map, 'updatedAt'),
+      deletedAt: ModelUtils.getNullableDateTime(map, 'deletedAt'),
+      deletedBy: ModelUtils.getString(map, 'deletedBy'),
+      createdBy: ModelUtils.getString(map, 'createdBy'),
+      updatedBy: ModelUtils.getString(map, 'updatedBy'),
+      version: ModelUtils.getInt(map, 'version'),
+      appointmentId: ModelUtils.getString(map, 'appointmentId'),
+      createdAt: ModelUtils.getDateTime(map, 'createdAt'),
+      updatedAt: ModelUtils.getDateTime(map, 'updatedAt'),
     );
   }
 
@@ -141,30 +99,35 @@ class AppointmentModel extends Appointment {
   // From API (JSON format) - handles both camelCase and snake_case
   factory AppointmentModel.fromJson(Map<String, dynamic> json) {
     return AppointmentModel(
-      studentId: _getString(json, 'studentId', 'student_id'),
-      scheduledStartAt:
-          _getDateTime(json, 'scheduledStartAt', 'scheduled_start_at'),
-      scheduledEndAt: _getDateTime(json, 'scheduledEndAt', 'scheduled_end_at'),
-      appointmentCategory:
-          _getString(json, 'appointmentCategory', 'appointment_category'),
-      appointmentType: _getString(json, 'appointmentType', 'appointment_type'),
-      description: _getString(json, 'description'),
-      status: _getString(json, 'status'),
-      checkInStatus: _getString(json, 'checkInStatus', 'check_in_status'),
+      studentId: ModelUtils.getString(json, 'studentId', 'student_id'),
+      scheduledStartAt: ModelUtils.getDateTime(
+          json, 'scheduledStartAt', 'scheduled_start_at'),
+      scheduledEndAt:
+          ModelUtils.getDateTime(json, 'scheduledEndAt', 'scheduled_end_at'),
+      appointmentCategory: ModelUtils.getString(
+          json, 'appointmentCategory', 'appointment_category'),
+      appointmentType:
+          ModelUtils.getString(json, 'appointmentType', 'appointment_type'),
+      description: ModelUtils.getString(json, 'description'),
+      status: ModelUtils.getString(json, 'status'),
+      checkInStatus:
+          ModelUtils.getString(json, 'checkInStatus', 'check_in_status'),
       qrCode: QRCodeModel.fromMap(
         json['qrCode'] ?? json['qr_code'] ?? <String, dynamic>{},
       ),
       cancellation: CancellationModel.fromMap(
         json['cancellation'] ?? <String, dynamic>{},
       ),
-      deletedAt: _getNullableDateTime(json, 'deletedAt', 'deleted_at'),
-      deletedBy: _getString(json, 'deletedBy', 'deleted_by'),
-      createdBy: _getString(json, 'createdBy', 'created_by'),
-      updatedBy: _getString(json, 'updatedBy', 'updated_by'),
-      version: _getInt(json, '__version__'),
-      appointmentId: _getString(json, 'appointmentId', 'appointment_id'),
-      createdAt: _getDateTime(json, 'createdAt', 'created_at'),
-      updatedAt: _getDateTime(json, 'updatedAt', 'updated_at'),
+      deletedAt:
+          ModelUtils.getNullableDateTime(json, 'deletedAt', 'deleted_at'),
+      deletedBy: ModelUtils.getString(json, 'deletedBy', 'deleted_by'),
+      createdBy: ModelUtils.getString(json, 'createdBy', 'created_by'),
+      updatedBy: ModelUtils.getString(json, 'updatedBy', 'updated_by'),
+      version: ModelUtils.getInt(json, '__version__'),
+      appointmentId:
+          ModelUtils.getString(json, 'appointmentId', 'appointment_id'),
+      createdAt: ModelUtils.getDateTime(json, 'createdAt', 'created_at'),
+      updatedAt: ModelUtils.getDateTime(json, 'updatedAt', 'updated_at'),
     );
   }
 

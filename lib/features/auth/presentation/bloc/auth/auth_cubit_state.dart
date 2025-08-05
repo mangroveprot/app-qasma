@@ -47,22 +47,61 @@ class AuthFailureState extends AuthState {
 }
 
 class LogoutLoadingState extends AuthLoadingState {
-  const LogoutLoadingState({bool isRefreshing = false})
-      : super(isRefreshing: isRefreshing, operation: 'logout');
+  final bool isAutoLogout;
+
+  const LogoutLoadingState({
+    bool isRefreshing = false,
+    this.isAutoLogout = false,
+  }) : super(isRefreshing: isRefreshing, operation: 'logout');
+
+  @override
+  List<Object?> get props => [isRefreshing, operation, isAutoLogout];
 }
 
 class LogoutSuccessState extends AuthSuccessState {
-  const LogoutSuccessState({dynamic data})
-      : super(data: data, operation: 'logout');
+  final bool isAutoLogout;
+
+  const LogoutSuccessState({
+    dynamic data,
+    this.isAutoLogout = false,
+  }) : super(data: data, operation: 'logout');
+
+  @override
+  List<Object?> get props => [data, operation, isAutoLogout];
 }
 
 class LogoutFailureState extends AuthFailureState {
+  final bool isAutoLogout;
+
   const LogoutFailureState({
     required List<String> errorMessages,
     List<String> suggestions = const [],
+    this.isAutoLogout = false,
   }) : super(
           errorMessages: errorMessages,
           suggestions: suggestions,
           operation: 'logout',
         );
+
+  @override
+  List<Object?> get props =>
+      [errorMessages, suggestions, operation, isAutoLogout];
+}
+
+// New state specifically for auto logout
+class AutoLogoutState extends AuthFailureState {
+  final String reason;
+
+  const AutoLogoutState({
+    this.reason = 'Session expired',
+    required List<String> errorMessages,
+    List<String> suggestions = const [],
+  }) : super(
+          errorMessages: errorMessages,
+          suggestions: suggestions,
+          operation: 'autoLogout',
+        );
+
+  @override
+  List<Object?> get props => [reason, errorMessages, suggestions, operation];
 }

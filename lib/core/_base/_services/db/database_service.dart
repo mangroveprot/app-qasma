@@ -137,6 +137,27 @@ class DatabaseService {
     return await _withRetry(() => db.transaction(action));
   }
 
+  // Drop the entire database
+  Future<void> dropDatabase() async {
+    try {
+      await close();
+
+      final path = join(await getDatabasesPath(), _databaseName);
+
+      // Delete the database file
+      await deleteDatabase(path);
+
+      _logger.i('Database $_databaseName dropped successfully');
+    } catch (e, stackTrace) {
+      throw AppError.create(
+        message: 'Failed to drop database',
+        type: ErrorType.database,
+        originalError: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
   // Close database
   Future<void> close() async {
     if (_database != null) {

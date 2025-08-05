@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../common/utils/menu_items_config.dart';
+import '../../../../common/widgets/models/modal_option.dart';
 import '../../../../common/widgets/toast/custom_toast.dart';
+import '../../../../common/widgets/toast/toast_enums.dart';
 import '../../../appointment/presentation/bloc/appointments_cubit.dart';
+import '../../../appointment_config/presentation/bloc/appointment_config_cubit.dart';
 import '../../../users/presentation/bloc/user_cubit.dart';
 import '../controllers/homepage_controller.dart';
 import '../widgets/home_widget/home_fab.dart';
@@ -82,6 +85,9 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
           BlocListener<UserCubit, UserCubitState>(
             listener: _handleUserState,
           ),
+          BlocListener<AppointmentConfigCubit, AppointmentConfigCubitState>(
+            listener: _handleAppointmentConfigState,
+          ),
         ],
         child: Scaffold(
           drawerEnableOpenDragGesture: true,
@@ -109,8 +115,23 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
               state: this,
             ),
           ),
-          floatingActionButton: const RepaintBoundary(
-            child: HomeFab(),
+          floatingActionButton: RepaintBoundary(
+            child: BlocBuilder<AppointmentConfigCubit,
+                AppointmentConfigCubitState>(
+              builder: (context, state) {
+                List<ModalOption> options = [];
+
+                if (state is AppointmentConfigLoadedState) {
+                  final configCubit = context.read<AppointmentConfigCubit>();
+                  final categories = configCubit.allCategories;
+                  options = controller.generateAppointmentOptions(categories);
+                }
+
+                return HomeFab(
+                  options: options,
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -144,6 +165,17 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
         message: 'Failed to load user data',
       );
       debugPrint('Failed to load user: ${state.errorMessages}');
+    }
+  }
+
+  void _handleAppointmentConfigState(
+      BuildContext context, AppointmentConfigCubitState state) {
+    if (state is AppointmentConfigFailureState) {
+      CustomToast.error(
+          context: context,
+          message: 'Failed to load appointment config',
+          position: ToastPosition.bottomCenter);
+      debugPrint('Failed to load appointment config: ${state.errorMessages}');
     }
   }
 

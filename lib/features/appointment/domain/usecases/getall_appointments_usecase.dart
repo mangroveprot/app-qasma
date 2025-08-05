@@ -9,6 +9,6 @@ class GetAllAppointmentUsecase
     implements Usecase<Either, List<AppointmentModel>> {
   @override
   Future<Either> call({List<AppointmentModel>? param}) {
-    return sl<AppointmentRepository>().getAll();
+    return sl<AppointmentRepository>().getAllAppointmentByUser();
   }
 }

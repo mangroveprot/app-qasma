@@ -15,7 +15,17 @@ import '../../features/appointment/data/repository/appointment_repositories_impl
 import '../../features/appointment/data/services/appointment_service_impl.dart';
 import '../../features/appointment/domain/repository/appointment_repositories.dart';
 import '../../features/appointment/domain/services/appointment_service.dart';
+import '../../features/appointment/domain/usecases/get_slots_usecase.dart';
 import '../../features/appointment/domain/usecases/getall_appointments_usecase.dart';
+import '../../features/appointment/domain/usecases/sync_appointments_usecase.dart';
+import '../../features/appointment_config/data/models/appointment_config_model.dart';
+import '../../features/appointment_config/data/models/appointment_config_table_model.dart';
+import '../../features/appointment_config/data/repository/appointment_config_repositories_impl.dart';
+import '../../features/appointment_config/data/services/appointment_config_service_impl.dart';
+import '../../features/appointment_config/domain/repository/appointment_config_repositories.dart';
+import '../../features/appointment_config/domain/services/appointment_config_services.dart';
+import '../../features/appointment_config/domain/usecases/get_config_usecase.dart';
+import '../../features/appointment_config/domain/usecases/sync_config_usecase.dart';
 import '../../features/auth/domain/services/auth_service.dart';
 import '../../features/auth/domain/usecases/signin_usecase.dart';
 import '../../features/auth/domain/usecases/signup_usecase.dart';
@@ -39,6 +49,7 @@ void setupServiceLocator() {
   _registerRepositories();
   _registerServices();
   _registerUseCases();
+  _registerAppointmentConfigRepositories();
 }
 
 void _registerCore() {
@@ -55,6 +66,7 @@ void _registerInfrastructure() {
       () => DatabaseService([
         UserTableModel(),
         AppointmentTableModel(),
+        AppointmentConfigTableModel()
       ]),
     );
 }
@@ -69,12 +81,17 @@ void _registerRepositories() {
   // Auth repositories
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl());
 
-  // User domain repository
+  // User repository
   sl.registerLazySingleton<UserRepository>(() => UserRepositoryImpl());
 
   // Appointment repository
   sl.registerLazySingleton<AppointmentRepository>(
     () => AppointmentRepositoryImpl(),
+  );
+
+  // Appointment Config repository
+  sl.registerLazySingleton<AppointmentConfigRepository>(
+    () => AppointmentConfigRepositoryImpl(),
   );
 }
 
@@ -87,7 +104,6 @@ void _registerUserRepositories() {
       fromDb: UserModel.fromDb,
       toDb: (user) => user.toDb(),
       databaseService: sl<DatabaseService>(),
-      logger: sl<Logger>(),
     ),
   );
 
@@ -117,7 +133,6 @@ void _registerAppointmentRepositories() {
       fromDb: AppointmentModel.fromDb,
       toDb: (appointment) => appointment.toDb(),
       databaseService: sl<DatabaseService>(),
-      logger: sl<Logger>(),
     ),
   );
 
@@ -130,10 +145,39 @@ void _registerAppointmentRepositories() {
       getId: (model) => model.appointmentId,
       getItemPath: (id) => '/getAppointmentById',
       deletePath: (id) => '/cancel/',
-      getAllByUser: () => '/getAllByUser',
+      includeId: true,
       syncField: SyncField<AppointmentModel>(
         name: 'updatedAt',
         accessor: (appointment) => appointment.updatedAt,
+      ),
+    ),
+  );
+}
+
+void _registerAppointmentConfigRepositories() {
+  sl.registerLazySingleton<LocalRepository<AppointmentConfigModel>>(
+    () => LocalRepository<AppointmentConfigModel>(
+      tableName: 'appointment_configs',
+      keyField: 'configId',
+      fromDb: AppointmentConfigModel.fromDb,
+      toDb: (config) => config.toDb(),
+      databaseService: sl<DatabaseService>(),
+    ),
+  );
+
+  sl.registerLazySingleton<AbstractRepository<AppointmentConfigModel>>(
+    () => RemoteRepository<AppointmentConfigModel>(
+      localRepository: sl<LocalRepository<AppointmentConfigModel>>(),
+      endpoint: '/api/config',
+      fromJson: AppointmentConfigModel.fromJson,
+      toJson: (config) => config.toJson(),
+      getId: (model) => model.configId!,
+      getItemPath: (id) => '/',
+      deletePath: (id) => '/cancel/',
+      includeId: false,
+      syncField: SyncField<AppointmentConfigModel>(
+        name: 'updatedAt',
+        accessor: (config) => config.updatedAt,
       ),
     ),
   );
@@ -149,6 +193,10 @@ void _registerServices() {
     )
     ..registerLazySingleton<AppointmentService>(
       () => AppointmentServiceImpl(sl<AbstractRepository<AppointmentModel>>()),
+    )
+    ..registerLazySingleton<AppointmentConfigService>(
+      () => AppointmentConfigServiceImpl(
+          sl<AbstractRepository<AppointmentConfigModel>>()),
     );
 }
 
@@ -165,4 +213,11 @@ void _registerUseCases() {
   // Appointment usecases
   sl.registerLazySingleton<GetAllAppointmentUsecase>(
       () => GetAllAppointmentUsecase());
+  sl.registerLazySingleton<SyncAppointmentsUsecase>(
+      () => SyncAppointmentsUsecase());
+  sl.registerLazySingleton<GetSlotsUseCase>(() => GetSlotsUseCase());
+
+  // Appointment Config Usecases
+  sl.registerLazySingleton<GetConfigUseCase>(() => GetConfigUseCase());
+  sl.registerLazySingleton<SyncConfigUsacase>(() => SyncConfigUsacase());
 }

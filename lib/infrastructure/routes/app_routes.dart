@@ -3,6 +3,7 @@ class Routes {
   static const String root = '/';
   static const String aut_path = '/auth';
   static const String home_path = '/home';
+  static const String book_appointment = '/book-appointment';
 
   // auth route names
   static const String create_account = 'create-account';

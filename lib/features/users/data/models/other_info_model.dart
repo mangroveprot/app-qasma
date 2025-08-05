@@ -1,20 +1,15 @@
+import '../../../../common/utils/model_utils.dart';
 import '../../domain/entities/other_info.dart';
 
 class OtherInfoModel extends OtherInfo {
   const OtherInfoModel({super.course, super.yearLevel, super.block});
 
-  // helper value safety
-  static String? _getValue(Map<String, dynamic> map, String key) {
-    final value = map[key];
-    return value != null ? value.toString() : null;
-  }
-
   // convert from for API
   factory OtherInfoModel.fromMap(Map<String, dynamic> map) {
     return OtherInfoModel(
-      course: _getValue(map, 'course'),
-      yearLevel: _getValue(map, 'year_level'),
-      block: _getValue(map, 'block'),
+      course: ModelUtils.getValue(map, 'course'),
+      yearLevel: ModelUtils.getValue(map, 'year_level'),
+      block: ModelUtils.getValue(map, 'block'),
     );
   }
 

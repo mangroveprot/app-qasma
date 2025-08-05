@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../common/manager/appointment_config_manager.dart';
 import '../../../../common/manager/appointment_manager.dart';
 import '../../../../common/manager/auth_manager.dart';
 import '../../../../common/manager/user_manager.dart';
@@ -10,21 +11,25 @@ import '../../../../common/utils/menu_items_config.dart';
 import '../../../../common/widgets/button_text/custom_text_button.dart';
 import '../../../../common/widgets/custom_modal/custom_modal.dart';
 import '../../../../common/widgets/modal.dart';
+import '../../../../common/widgets/models/modal_option.dart';
 import '../../../../common/widgets/toast/custom_toast.dart';
 import '../../../../core/_base/_services/storage/shared_preference.dart';
+import '../../../../infrastructure/routes/app_routes.dart';
 import '../../../../theme/theme_extensions.dart';
 import '../../../appointment/presentation/bloc/appointments_cubit.dart';
+import '../../../appointment_config/presentation/bloc/appointment_config_cubit.dart';
 import '../../../users/presentation/bloc/user_cubit.dart';
 
 class HomePageController {
   // Cubits
   late final AppointmentsCubit _appointmentsCubit;
   late final UserCubit _userCubit;
+  late final AppointmentConfigCubit _appointmentConfigCubit;
 
   // Managers
   late final AppointmentManager _appointmentManager;
   late final UserManager _userManager;
-  late final AuthManager _authManager;
+  late final AppointmentConfigManager _appointmentConfigManager;
 
   // Navigation callback - injected from outside
   Function(String route)? _navigationCallback;
@@ -40,6 +45,9 @@ class HomePageController {
         BlocProvider<UserCubit>(
           create: (context) => _userCubit,
         ),
+        BlocProvider<AppointmentConfigCubit>(
+          create: (context) => _appointmentConfigCubit,
+        ),
       ];
 
   void initialize({Function(String route)? onNavigate}) {
@@ -53,17 +61,19 @@ class HomePageController {
   void _initializeManagers() {
     _appointmentManager = AppointmentManager();
     _userManager = UserManager();
-    _authManager = AuthManager();
+    _appointmentConfigManager = AppointmentConfigManager();
   }
 
   void _initializeCubits() {
     _appointmentsCubit = AppointmentsCubit();
     _userCubit = UserCubit();
+    _appointmentConfigCubit = AppointmentConfigCubit();
   }
 
   void _loadInitialData() {
     _loadUserData();
-    _loadAppointments();
+    appoitnmentRefreshData();
+    _loadAppointmentConfig();
   }
 
   void _loadUserData() {
@@ -73,15 +83,16 @@ class HomePageController {
     }
   }
 
-  void _loadAppointments() {
-    _appointmentManager.loadAllAppointments(_appointmentsCubit);
+  void _loadAppointmentConfig() {
+    _appointmentConfigManager
+        .loadAllAppointmentsConfig(_appointmentConfigCubit);
   }
 
   // ============================================================================
   // PUBLIC METHODS - Called by UI components
   // ============================================================================
 
-  Future<void> refreshData() async {
+  Future<void> appoitnmentRefreshData() async {
     await _appointmentManager.refreshAppointments(_appointmentsCubit);
   }
 
@@ -97,6 +108,22 @@ class HomePageController {
     }
   }
 
+  List<ModalOption> generateAppointmentOptions(List<String> categories) {
+    try {
+      final options = categories
+          .map((category) => ModalOption(
+                value: category.toLowerCase(),
+                title: category,
+                subtitle: '',
+              ))
+          .toList();
+
+      return options;
+    } catch (e) {
+      return [];
+    }
+  }
+
   Future<void> handleCancelAppointment(
       String appointmentId, BuildContext context) async {
     final shouldCancel =
@@ -108,7 +135,7 @@ class HomePageController {
 
     try {
       await _appointmentManager.cancelAppointment(appointmentId, reason);
-      await refreshData();
+      await appoitnmentRefreshData();
 
       if (context.mounted) {
         CustomToast.success(
@@ -212,17 +239,16 @@ class HomePageController {
 
   Future<void> _handleLogout(BuildContext context) async {
     try {
-      await _authManager.logout(context);
-      _navigationCallback?.call('/login'); // or whatever your root route is
+      await AuthManager.logout(context);
+      context.go(Routes.root);
     } catch (e) {
       debugPrint('Logout failed: $e');
-      // Even if logout fails, try to navigate
-      _navigationCallback?.call('/login');
     }
   }
 
   void dispose() {
     _appointmentsCubit.close();
     _userCubit.close();
+    _appointmentConfigCubit.close();
   }
 }

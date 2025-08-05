@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 
 import '../../features/appointment/domain/usecases/getall_appointments_usecase.dart';
+import '../../features/appointment/domain/usecases/sync_appointments_usecase.dart';
 import '../../features/appointment/presentation/bloc/appointments_cubit.dart';
 import '../../infrastructure/injection/service_locator.dart';
 
 class AppointmentManager {
   late final GetAllAppointmentUsecase _getAllAppointmentsUseCase;
+  late final SyncAppointmentsUsecase _syncAppointmentsUsecase;
 
   AppointmentManager() {
     _getAllAppointmentsUseCase = sl<GetAllAppointmentUsecase>();
+    _syncAppointmentsUsecase = sl<SyncAppointmentsUsecase>();
   }
 
   void loadAllAppointments(AppointmentsCubit cubit) {
@@ -16,7 +19,7 @@ class AppointmentManager {
   }
 
   Future<void> refreshAppointments(AppointmentsCubit cubit) async {
-    await cubit.refreshAppointments(usecase: _getAllAppointmentsUseCase);
+    await cubit.refreshAppointments(usecase: _syncAppointmentsUsecase);
   }
 
   void filterByStatus(String status, AppointmentsCubit cubit) {

@@ -20,12 +20,9 @@ class LocalRepository<T> extends BaseRepository {
     super.logger,
   });
 
-  // getById(idNumber: 1)
-  // getById(idNumber: 1)
   Future<T?> getItemById(dynamic id) async {
     return handleDatabaseOperation(() async {
       final db = await databaseService.database;
-      print('🔍 [DEBUG] Querying table: $tableName for id: $id');
 
       final result = await db.query(
         tableName,
@@ -34,21 +31,12 @@ class LocalRepository<T> extends BaseRepository {
         limit: 1,
       );
 
-      print('🔍 [DEBUG] Database query result: ${result.length} rows');
-      if (result.isNotEmpty) {
-        print('🔍 [DEBUG] Database row keys: ${result.first.keys.toList()}');
-        print('🔍 [DEBUG] Database row data: ${result.first}');
-      }
-
       if (result.isEmpty) return null;
 
       try {
         final item = fromDb(result.first);
-        print('🔍 [DEBUG] Successfully created model from database');
         return item;
-      } catch (e, stack) {
-        print('🔍 [DEBUG] Error creating model from database: $e');
-        print('🔍 [DEBUG] Stack trace: $stack');
+      } catch (e) {
         rethrow;
       }
     });

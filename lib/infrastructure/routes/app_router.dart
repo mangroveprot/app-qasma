@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/appointment/presentation/pages/book_appointment_page.dart';
 import '../../features/auth/presentation/pages/create_account_page.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/get_started_page.dart';
@@ -8,7 +9,7 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/otp_verification_page.dart';
 import '../../features/auth/presentation/pages/test_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
-import '../../features/spash/splash_screen.dart';
+import '../../features/splash/splash_screen.dart';
 import 'app_routes.dart';
 
 class AppRouter {
@@ -22,7 +23,9 @@ class AppRouter {
     routes: [
       GoRoute(
         path: Routes.root,
-        builder: (context, state) => const SplashScreen(),
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: SplashScreen(),
+        ),
       ),
       GoRoute(
         path: Routes.aut_path, // '/auth'
@@ -30,7 +33,8 @@ class AppRouter {
         routes: [
           GoRoute(
             path: Routes.login,
-            builder: (context, state) => const LoginPage(),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: LoginPage()),
           ),
           GoRoute(
             path: Routes.get_started,
@@ -55,6 +59,11 @@ class AppRouter {
       GoRoute(
         path: Routes.home_path, // '/home'
         builder: (context, state) => const HomePage(),
+        routes: [],
+      ),
+      GoRoute(
+        path: Routes.book_appointment, // '/book-appointment'
+        builder: (context, state) => const BookAppointmentPage(),
         routes: [],
       )
     ],

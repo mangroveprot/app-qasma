@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
-import '../../../../../common/utils/constant.dart';
 import '../../../../../common/utils/content_item.dart';
 import '../../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../../common/widgets/custom_modal/custom_modal.dart';
+import '../../../../../common/widgets/models/modal_option.dart';
+import '../../../../../infrastructure/routes/app_routes.dart';
 import '../../../../../theme/theme_extensions.dart';
 
 class HomeFab extends StatelessWidget {
-  const HomeFab({super.key});
+  final List<ModalOption> options;
+  const HomeFab({super.key, required this.options});
 
   @override
   Widget build(BuildContext context) {
@@ -29,14 +32,17 @@ class HomeFab extends StatelessWidget {
                       final cubit = context.read<ButtonCubit>();
                       cubit.emitLoading();
                       final category = await CustomModal.showSelectionModal(
-                          context,
-                          title: ContentItems.appointmentSelection.title,
-                          subtitle:
-                              ContentItems.appointmentSelection.description,
-                          options: newAppointmentOptions);
+                        context,
+                        title: ContentItems.appointmentSelection.title,
+                        subtitle: ContentItems.appointmentSelection.description,
+                        options: options,
+                      );
                       cubit.emitInitial();
                       if (category != null) {
-                        debugPrint(category);
+                        context.go(
+                          Routes.book_appointment,
+                          extra: {'category': category},
+                        );
                       }
                     },
               backgroundColor: isLoading ? colors.textPrimary : colors.primary,

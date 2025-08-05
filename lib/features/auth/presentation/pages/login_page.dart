@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../common/helpers/helpers.dart';
 import '../../../../common/utils/form_field_config.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/bloc/form/form_cubit.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
+import '../../../../infrastructure/routes/app_routes.dart';
 import '../../data/models/signin_params.dart';
 import '../../domain/usecases/signin_usecase.dart';
 import '../widgets/login_widget/login_form.dart';
@@ -43,16 +46,15 @@ class LoginPageState extends State<LoginPage> {
   Map<String, String> _buildValidationFields() {
     final values = <String, String>{};
 
-    // add text field values
     for (final field in _textFields) {
-      values[field.field_key] = textControllers[field.field_key]!.text;
+      values[field.field_key] = textControllers[field.field_key]!.text.trim();
     }
 
     return values;
   }
 
   String _getTextValue(FormFieldConfig field) {
-    return textControllers[field.field_key]?.text ?? '';
+    return textControllers[field.field_key]?.text.trim() ?? '';
   }
 
   void handleSubmit(BuildContext context) {
@@ -64,6 +66,18 @@ class LoginPageState extends State<LoginPage> {
   }
 
   void _performLogin(BuildContext context) {
+    final password = _getTextValue(field_password);
+    final isValid = isPasswordValid(password);
+    print({password, isValid});
+
+    if (!isValid) {
+      formCubit.setFieldError(
+        field_password.field_key,
+        'Password must be at least 8 characters long',
+      );
+      return;
+    }
+
     final user_credentials = SigninParams(
         idNumber: _getTextValue(field_idNumber),
         password: _getTextValue(field_password));
@@ -111,7 +125,7 @@ class LoginPageState extends State<LoginPage> {
   Future<void> _handleButtonState(
       BuildContext context, ButtonState state) async {
     if (state is ButtonSuccessState) {
-      print({state.data});
+      context.go(Routes.root);
     }
   }
 }
