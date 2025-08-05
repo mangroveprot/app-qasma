@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../common/helpers/spacing.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
-import '../../../../appointment/presentation/bloc/appointments_cubit.dart';
 
+import '../../../../appointment/presentation/bloc/appointments/appointments_cubit.dart';
 import '../../../../appointment/presentation/pages/book_appointment_page.dart';
 import '../../pages/home_page.dart';
 import 'home_appointment_list.dart';
@@ -46,6 +46,7 @@ class _HomeFormState extends State<HomeForm> {
 
     try {
       await widget.state.controller.appoitnmentRefreshData();
+      await widget.state.controller.appointConfigRefreshData();
       _lastRefreshTime = DateTime.now();
     } finally {
       if (mounted) setState(() => _isRefreshing = false);

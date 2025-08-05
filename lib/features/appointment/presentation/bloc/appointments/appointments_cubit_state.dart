@@ -78,14 +78,11 @@ class AppointmentsFailureState extends AppointmentCubitState {
   @override
   List<Object?> get props => [suggestions, errorMessages];
 
-  // Helper getter to get the first error message
   String get primaryError =>
       errorMessages.isNotEmpty ? errorMessages.first : 'Unknown error occurred';
 
-  // Helper getter to check if there are multiple errors
   bool get hasMultipleErrors => errorMessages.length > 1;
 
-  // Helper getter to get formatted error message
   String get formattedMessage {
     if (errorMessages.length <= 1) {
       return primaryError;
@@ -93,6 +90,5 @@ class AppointmentsFailureState extends AppointmentCubitState {
     return '${errorMessages.first}\n• ${errorMessages.skip(1).join('\n• ')}';
   }
 
-  // Helper getter to get combined error message
   String get combinedMessage => errorMessages.join(', ');
 }

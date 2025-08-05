@@ -16,7 +16,7 @@ import '../../../../common/widgets/toast/custom_toast.dart';
 import '../../../../core/_base/_services/storage/shared_preference.dart';
 import '../../../../infrastructure/routes/app_routes.dart';
 import '../../../../theme/theme_extensions.dart';
-import '../../../appointment/presentation/bloc/appointments_cubit.dart';
+import '../../../appointment/presentation/bloc/appointments/appointments_cubit.dart';
 import '../../../appointment_config/presentation/bloc/appointment_config_cubit.dart';
 import '../../../users/presentation/bloc/user_cubit.dart';
 
@@ -31,10 +31,8 @@ class HomePageController {
   late final UserManager _userManager;
   late final AppointmentConfigManager _appointmentConfigManager;
 
-  // Navigation callback - injected from outside
   Function(String route)? _navigationCallback;
 
-  // Initialization flag
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
 
@@ -94,6 +92,11 @@ class HomePageController {
 
   Future<void> appoitnmentRefreshData() async {
     await _appointmentManager.refreshAppointments(_appointmentsCubit);
+  }
+
+  Future<void> appointConfigRefreshData() async {
+    await _appointmentConfigManager
+        .refreshAppointmentsConfig(_appointmentConfigCubit);
   }
 
   void filterAppointmentsByStatus(String status) {

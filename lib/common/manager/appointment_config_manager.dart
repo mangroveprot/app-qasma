@@ -12,4 +12,8 @@ class AppointmentConfigManager {
   void loadAllAppointmentsConfig(AppointmentConfigCubit cubit) {
     cubit.loadAppointmentConfig(usecase: _syncConfigUsacase);
   }
+
+  Future<void> refreshAppointmentsConfig(AppointmentConfigCubit cubit) async {
+    await cubit.loadAppointmentConfig(usecase: _syncConfigUsacase);
+  }
 }

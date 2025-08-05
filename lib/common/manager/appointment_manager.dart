@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../features/appointment/domain/usecases/getall_appointments_usecase.dart';
 import '../../features/appointment/domain/usecases/sync_appointments_usecase.dart';
-import '../../features/appointment/presentation/bloc/appointments_cubit.dart';
+import '../../features/appointment/presentation/bloc/appointments/appointments_cubit.dart';
 import '../../infrastructure/injection/service_locator.dart';
 
 class AppointmentManager {

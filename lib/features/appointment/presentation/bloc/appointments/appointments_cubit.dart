@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
 
-import '../../../../common/error/app_error.dart';
-import '../../../../core/_base/_bloc_cubit/base_cubit.dart';
-import '../../../../core/_usecase/usecase.dart';
-import '../../data/models/appointment_model.dart';
+import '../../../../../common/error/app_error.dart';
+import '../../../../../core/_base/_bloc_cubit/base_cubit.dart';
+import '../../../../../core/_usecase/usecase.dart';
+import '../../../data/models/appointment_model.dart';
 
 part 'appointments_cubit_state.dart';
 

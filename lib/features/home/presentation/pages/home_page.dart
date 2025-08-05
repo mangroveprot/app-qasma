@@ -5,7 +5,7 @@ import '../../../../common/utils/menu_items_config.dart';
 import '../../../../common/widgets/models/modal_option.dart';
 import '../../../../common/widgets/toast/custom_toast.dart';
 import '../../../../common/widgets/toast/toast_enums.dart';
-import '../../../appointment/presentation/bloc/appointments_cubit.dart';
+import '../../../appointment/presentation/bloc/appointments/appointments_cubit.dart';
 import '../../../appointment_config/presentation/bloc/appointment_config_cubit.dart';
 import '../../../users/presentation/bloc/user_cubit.dart';
 import '../controllers/homepage_controller.dart';
