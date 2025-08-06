@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
-import '../../../../common/utils/menu_items_config.dart';
 import '../../../../common/widgets/models/modal_option.dart';
-import '../../../../common/widgets/toast/custom_toast.dart';
-import '../../../../common/widgets/toast/toast_enums.dart';
+import '../../../../common/widgets/toast/app_toast.dart';
+import '../../../../infrastructure/routes/app_routes.dart';
 import '../../../appointment/presentation/bloc/appointments/appointments_cubit.dart';
 import '../../../appointment_config/presentation/bloc/appointment_config_cubit.dart';
 import '../../../users/presentation/bloc/user_cubit.dart';
@@ -27,46 +27,35 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
+  void _handleNavigation(String route, {Object? extra}) {
+    // Use go() only for root navigation (like after logout)
+    if (route == Routes.root || route == '/login') {
+      if (extra != null) {
+        context.go(route, extra: extra);
+      } else {
+        context.go(route);
+      }
+    } else {
+      // Use push() for all other navigation to maintain back stack
+      if (extra != null) {
+        context.push(route, extra: extra);
+      } else {
+        context.push(route);
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     controller = HomePageController();
-    controller.initialize(
-      onNavigate: _handleNavigation,
-    );
-  }
-
-  void _handleNavigation(String route) {
-    switch (route) {
-      case MenuKeys.appointments:
-        debugPrint('Navigating to Appointments');
-        break;
-      case MenuKeys.myProfile:
-        debugPrint('Navigating to Profile');
-        break;
-      case MenuKeys.history:
-        debugPrint('Navigating to History');
-        break;
-      case MenuKeys.privacyPolicy:
-        debugPrint('Navigating to Privacy Policy');
-        break;
-      case MenuKeys.termsAndCondition:
-        debugPrint('Navigating to Terms');
-        break;
-      case MenuKeys.settings:
-        debugPrint('Navigating to Settings');
-        break;
-      case MenuKeys.logout:
-        //   _handleLogout();
-        break;
-    }
+    controller.initialize(onNavigate: _handleNavigation);
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
 
-    // Ensure cubits are initialized
     if (!controller.isInitialized) {
       return const Scaffold(
         body: Center(
@@ -89,50 +78,57 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
             listener: _handleAppointmentConfigState,
           ),
         ],
-        child: Scaffold(
-          drawerEnableOpenDragGesture: true,
-          drawerScrimColor: Colors.black54,
-          drawerEdgeDragWidth: 60,
-          appBar: MainAppBar(
-            title: 'JRMSU-KC QASMA',
-            onNotificationTap: controller.handleNotificationTap,
-          ),
-          drawer: BlocBuilder<UserCubit, UserCubitState>(
-            builder: (context, state) {
-              final userName = state is UserLoadedState
-                  ? '${state.user.first_name} ${state.user.last_name}'.trim()
-                  : '';
+        child: BlocBuilder<UserCubit, UserCubitState>(
+          builder: (context, userState) {
+            final fullName = userState is UserLoadedState
+                ? '${userState.user.first_name} ${userState.user.last_name}'
+                    .trim()
+                : '';
 
-              return CustomSidebar(
-                userName: userName,
+            final firstName =
+                userState is UserLoadedState ? userState.user.first_name : '';
+
+            return Scaffold(
+              drawerEnableOpenDragGesture: true,
+              drawerScrimColor: Colors.black54,
+              drawerEdgeDragWidth: 60,
+              appBar: MainAppBar(
+                title: 'JRMSU-KC QASMA',
+                onNotificationTap: controller.handleNotificationTap,
+              ),
+              drawer: CustomSidebar(
+                userName: fullName,
                 onMenuItemTap: (menuItem) =>
                     controller.handleMenuItemTap(menuItem, context),
-              );
-            },
-          ),
-          body: SafeArea(
-            child: HomeForm(
-              state: this,
-            ),
-          ),
-          floatingActionButton: RepaintBoundary(
-            child: BlocBuilder<AppointmentConfigCubit,
-                AppointmentConfigCubitState>(
-              builder: (context, state) {
-                List<ModalOption> options = [];
+              ),
+              body: SafeArea(
+                child: HomeForm(
+                  state: this,
+                  firstName: firstName,
+                ),
+              ),
+              floatingActionButton: RepaintBoundary(
+                child: BlocBuilder<AppointmentConfigCubit,
+                    AppointmentConfigCubitState>(
+                  builder: (context, state) {
+                    List<ModalOption> options = [];
 
-                if (state is AppointmentConfigLoadedState) {
-                  final configCubit = context.read<AppointmentConfigCubit>();
-                  final categories = configCubit.allCategories;
-                  options = controller.generateAppointmentOptions(categories);
-                }
+                    if (state is AppointmentConfigLoadedState) {
+                      final configCubit =
+                          context.read<AppointmentConfigCubit>();
+                      final categories = configCubit.allCategories;
+                      options =
+                          controller.generateAppointmentOptions(categories);
+                    }
 
-                return HomeFab(
-                  options: options,
-                );
-              },
-            ),
-          ),
+                    return HomeFab(
+                      options: options,
+                    );
+                  },
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -143,16 +139,19 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
     switch (state.runtimeType) {
       case AppointmentsFailureState:
         final failureState = state as AppointmentsFailureState;
-        CustomToast.error(
-          context: context,
+        AppToast.show(
           message: failureState.primaryError,
+          type: ToastType.error,
         );
         break;
 
       case AppointmentsLoadedState:
         final loadedState = state as AppointmentsLoadedState;
         if (loadedState.appointments.isEmpty) {
-          CustomToast.info(context: context, message: 'No appointments found');
+          AppToast.show(
+            message: 'No appointments found',
+            type: ToastType.error,
+          );
         }
         break;
     }
@@ -160,10 +159,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
 
   void _handleUserState(BuildContext context, UserCubitState state) {
     if (state is UserFailureState) {
-      CustomToast.error(
-        context: context,
-        message: 'Failed to load user data',
-      );
+      AppToast.show(message: 'Failed to load user data', type: ToastType.error);
       debugPrint('Failed to load user: ${state.errorMessages}');
     }
   }
@@ -171,11 +167,10 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
   void _handleAppointmentConfigState(
       BuildContext context, AppointmentConfigCubitState state) {
     if (state is AppointmentConfigFailureState) {
-      CustomToast.error(
-          context: context,
-          message: 'Failed to load appointment config',
-          position: ToastPosition.bottomCenter);
-      debugPrint('Failed to load appointment config: ${state.errorMessages}');
+      AppToast.show(
+        message: 'Failed to load appointment config',
+        type: ToastType.error,
+      );
     }
   }
 

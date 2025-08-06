@@ -20,7 +20,6 @@ class AppointmentModel extends Appointment {
     super.deletedBy,
     required super.createdBy,
     super.updatedBy,
-    required super.version,
     required super.appointmentId,
     required super.createdAt,
     required super.updatedAt,
@@ -43,7 +42,6 @@ class AppointmentModel extends Appointment {
       'deletedBy': deletedBy,
       'createdBy': createdBy,
       'updatedBy': updatedBy,
-      'version': version,
       'appointmentId': appointmentId,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
@@ -73,7 +71,6 @@ class AppointmentModel extends Appointment {
       deletedBy: ModelUtils.getString(map, 'deletedBy'),
       createdBy: ModelUtils.getString(map, 'createdBy'),
       updatedBy: ModelUtils.getString(map, 'updatedBy'),
-      version: ModelUtils.getInt(map, 'version'),
       appointmentId: ModelUtils.getString(map, 'appointmentId'),
       createdAt: ModelUtils.getDateTime(map, 'createdAt'),
       updatedAt: ModelUtils.getDateTime(map, 'updatedAt'),
@@ -93,6 +90,29 @@ class AppointmentModel extends Appointment {
       'qrCode': qrCode.toMap(),
       'cancellation': cancellation.toMap(),
       'appointmentId': appointmentId,
+    };
+  }
+
+  Map<String, dynamic> createAppointmentToJson() {
+    return {
+      'studentId': studentId,
+      'scheduledStartAt': scheduledStartAt.toIso8601String(),
+      'scheduledEndAt': scheduledEndAt.toIso8601String(),
+      'appointmentType': appointmentType,
+      'appointmentCategory': appointmentCategory,
+      'description': description,
+    };
+  }
+
+  Map<String, dynamic> updateAppointmentToJson() {
+    return {
+      'studentId': studentId,
+      'appointmentId': appointmentId,
+      'scheduledStartAt': scheduledStartAt.toIso8601String(),
+      'scheduledEndAt': scheduledEndAt.toIso8601String(),
+      'appointmentType': appointmentType,
+      'appointmentCategory': appointmentCategory,
+      'description': description,
     };
   }
 
@@ -123,7 +143,6 @@ class AppointmentModel extends Appointment {
       deletedBy: ModelUtils.getString(json, 'deletedBy', 'deleted_by'),
       createdBy: ModelUtils.getString(json, 'createdBy', 'created_by'),
       updatedBy: ModelUtils.getString(json, 'updatedBy', 'updated_by'),
-      version: ModelUtils.getInt(json, '__version__'),
       appointmentId:
           ModelUtils.getString(json, 'appointmentId', 'appointment_id'),
       createdAt: ModelUtils.getDateTime(json, 'createdAt', 'created_at'),
@@ -148,7 +167,6 @@ class AppointmentModel extends Appointment {
       deletedBy: deletedBy,
       createdBy: createdBy,
       updatedBy: updatedBy,
-      version: version,
       appointmentId: appointmentId,
       createdAt: createdAt,
       updatedAt: updatedAt,
@@ -172,7 +190,6 @@ class AppointmentModel extends Appointment {
       deletedBy: entity.deletedBy,
       createdBy: entity.createdBy,
       updatedBy: entity.updatedBy,
-      version: entity.version,
       appointmentId: entity.appointmentId,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,

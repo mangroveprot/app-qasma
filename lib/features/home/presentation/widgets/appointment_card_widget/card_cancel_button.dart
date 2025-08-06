@@ -35,7 +35,7 @@ class CardCancelButton extends StatelessWidget {
               onPressed: () async {
                 final cubit = context.read<ButtonCubit>();
                 cubit.emitLoading();
-                await Future.delayed(const Duration(milliseconds: 100));
+                await Future.delayed(const Duration(milliseconds: 500));
                 onPressed();
                 cubit.emitInitial();
               },

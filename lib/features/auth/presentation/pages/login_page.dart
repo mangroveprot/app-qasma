@@ -68,7 +68,6 @@ class LoginPageState extends State<LoginPage> {
   void _performLogin(BuildContext context) {
     final password = _getTextValue(field_password);
     final isValid = isPasswordValid(password);
-    print({password, isValid});
 
     if (!isValid) {
       formCubit.setFieldError(

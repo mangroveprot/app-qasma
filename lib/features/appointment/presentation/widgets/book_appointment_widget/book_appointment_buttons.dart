@@ -6,7 +6,13 @@ import '../../../../../common/widgets/button_text/custom_text_button.dart';
 import '../../../../../theme/theme_extensions.dart';
 
 class BookAppointmentButtons extends StatelessWidget {
-  const BookAppointmentButtons({super.key});
+  final VoidCallback onPressed;
+  final bool isRescheduling;
+  const BookAppointmentButtons({
+    super.key,
+    required this.onPressed,
+    this.isRescheduling = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -27,18 +33,19 @@ class BookAppointmentButtons extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          CustomTextButton(
-            onPressed: () {
-              context.pop();
-            },
-            text: 'Cancel',
-            textDecoration: TextDecoration.underline,
-            borderRadius: radius.medium,
+          TextButton(
+            onPressed: () => context.pop(),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(
+                decoration: TextDecoration.underline,
+              ),
+            ),
           ),
           Spacing.horizontalMedium,
           CustomTextButton(
-            onPressed: () {},
-            text: 'Appoint Now',
+            onPressed: onPressed,
+            text: isRescheduling ? 'Reschedule' : 'Appoint Now',
             backgroundColor: colors.primary,
             borderRadius: radius.medium,
             textColor: colors.white,

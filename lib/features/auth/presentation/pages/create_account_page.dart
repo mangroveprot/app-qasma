@@ -8,7 +8,7 @@ import '../../../../common/utils/form_field_config.dart';
 import '../../../../common/widgets/bloc/form/form_cubit.dart';
 import '../../../../common/widgets/custom_app_bar.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
-import '../../../../common/widgets/toast/custom_toast.dart';
+import '../../../../common/widgets/toast/app_toast.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
 import '../../../../infrastructure/routes/app_routes.dart';
 import '../../../users/domain/entities/other_info.dart';
@@ -220,7 +220,10 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   void _handleButtonState(BuildContext context, ButtonState state) {
     if (state is ButtonFailureState) {
       if (state.errorMessages.isNotEmpty) {
-        CustomToast.error(context: context, message: state.errorMessages.first);
+        AppToast.show(
+          message: state.errorMessages.first,
+          type: ToastType.error,
+        );
       }
     }
 

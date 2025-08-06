@@ -18,7 +18,6 @@ class Appointment extends Equatable {
   final String? deletedBy;
   final String createdBy;
   final String? updatedBy;
-  final int version;
   final String appointmentId;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -38,7 +37,6 @@ class Appointment extends Equatable {
     this.deletedBy,
     required this.createdBy,
     this.updatedBy,
-    required this.version,
     required this.appointmentId,
     required this.createdAt,
     required this.updatedAt,
@@ -75,7 +73,6 @@ class Appointment extends Equatable {
         deletedBy,
         createdBy,
         updatedBy,
-        version,
         appointmentId,
         createdAt,
         updatedAt,

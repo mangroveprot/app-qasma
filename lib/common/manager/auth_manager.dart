@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/bloc/auth/auth_cubit.dart';
 import '../../infrastructure/routes/app_router.dart';
 import '../../infrastructure/routes/app_routes.dart';
+import '../widgets/toast/app_toast.dart';
 
 class AuthManager {
   static bool _isNavigating = false;
@@ -61,13 +62,8 @@ class AuthManager {
 
   static void _showLogoutMessage(BuildContext context, String message) {
     try {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.orange,
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      AppToast.show(
+          message: 'You are logging out...', type: ToastType.original);
     } catch (e) {
       debugPrint('Failed to show snackbar: $e');
     }

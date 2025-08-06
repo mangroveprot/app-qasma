@@ -37,7 +37,7 @@ class BookingDropDown extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Text(
-              'Loading...',
+              'Getting available slots...',
               style: TextStyle(color: Colors.grey.shade600),
             ),
           ],

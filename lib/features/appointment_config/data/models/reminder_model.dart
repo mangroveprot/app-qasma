@@ -1,4 +1,3 @@
-import 'dart:convert';
 import '../../domain/entites/reminder.dart';
 
 class ReminderModel extends Reminder {
@@ -46,4 +45,4 @@ class ReminderModel extends Reminder {
       message: entity.message,
     );
   }
-} 
+}

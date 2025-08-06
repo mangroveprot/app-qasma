@@ -4,7 +4,6 @@ import '../../../../../common/helpers/spacing.dart';
 import '../../../../../common/utils/form_field_config.dart';
 import '../../../../../infrastructure/routes/app_routes.dart';
 import '../../pages/get_started_page.dart';
-import '../../pages/login_page.dart';
 import '../call_to_action.dart';
 import '../signup_header.dart';
 import 'basic_info_section.dart';
@@ -50,7 +49,10 @@ class GetStartedForm extends StatelessWidget {
               ),
             ),
             Spacing.verticalMedium,
-            RepaintBoundary(child: NextButton(onPressed: state.handleSubmit)),
+            RepaintBoundary(
+                child: NextButton(
+              onPressed: () => state.handleSubmit(context),
+            )),
             Spacing.verticalMedium,
             RepaintBoundary(
               child: CallToAction(
@@ -60,16 +62,6 @@ class GetStartedForm extends StatelessWidget {
               ),
             ),
             Spacing.verticalMedium,
-            ElevatedButton(
-              child: const Text('Go to Second Page'),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
-                );
-                // context.go(Routes.buildPath(Routes.aut_path, Routes.otp_verification));
-              },
-            ),
           ],
         ),
       ),

@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../common/helpers/spacing.dart';
-import '../../../../../common/utils/form_field_config.dart';
+import '../../../../../common/widgets/toast/app_toast.dart';
 import '../../../../../theme/theme_extensions.dart';
 import '../../bloc/slots/slots_cubit.dart';
 import '../../pages/book_appointment_page.dart';
 import 'book_appointment_buttons.dart';
 import 'book_category_section.dart';
+import 'book_description_section.dart';
 import 'book_type_date_time_section.dart';
 
 class BookAppointmentForm extends StatelessWidget {
@@ -33,37 +34,9 @@ class BookAppointmentForm extends StatelessWidget {
       create: (context) => SlotsCubit(),
       child: BlocListener<SlotsCubit, SlotsCubitState>(
         listener: (context, slotsState) {
-          // Handle error states with better UX
           if (slotsState is SlotsFailureState) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.error_outline, color: Colors.white),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        slotsState.errorMessages.first,
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    ),
-                  ],
-                ),
-                backgroundColor: Colors.red.shade600,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                margin: const EdgeInsets.all(16),
-                duration: const Duration(seconds: 4),
-                action: SnackBarAction(
-                  label: 'Dismiss',
-                  textColor: Colors.white,
-                  onPressed: () =>
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar(),
-                ),
-              ),
-            );
+            AppToast.show(
+                message: slotsState.errorMessages.first, type: ToastType.error);
           }
         },
         child: Column(
@@ -92,17 +65,16 @@ class BookAppointmentForm extends StatelessWidget {
                                 // Appointment Type and DateTime Section
                                 RepaintBoundary(
                                   child: BookTypeDataTimeSection(
-                                    dateAndTimeController: state
-                                            .dropdownControllers[
-                                        field_appointmentDateTime.field_key]!,
-                                    appointmentTypeController:
-                                        state.dropdownControllers[
-                                            field_appointmentType.field_key]!,
+                                    textControllers: state.textControllers,
+                                    dropdownControllers:
+                                        state.dropdownControllers,
+                                    category: state.category,
                                   ),
                                 ),
-
-                                // Add some bottom padding to ensure content doesn't get cut off
-                                const SizedBox(height: 20),
+                                Spacing.verticalMedium,
+                                BookDescriptionSection(
+                                  textControllers: state.textControllers,
+                                ),
                               ]),
                             ),
                           ),
@@ -110,22 +82,14 @@ class BookAppointmentForm extends StatelessWidget {
                       ),
                     ),
 
-                    // Bottom buttons section
-                    Container(
-                      decoration: BoxDecoration(
-                        color: colors.white,
-                        border: Border(
-                          top: BorderSide(
-                            color: Colors.grey.shade200,
-                            width: 1,
-                          ),
-                        ),
-                      ),
-                      child: const SafeArea(
-                        top: false,
-                        child: Padding(
-                          padding: EdgeInsets.all(16),
-                          child: BookAppointmentButtons(),
+                    // buttons section
+                    SafeArea(
+                      top: false,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: BookAppointmentButtons(
+                          onPressed: () => state.handleSubmit(context),
+                          isRescheduling: state.isRescheduling,
                         ),
                       ),
                     ),

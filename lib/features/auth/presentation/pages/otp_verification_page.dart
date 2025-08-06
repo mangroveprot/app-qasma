@@ -6,7 +6,7 @@ import '../../../../common/utils/form_field_config.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/bloc/form/form_cubit.dart';
 import '../../../../common/widgets/custom_app_bar.dart';
-import '../../../../common/widgets/toast/custom_toast.dart';
+import '../../../../common/widgets/toast/app_toast.dart';
 import '../../../../infrastructure/routes/app_route_extractor.dart';
 import '../widgets/otp_verrification_widget/otp_verification_form.dart';
 
@@ -158,7 +158,10 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
   void _handleButtonState(BuildContext context, ButtonState state) {
     if (state is ButtonFailureState) {
       if (state.errorMessages.isNotEmpty) {
-        CustomToast.error(context: context, message: state.errorMessages.first);
+        AppToast.show(
+          message: state.errorMessages.first,
+          type: ToastType.error,
+        );
       }
     }
 

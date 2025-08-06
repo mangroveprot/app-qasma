@@ -24,7 +24,7 @@ const FormFieldConfig field_idNumber_email = FormFieldConfig(
 const FormFieldConfig field_course = FormFieldConfig(
   field_key: 'course',
   name: 'Course',
-  hint: 'Enter your first name...',
+  hint: 'Select a course....',
 );
 const FormFieldConfig field_password = FormFieldConfig(
   field_key: 'password',
@@ -136,6 +136,12 @@ const FormFieldConfig field_appointmentType = FormFieldConfig(
 
 const FormFieldConfig field_appointmentDateTime = FormFieldConfig(
   field_key: 'appointment-dateTime',
-  name: 'Data & Timr',
+  name: 'Data & Time',
   hint: 'Select an date time...',
+);
+
+const FormFieldConfig field_description = FormFieldConfig(
+  field_key: 'description',
+  name: 'Description',
+  hint: 'Write something here...',
 );

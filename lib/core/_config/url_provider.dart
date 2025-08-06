@@ -27,6 +27,8 @@ class URLProviderConfig {
   String get getConfig => '${configEndPoint}/';
 
   // Appointment URLS
+  String get newAppointment => '${appointmentEndPoint}/';
+  String get updateAppointment => '${appointmentEndPoint}/update';
   String get getAllAppointmentByUser => '${appointmentEndPoint}/getAllByUser';
   String get getSlots => '${appointmentEndPoint}/slots';
 

@@ -4,6 +4,7 @@ import '../../../../common/error/app_error.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
 import '../../domain/repository/appointment_repositories.dart';
 import '../../domain/services/appointment_service.dart';
+import '../models/appointment_model.dart';
 
 class AppointmentRepositoryImpl extends AppointmentRepository {
   final AppointmentService _appointmentService = sl<AppointmentService>();
@@ -38,6 +39,34 @@ class AppointmentRepositoryImpl extends AppointmentRepository {
   Future<Either<AppError, Map<String, dynamic>>> getSlots(
       String duration) async {
     final Either result = await _appointmentService.getSlots(duration);
+    return result.fold(
+      (error) {
+        return Left(error);
+      },
+      (data) {
+        return Right(data);
+      },
+    );
+  }
+
+  @override
+  Future<Either<AppError, AppointmentModel>> createNewAppointment(
+      AppointmentModel model) async {
+    final Either result = await _appointmentService.createNewAppointment(model);
+    return result.fold(
+      (error) {
+        return Left(error);
+      },
+      (data) {
+        return Right(data);
+      },
+    );
+  }
+
+  @override
+  Future<Either<AppError, AppointmentModel>> updateAppointment(
+      AppointmentModel model) async {
+    final Either result = await _appointmentService.updateAppointment(model);
     return result.fold(
       (error) {
         return Left(error);

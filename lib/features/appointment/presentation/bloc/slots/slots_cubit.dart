@@ -50,7 +50,7 @@ class SlotsCubit extends BaseCubit<SlotsCubitState> {
   }) async {
     emitLoading(isRefreshing: isRefreshing);
 
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(milliseconds: 500));
 
     try {
       final Either result = await usecase.call(param: duration);

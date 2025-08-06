@@ -7,7 +7,6 @@ import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/get_started_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/otp_verification_page.dart';
-import '../../features/auth/presentation/pages/test_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/splash/splash_screen.dart';
 import 'app_routes.dart';
@@ -52,7 +51,6 @@ class AppRouter {
             path: Routes.forgot_password,
             builder: (context, state) => const ForgotPasswordPage(),
           ),
-          GoRoute(path: 'test', builder: (context, state) => const TestPage()),
         ],
       ),
       // home

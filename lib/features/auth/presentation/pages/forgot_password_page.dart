@@ -5,7 +5,7 @@ import '../../../../common/utils/form_field_config.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/bloc/form/form_cubit.dart';
 import '../../../../common/widgets/custom_app_bar.dart';
-import '../../../../common/widgets/toast/custom_toast.dart';
+import '../../../../common/widgets/toast/app_toast.dart';
 import '../widgets/forgot_password_widget/forgot_password_form.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -103,7 +103,10 @@ class ForgotPasswordPageState extends State<ForgotPasswordPage> {
     if (state is ButtonFailureState) {
       Future.microtask(() async {
         for (final message in state.errorMessages) {
-          CustomToast.error(context: context, message: message);
+          AppToast.show(
+            message: message,
+            type: ToastType.error,
+          );
           await Future.delayed(const Duration(milliseconds: 1500));
         }
       });

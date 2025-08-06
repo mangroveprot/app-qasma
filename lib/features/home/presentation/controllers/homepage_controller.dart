@@ -12,13 +12,14 @@ import '../../../../common/widgets/button_text/custom_text_button.dart';
 import '../../../../common/widgets/custom_modal/custom_modal.dart';
 import '../../../../common/widgets/modal.dart';
 import '../../../../common/widgets/models/modal_option.dart';
-import '../../../../common/widgets/toast/custom_toast.dart';
+import '../../../../common/widgets/toast/app_toast.dart';
 import '../../../../core/_base/_services/storage/shared_preference.dart';
 import '../../../../infrastructure/routes/app_routes.dart';
 import '../../../../theme/theme_extensions.dart';
 import '../../../appointment/presentation/bloc/appointments/appointments_cubit.dart';
 import '../../../appointment_config/presentation/bloc/appointment_config_cubit.dart';
 import '../../../users/presentation/bloc/user_cubit.dart';
+import '../../../appointment/data/models/appointment_model.dart';
 
 class HomePageController {
   // Cubits
@@ -31,7 +32,7 @@ class HomePageController {
   late final UserManager _userManager;
   late final AppointmentConfigManager _appointmentConfigManager;
 
-  Function(String route)? _navigationCallback;
+  Function(String route, {Object? extra})? _navigationCallback;
 
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
@@ -48,7 +49,7 @@ class HomePageController {
         ),
       ];
 
-  void initialize({Function(String route)? onNavigate}) {
+  void initialize({Function(String route, {Object? extra})? onNavigate}) {
     _navigationCallback = onNavigate;
     _initializeManagers();
     _initializeCubits();
@@ -141,20 +142,44 @@ class HomePageController {
       await appoitnmentRefreshData();
 
       if (context.mounted) {
-        CustomToast.success(
-            context: context, message: 'Appointment cancelled successfully');
+        AppToast.show(
+          message: 'Appointment cancelled successfully',
+          type: ToastType.success,
+        );
       }
     } catch (e) {
       if (context.mounted) {
-        CustomToast.error(
-            context: context, message: 'Failed to cancel appointment');
+        AppToast.show(
+          message: 'Failed to cancel appointment',
+          type: ToastType.error,
+        );
       }
     }
   }
 
   void handleRescheduleAppointment(String appointmentId) {
-    // TODO: Implement rescheduling logic
-    debugPrint('Reschedule appointment: $appointmentId');
+    // Find the appointment in the current list
+    final appointments = _appointmentsCubit.state;
+    AppointmentModel? appointmentToReschedule;
+
+    if (appointments is AppointmentsLoadedState) {
+      try {
+        appointmentToReschedule = appointments.appointments.firstWhere(
+            (appointment) => appointment.appointmentId == appointmentId);
+      } catch (e) {
+        debugPrint('Appointment not found for rescheduling: $appointmentId');
+        return;
+      }
+    }
+
+    if (appointmentToReschedule != null) {
+      _navigationCallback?.call(
+        Routes.book_appointment,
+        extra: {'appointment': appointmentToReschedule},
+      );
+    } else {
+      debugPrint('Appointment not found for rescheduling: $appointmentId');
+    }
   }
 
   void handleShowHistory() {

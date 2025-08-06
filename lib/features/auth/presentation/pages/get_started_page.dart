@@ -6,7 +6,7 @@ import '../../../../common/utils/form_field_config.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/bloc/form/form_cubit.dart';
 import '../../../../common/widgets/custom_app_bar.dart';
-import '../../../../common/widgets/toast/custom_toast.dart';
+import '../../../../common/widgets/toast/app_toast.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
 import '../../../../infrastructure/routes/app_routes.dart';
 import '../../../users/domain/usecases/is_register_usecase.dart';
@@ -80,7 +80,7 @@ class GetStartedPageState extends State<GetStartedPage> {
     return dropdownControllers[field.field_key]?.value ?? '';
   }
 
-  void handleSubmit() {
+  void handleSubmit(BuildContext context) {
     final isValid = formCubit.validateAll(
       _buildValidationFields(),
       // optionalFields: _optionalFields.map((field) => field.field_key).toList(),
@@ -88,10 +88,10 @@ class GetStartedPageState extends State<GetStartedPage> {
 
     if (!isValid) return;
 
-    _performValidation();
+    _performValidation(context);
   }
 
-  void _performValidation() {
+  void _performValidation(BuildContext context) {
     final passwordText = _getTextValue(field_password);
     final confirmPasswordText = _getTextValue(field_confirm_password);
     final idNumberText = _getTextValue(field_idNumber);
@@ -162,7 +162,10 @@ class GetStartedPageState extends State<GetStartedPage> {
     if (state is ButtonFailureState) {
       Future.microtask(() async {
         for (final message in state.errorMessages) {
-          CustomToast.error(context: context, message: message);
+          AppToast.show(
+            message: message,
+            type: ToastType.error,
+          );
           await Future.delayed(const Duration(milliseconds: 1500));
         }
       });

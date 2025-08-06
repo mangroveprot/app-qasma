@@ -15,9 +15,11 @@ import '../../features/appointment/data/repository/appointment_repositories_impl
 import '../../features/appointment/data/services/appointment_service_impl.dart';
 import '../../features/appointment/domain/repository/appointment_repositories.dart';
 import '../../features/appointment/domain/services/appointment_service.dart';
+import '../../features/appointment/domain/usecases/create_new_appointment_usecase.dart';
 import '../../features/appointment/domain/usecases/get_slots_usecase.dart';
 import '../../features/appointment/domain/usecases/getall_appointments_usecase.dart';
 import '../../features/appointment/domain/usecases/sync_appointments_usecase.dart';
+import '../../features/appointment/domain/usecases/update_appointment_usecase.dart';
 import '../../features/appointment_config/data/models/appointment_config_model.dart';
 import '../../features/appointment_config/data/models/appointment_config_table_model.dart';
 import '../../features/appointment_config/data/repository/appointment_config_repositories_impl.dart';
@@ -216,8 +218,12 @@ void _registerUseCases() {
   sl.registerLazySingleton<SyncAppointmentsUsecase>(
       () => SyncAppointmentsUsecase());
   sl.registerLazySingleton<GetSlotsUseCase>(() => GetSlotsUseCase());
+  sl.registerLazySingleton<UpdateAppointmentUsecase>(
+      () => UpdateAppointmentUsecase());
 
   // Appointment Config Usecases
   sl.registerLazySingleton<GetConfigUseCase>(() => GetConfigUseCase());
   sl.registerLazySingleton<SyncConfigUsacase>(() => SyncConfigUsacase());
+  sl.registerLazySingleton<CreateNewAppointmentUsecase>(
+      () => CreateNewAppointmentUsecase());
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -17,7 +18,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       title: Text(
         title,
-        style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.w400),
+        style: const TextStyle(
+            color: Colors.black, fontSize: 16, fontWeight: FontWeight.w400),
       ),
       backgroundColor: backgroundColor,
       elevation: 0.0,
@@ -33,7 +35,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       children: [
         GestureDetector(
           onTap: () {
-            Navigator.pop(context); // Navigate back
+            context.pop();
           },
           child: Container(
             margin: const EdgeInsets.all(10),
@@ -74,6 +76,5 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   // }
 
   @override
-  // Implementing PreferredSizeWidget
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

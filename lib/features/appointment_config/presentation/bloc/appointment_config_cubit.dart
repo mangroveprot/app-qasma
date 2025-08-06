@@ -85,7 +85,17 @@ class AppointmentConfigCubit extends BaseCubit<AppointmentConfigCubitState> {
 
 // Get CategoryType objects for a specific category
   List<CategoryType> getCategoryTypes(String category) {
-    return currentConfig?.categoryAndType?[category] ?? [];
+    final categoryAndType = currentConfig?.categoryAndType;
+    if (categoryAndType == null) return [];
+
+    // Case-insensitive lookup
+    final normalizedCategory = category.toLowerCase();
+    for (final entry in categoryAndType.entries) {
+      if (entry.key.toLowerCase() == normalizedCategory) {
+        return entry.value;
+      }
+    }
+    return [];
   }
 
 // Get type names only for a specific category

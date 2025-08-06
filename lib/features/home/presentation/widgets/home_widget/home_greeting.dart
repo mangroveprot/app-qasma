@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../common/helpers/helpers.dart';
 import '../../../../../common/helpers/spacing.dart';
 import '../../../../../theme/theme_extensions.dart';
 
@@ -34,7 +35,7 @@ class HomeGreetingCard extends StatelessWidget {
               text: TextSpan(
                 children: [
                   TextSpan(
-                    text: 'Good Morning $userName',
+                    text: 'Good ${getTimeOfDayGreeting()} $userName',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: weight.bold,

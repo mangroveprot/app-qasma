@@ -9,7 +9,7 @@ import 'card_qrcode_section.dart';
 import 'card_reschedule_button.dart';
 import 'status_chip.dart';
 
-class AppointmentCard extends StatelessWidget {
+class AppointmentCard extends StatefulWidget {
   final AppointmentModel appointment;
   final VoidCallback onCancel;
   final VoidCallback onReschedule;
@@ -18,6 +18,13 @@ class AppointmentCard extends StatelessWidget {
       required this.appointment,
       required this.onCancel,
       required this.onReschedule});
+
+  @override
+  State<AppointmentCard> createState() => _AppointmentCardState();
+}
+
+class _AppointmentCardState extends State<AppointmentCard> {
+  bool _showActions = false;
 
   @override
   Widget build(BuildContext context) {
@@ -69,20 +76,21 @@ class AppointmentCard extends StatelessWidget {
                     children: [
                       Text(
                         formatUtcToLocal(
-                            utcTime: appointment.scheduledStartAt.toString(),
+                            utcTime:
+                                widget.appointment.scheduledStartAt.toString(),
                             style: DateTimeFormatStyle.dateOnly),
                         style: _titleTextStyle,
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${formatUtcToLocal(utcTime: appointment.scheduledStartAt.toString(), style: DateTimeFormatStyle.timeOnly)} - '
-                        '${formatUtcToLocal(utcTime: appointment.scheduledEndAt.toString(), style: DateTimeFormatStyle.timeOnly)}',
+                        '${formatUtcToLocal(utcTime: widget.appointment.scheduledStartAt.toString(), style: DateTimeFormatStyle.timeOnly)} - '
+                        '${formatUtcToLocal(utcTime: widget.appointment.scheduledEndAt.toString(), style: DateTimeFormatStyle.timeOnly)}',
                         style: _subtitleTextStyle,
                       ),
                     ],
                   ),
                 ),
-                StatusChip(status: appointment.status),
+                StatusChip(status: widget.appointment.status),
               ],
             ),
 
@@ -105,7 +113,7 @@ class AppointmentCard extends StatelessWidget {
                         style: _labelTextStyle,
                       ),
                       Text(
-                        appointment.appointmentCategory,
+                        widget.appointment.appointmentCategory,
                         style: _subtitleTextStyle,
                       ),
                       Spacing.verticalSmall,
@@ -117,7 +125,7 @@ class AppointmentCard extends StatelessWidget {
                             TextSpan(
                                 text: 'Description: ', style: _labelTextStyle),
                             TextSpan(
-                                text: appointment.description,
+                                text: widget.appointment.description,
                                 style: _subtitleTextStyle),
                           ],
                         ),
@@ -132,7 +140,7 @@ class AppointmentCard extends StatelessWidget {
                                 text: 'Appointment Type: ',
                                 style: _labelTextStyle),
                             TextSpan(
-                                text: appointment.appointmentType,
+                                text: widget.appointment.appointmentType,
                                 style: _subtitleTextStyle),
                           ],
                         ),
@@ -147,19 +155,62 @@ class AppointmentCard extends StatelessWidget {
               ],
             ),
 
-            Spacing.verticalLarge,
-            _divider,
             Spacing.verticalMedium,
+            _divider,
+            Spacing.verticalSmall,
 
-            // Action Buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                CardRescheduleButton(onPressed: onReschedule),
-                Spacing.verticalSmall,
-                RepaintBoundary(child: CardCancelButton(onPressed: onCancel))
-              ],
+            // See More / Actions
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  _showActions = !_showActions;
+                });
+              },
+              child: Center(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                  decoration: BoxDecoration(
+                    color: colors.textPrimary.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        _showActions ? 'See less' : 'See more',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: colors.textPrimary,
+                          fontWeight: weight.medium,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        _showActions
+                            ? Icons.keyboard_arrow_up
+                            : Icons.keyboard_arrow_down,
+                        color: colors.textPrimary,
+                        size: 20,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
+
+            if (_showActions) ...[
+              Spacing.verticalMedium,
+              // Action Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CardRescheduleButton(onPressed: widget.onReschedule),
+                  CardCancelButton(onPressed: widget.onCancel),
+                ],
+              ),
+            ],
           ],
         ),
       ),

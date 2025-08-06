@@ -39,7 +39,7 @@ class HomeFab extends StatelessWidget {
                       );
                       cubit.emitInitial();
                       if (category != null) {
-                        context.go(
+                        context.push(
                           Routes.book_appointment,
                           extra: {'category': category},
                         );

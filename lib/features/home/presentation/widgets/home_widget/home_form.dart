@@ -2,18 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../common/helpers/spacing.dart';
+import '../../../../../theme/theme_extensions.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
 
 import '../../../../appointment/presentation/bloc/appointments/appointments_cubit.dart';
-import '../../../../appointment/presentation/pages/book_appointment_page.dart';
 import '../../pages/home_page.dart';
 import 'home_appointment_list.dart';
 import 'home_greeting.dart';
 
 class HomeForm extends StatefulWidget {
   final HomePageState state;
+  final String firstName;
 
-  const HomeForm({super.key, required this.state});
+  const HomeForm({super.key, required this.state, required this.firstName});
 
   @override
   State<HomeForm> createState() => _HomeFormState();
@@ -81,11 +82,13 @@ class _HomeFormState extends State<HomeForm> {
               onCancel: (id) =>
                   widget.state.controller.handleCancelAppointment(id, context),
               onReschedule: widget.state.controller.handleRescheduleAppointment,
+              userName: widget.firstName,
             );
           }
 
           if (state is AppointmentsFailureState) {
             return _ErrorContent(
+              userName: widget.firstName,
               error: state.primaryError,
               onRefresh: _onRefresh,
               onRetry: widget.state.controller.appoitnmentRefreshData,
@@ -111,6 +114,7 @@ class _LoadingContent extends StatelessWidget {
 }
 
 class _LoadedContent extends StatelessWidget {
+  final String userName;
   final List<AppointmentModel> appointments;
   final Future<void> Function() onRefresh;
   final void Function(String) onCancel;
@@ -122,24 +126,25 @@ class _LoadedContent extends StatelessWidget {
     required this.onRefresh,
     required this.onCancel,
     required this.onReschedule,
+    required this.userName,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ElevatedButton(
-          child: const Text('Go to Second Page'),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const BookAppointmentPage()),
-            );
-            // context.go(Routes.buildPath(Routes.aut_path, Routes.otp_verification));
-          },
+        // ElevatedButton(
+        //     child: const Text('Go to Second Page'),
+        //     onPressed: () {
+        //       AppToast.show(
+        //         message: 'APPPPPPPPP JSDFPIDNSPKFMS',
+        //         type: ToastType.original,
+        //         position: ToastPosition.bottom,
+        //       );
+        //     }),
+        HomeGreetingCard(
+          userName: userName,
         ),
-        const HomeGreetingCard(),
         Spacing.verticalSmall,
         Expanded(
           child: appointments.isEmpty
@@ -160,6 +165,7 @@ class _LoadedContent extends StatelessWidget {
 
 class _ErrorContent extends StatelessWidget {
   final String error;
+  final String userName;
   final Future<void> Function() onRefresh;
   final VoidCallback onRetry;
   final bool isRefreshing;
@@ -170,6 +176,7 @@ class _ErrorContent extends StatelessWidget {
     required this.onRefresh,
     required this.onRetry,
     required this.isRefreshing,
+    required this.userName,
   }) : super(key: key);
 
   @override
@@ -213,12 +220,70 @@ class _EmptyContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return RefreshIndicator(
       onRefresh: onRefresh,
-      child: const _ScrollableContent(
-        icon: Icons.calendar_today_outlined,
-        title: 'No appointments to display',
-        subtitle: 'Pull down to refresh',
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(24),
+        children: [
+          const SizedBox(height: 60),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: colors.textPrimary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.calendar_today_outlined,
+              size: 58,
+              color: colors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 32),
+          Text(
+            'No appointments yet',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          Spacing.verticalSmall,
+          Text(
+            'Book your first appointment to get started',
+            style: TextStyle(color: colors.textPrimary),
+            textAlign: TextAlign.center,
+          ),
+          Spacing.verticalMedium,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Tap the ',
+                style: TextStyle(color: colors.textPrimary),
+              ),
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: colors.textPrimary,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.add,
+                  color: colors.white,
+                  size: 14,
+                ),
+              ),
+              Text(
+                ' button to book an appointment',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

@@ -15,7 +15,6 @@ class AppointmentTableModel implements TableModel {
     checkInStatus TEXT NOT NULL,
     qrCode TEXT NOT NULL,              -- QRCode → JSON stringified TEXT
     cancellation TEXT NOT NULL,        -- Cancellation → JSON stringified TEXT
-    version INTEGER NOT NULL,          -- __version__ field
 
     -- Auditing fields
     createdAt TEXT NOT NULL,           -- DateTime → ISO8601 String

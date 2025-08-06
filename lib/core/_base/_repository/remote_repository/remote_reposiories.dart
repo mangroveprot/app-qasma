@@ -150,6 +150,7 @@ class RemoteRepository<T> extends BaseRepository
             rawList.map((e) => fromJson(Map<String, dynamic>.from(e))).toList();
 
         DateTime? latestUpdatedAt;
+        bool allItemsProcessedSuccessfully = true;
 
         for (final item in updatedItems) {
           try {
@@ -163,7 +164,7 @@ class RemoteRepository<T> extends BaseRepository
               latestUpdatedAt = itemUpdatedAt;
             }
 
-            final existingItem = await getItemById(itemId);
+            final existingItem = await _localRepository.getItemById(itemId);
             bool shouldSave = false;
 
             if (existingItem == null) {
@@ -181,16 +182,19 @@ class RemoteRepository<T> extends BaseRepository
             }
           } catch (e) {
             debugPrint('Failed to sync item ${getId(item)}: $e');
+            allItemsProcessedSuccessfully = false;
           }
         }
 
-        // Update sync timestamp
-        if (latestUpdatedAt != null) {
-          await prefs.setString(
-              '${endpoint}_lastSyncTime', latestUpdatedAt.toIso8601String());
-        } else if (updatedItems.isNotEmpty) {
-          await prefs.setString(
-              '${endpoint}_lastSyncTime', DateTime.now().toIso8601String());
+        // Only update sync timestamp if all items were processed successfully
+        if (allItemsProcessedSuccessfully) {
+          if (latestUpdatedAt != null) {
+            await prefs.setString(
+                '${endpoint}_lastSyncTime', latestUpdatedAt.toIso8601String());
+          } else if (updatedItems.isNotEmpty) {
+            await prefs.setString(
+                '${endpoint}_lastSyncTime', DateTime.now().toIso8601String());
+          }
         }
       },
       onConflict: () async {
@@ -201,6 +205,7 @@ class RemoteRepository<T> extends BaseRepository
         final items =
             rawList.map((e) => fromJson(Map<String, dynamic>.from(e))).toList();
         DateTime? latestUpdatedAt;
+        bool allItemsProcessedSuccessfully = true;
 
         for (final item in items) {
           try {
@@ -215,15 +220,18 @@ class RemoteRepository<T> extends BaseRepository
             }
           } catch (e) {
             debugPrint('Failed to save item during conflict resolution: $e');
+            allItemsProcessedSuccessfully = false;
           }
         }
 
-        final prefs = await SharedPreferences.getInstance();
-        final syncTime = latestUpdatedAt?.toIso8601String() ??
-            DateTime.now().toIso8601String();
-        await prefs.setString('${endpoint}_lastSyncTime', syncTime);
+        // Only update sync timestamp if all items were processed successfully
+        if (allItemsProcessedSuccessfully) {
+          final prefs = await SharedPreferences.getInstance();
+          final syncTime = latestUpdatedAt?.toIso8601String() ??
+              DateTime.now().toIso8601String();
+          await prefs.setString('${endpoint}_lastSyncTime', syncTime);
+        }
       },
-      onComplete: () => Future.value(),
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../common/helpers/helpers.dart';
 import '../../../../../common/helpers/spacing.dart';
 import '../../../../../theme/theme_extensions.dart';
 
@@ -25,9 +26,9 @@ class BookCategorySection extends StatelessWidget {
     );
 
     final _categoryTextStyle = TextStyle(
-      fontSize: 12,
+      fontSize: 14,
       color: colors.black,
-      fontWeight: fontWeight.regular,
+      fontWeight: fontWeight.medium,
     );
 
     return Column(
@@ -40,7 +41,7 @@ class BookCategorySection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
           decoration: _categoryContainerDecoration,
           child: Center(
-            child: Text(category, style: _categoryTextStyle),
+            child: Text(capitalizeWords(category), style: _categoryTextStyle),
           ),
         ),
       ],

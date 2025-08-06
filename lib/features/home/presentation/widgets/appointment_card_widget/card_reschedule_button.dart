@@ -16,29 +16,37 @@ class CardRescheduleButton extends StatelessWidget {
     final weight = context.weight;
     final radii = context.radii;
 
-    return Align(
-      alignment: Alignment.centerRight,
-      child: IntrinsicWidth(
-        child: BlocProvider<ButtonCubit>(
-          create: (context) => ButtonCubit(),
-          child: CustomAppButton(
-            height: 44,
-            labelText: 'Reschedule',
-            labelFontSize: 12,
-            labelTextColor: colors.white,
-            backgroundColor: colors.secondary,
-            labelTextDecoration: TextDecoration.none,
-            labelFontWeight: weight.medium,
-            borderRadius: radii.medium,
-            disabledBackgroundColor: colors.textPrimary,
-            icon: Icons.edit_calendar,
-            iconSize: 12,
-            iconPosition: Position.left,
-            contentAlignment: MainAxisAlignment.center,
-            onPressedCallback: onPressed,
+    return BlocProvider(
+      create: (context) => ButtonCubit(),
+      child: Builder(builder: (context) {
+        return Align(
+          alignment: Alignment.centerRight,
+          child: IntrinsicWidth(
+            child: CustomAppButton(
+              height: 44,
+              labelText: 'Reschedule',
+              labelFontSize: 12,
+              labelTextColor: colors.white,
+              backgroundColor: colors.secondary,
+              labelTextDecoration: TextDecoration.none,
+              labelFontWeight: weight.medium,
+              borderRadius: radii.medium,
+              disabledBackgroundColor: colors.textPrimary,
+              icon: Icons.edit_calendar,
+              iconSize: 12,
+              iconPosition: Position.left,
+              contentAlignment: MainAxisAlignment.center,
+              onPressedCallback: () async {
+                final cubit = context.read<ButtonCubit>();
+                cubit.emitLoading();
+                await Future.delayed(const Duration(milliseconds: 500));
+                onPressed();
+                cubit.emitInitial();
+              },
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }
