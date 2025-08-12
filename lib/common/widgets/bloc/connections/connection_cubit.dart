@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 
@@ -53,7 +54,7 @@ class ConnectionCubit extends Cubit<ConnectionCubitState> {
   }
 
   void _emitIfChanged(ConnectionCubitState newState) {
-    if (state.runtimeType != newState.runtimeType) {
+    if (state != newState) {
       emit(newState);
     }
   }

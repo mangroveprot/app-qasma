@@ -39,15 +39,17 @@ class OtpVerificationForm extends StatelessWidget {
                 OtpBuildFieldsSection(
                   onChanged: state.onOtpChanged,
                   onBackspace: state.onBackspace,
-                  onSubmitted: state.onSubmitted,
+                  onSubmitted: (int) => state.onSubmitted(context, int),
                   fieldKey: state.otp_field_key,
                   controllers: state.controllers,
                   focusNodes: state.focusNodes,
                 ),
                 Spacing.verticalMedium,
-                OtpVerifyButton(onPressed: state.handleVerifyOTP),
+                OtpVerifyButton(
+                    onPressed: () => state.handleVerifyOTP(context)),
                 Spacing.verticalMedium,
-                OtpResendButton(onPressedResend: state.handleResendOTP),
+                OtpResendButton(
+                    onPressedResend: () => state.handleResendOTP(context)),
                 Spacing.verticalMedium,
               ],
             ),

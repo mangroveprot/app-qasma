@@ -34,6 +34,7 @@ class CustomAppButton extends StatelessWidget {
   final double loadingSpinnerSize;
   final Color? disabledBackgroundColor;
   final Border? border;
+  final String? buttonId; // Add this line
 
   const CustomAppButton({
     Key? key,
@@ -59,13 +60,14 @@ class CustomAppButton extends StatelessWidget {
     this.loadingSpinnerSize = 20,
     this.disabledBackgroundColor = Colors.transparent,
     this.border,
+    this.buttonId, // Add this line
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ButtonCubit, ButtonState>(
       builder: (context, state) {
-        final isButtonLoading = state is ButtonLoadingState;
+        final isButtonLoading = _shouldShowLoading(state);
 
         if (isButtonLoading) {
           return _ButtonContentLoading(
@@ -115,5 +117,17 @@ class CustomAppButton extends StatelessWidget {
         );
       },
     );
+  }
+
+  /// Determines if this button should show loading state
+  bool _shouldShowLoading(ButtonState state) {
+    if (state is! ButtonLoadingState) return false;
+
+    // If no buttonId on state = all buttons load
+    // If no buttonId on widget = react to all states
+    // If both have IDs = only load if they match
+    return state.buttonId == null ||
+        buttonId == null ||
+        state.buttonId == buttonId;
   }
 }

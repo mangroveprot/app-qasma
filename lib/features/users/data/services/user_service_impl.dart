@@ -5,9 +5,11 @@ import '../../../../common/networks/api_client.dart';
 import '../../../../common/networks/response/api_response.dart';
 import '../../../../core/_base/_repository/base_repository/abstract_repositories.dart';
 import '../../../../core/_base/_services/base_service/base_service.dart';
+import '../../../../core/_base/_services/storage/shared_preference.dart';
 import '../../../../core/_config/url_provider.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
 import '../../domain/services/user_service.dart';
+import '../models/params/dynamic_param.dart';
 import '../models/user_model.dart';
 
 class UserServiceImpl extends BaseService<UserModel> implements UserService {
@@ -23,7 +25,7 @@ class UserServiceImpl extends BaseService<UserModel> implements UserService {
         [identifier],
       );
 
-      final response = await _apiClient.get(url);
+      final response = await _apiClient.get(url, requiresAuth: false);
       final apiResponse = ApiResponse.fromJson(response.data, (json) => json);
 
       if (apiResponse.isSuccess) {
@@ -62,6 +64,60 @@ class UserServiceImpl extends BaseService<UserModel> implements UserService {
           ? e
           : AppError.create(
               message: 'Unexpected error during getUser',
+              type: ErrorType.unknown,
+              originalError: e,
+              stackTrace: stack,
+            );
+      return Left(error);
+    }
+  }
+
+  @override
+  Future<Either<AppError, bool>> update(DynamicParam param) async {
+    try {
+      final currIdNumber = SharedPrefs().getString('currentUserId');
+      final url = _urlProviderConfig.addPathSegments(
+        _urlProviderConfig.userUpdateUrl,
+        [currIdNumber ?? ''],
+      );
+
+      final response = await _apiClient.patch(
+        url,
+        data: param.toJson(),
+        requiresAuth: false,
+      );
+
+      final apiResponse = ApiResponse.fromJson(response.data, (json) => json);
+
+      if (apiResponse.isSuccess) {
+        return const Right(true);
+      } else {
+        return Left(apiResponse.error!);
+      }
+    } catch (e, stack) {
+      final error = e is AppError
+          ? e
+          : AppError.create(
+              message: 'Unexpected error during getUser',
+              type: ErrorType.unknown,
+              originalError: e,
+              stackTrace: stack,
+            );
+      return Left(error);
+    }
+  }
+
+  @override
+  Future<Either<AppError, List<UserModel>>> syncUser() async {
+    try {
+      await sync();
+      final response = await getAll();
+      return Right(response);
+    } catch (e, stack) {
+      final error = e is AppError
+          ? e
+          : AppError.create(
+              message: 'Unexpected error during getting all user',
               type: ErrorType.unknown,
               originalError: e,
               stackTrace: stack,

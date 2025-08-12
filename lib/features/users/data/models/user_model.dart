@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../../../../common/utils/model_utils.dart';
 import '../../domain/entities/user.dart';
 import 'other_info_model.dart';
 
@@ -29,6 +30,56 @@ class UserModel extends User {
     super.deletedAt,
     super.deletedBy,
   });
+
+  UserModel copyWith({
+    String? idNumber,
+    String? email,
+    String? password,
+    String? role,
+    bool? verified,
+    bool? active,
+    String? first_name,
+    String? last_name,
+    String? middle_name,
+    String? suffix,
+    String? gender,
+    DateTime? date_of_birth,
+    String? address,
+    String? contact_number,
+    String? facebook,
+    OtherInfoModel? other_info,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? createdBy,
+    String? updatedBy,
+    DateTime? deletedAt,
+    String? deletedBy,
+  }) {
+    return UserModel(
+      idNumber: idNumber ?? this.idNumber,
+      email: email ?? this.email,
+      password: password ?? this.password,
+      role: role ?? this.role,
+      verified: verified ?? this.verified,
+      active: active ?? this.active,
+      first_name: first_name ?? this.first_name,
+      last_name: last_name ?? this.last_name,
+      middle_name: middle_name ?? this.middle_name,
+      suffix: suffix ?? this.suffix,
+      gender: gender ?? this.gender,
+      date_of_birth: date_of_birth ?? this.date_of_birth,
+      address: address ?? this.address,
+      contact_number: contact_number ?? this.contact_number,
+      facebook: facebook ?? this.facebook,
+      other_info: other_info ?? this.other_info,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      createdBy: createdBy ?? this.createdBy,
+      updatedBy: updatedBy ?? this.updatedBy,
+      deletedAt: deletedAt ?? this.deletedAt,
+      deletedBy: deletedBy ?? this.deletedBy,
+    );
+  }
 
   // helpers for value safety
   // helpers for value safety
@@ -69,28 +120,6 @@ class UserModel extends User {
       return DateTime.parse(value);
     }
     return DateTime.now();
-  }
-
-  static DateTime? _getNullableDateTime(
-    Map<String, dynamic> map,
-    String key1, [
-    String? key2,
-  ]) {
-    dynamic raw;
-
-    if (map.containsKey(key1)) {
-      raw = map[key1];
-    } else if (key2 != null && map.containsKey(key2)) {
-      raw = map[key2];
-    } else {
-      return null;
-    }
-
-    final value = raw?.toString();
-    if (value != null && value.isNotEmpty) {
-      return DateTime.tryParse(value);
-    }
-    return null;
   }
 
   // to db (sqlite)
@@ -143,12 +172,12 @@ class UserModel extends User {
             ? jsonDecode(map['other_info'])
             : <String, dynamic>{},
       ),
-      createdAt: _getDateTime(map, 'createdAt'),
-      updatedAt: _getDateTime(map, 'updatedAt'),
-      createdBy: _getString(map, 'createdBy'),
-      updatedBy: _getString(map, 'updatedBy'),
-      deletedAt: _getNullableDateTime(map, 'deletedAt'),
-      deletedBy: _getString(map, 'deletedBy'),
+      deletedAt: ModelUtils.getNullableDateTime(map, 'deletedAt'),
+      deletedBy: ModelUtils.getString(map, 'deletedBy'),
+      createdBy: ModelUtils.getString(map, 'createdBy'),
+      updatedBy: ModelUtils.getString(map, 'updatedBy'),
+      createdAt: ModelUtils.getDateTime(map, 'createdAt'),
+      updatedAt: ModelUtils.getDateTime(map, 'updatedAt'),
     );
   }
 
@@ -192,12 +221,13 @@ class UserModel extends User {
       other_info: OtherInfoModel.fromMap(
         json['other_info'] ?? json['other_info'] ?? <String, dynamic>{},
       ),
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      createdBy: null,
-      updatedBy: null,
-      deletedAt: null,
-      deletedBy: null,
+      deletedAt:
+          ModelUtils.getNullableDateTime(json, 'deletedAt', 'deleted_at'),
+      deletedBy: ModelUtils.getString(json, 'deletedBy', 'deleted_by'),
+      createdBy: ModelUtils.getString(json, 'createdBy', 'created_by'),
+      updatedBy: ModelUtils.getString(json, 'updatedBy', 'updated_by'),
+      createdAt: ModelUtils.getDateTime(json, 'createdAt', 'created_at'),
+      updatedAt: ModelUtils.getDateTime(json, 'updatedAt', 'updated_at'),
     );
   }
 

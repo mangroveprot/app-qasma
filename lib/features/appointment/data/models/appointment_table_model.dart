@@ -13,6 +13,9 @@ class AppointmentTableModel implements TableModel {
     description TEXT NOT NULL,
     status TEXT NOT NULL,
     checkInStatus TEXT NOT NULL,
+    checkInTime TEXT,                  -- DateTime → ISO8601 String
+    staffId TEXT,                      -- Staff ID
+    counselorId TEXT,                  -- Counselor ID
     qrCode TEXT NOT NULL,              -- QRCode → JSON stringified TEXT
     cancellation TEXT NOT NULL,        -- Cancellation → JSON stringified TEXT
 
@@ -37,6 +40,9 @@ class AppointmentTableModel implements TableModel {
         'CREATE INDEX idx_appointments_appointment_type ON appointments(appointmentType)',
         'CREATE INDEX idx_appointments_appointment_category ON appointments(appointmentCategory)',
         'CREATE INDEX idx_appointments_check_in_status ON appointments(checkInStatus)',
+        'CREATE INDEX idx_appointments_staff_id ON appointments(staffId)', // New index for staffId
+        'CREATE INDEX idx_appointments_counselor_id ON appointments(counselorId)', // New index for counselorId
+        'CREATE INDEX idx_appointments_check_in_time ON appointments(checkInTime)', // New index for checkInTime
       ];
 }
 

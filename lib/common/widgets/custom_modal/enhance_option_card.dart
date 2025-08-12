@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../theme/theme_extensions.dart';
 import '../models/modal_option.dart';
@@ -8,171 +9,107 @@ class EnhancedOptionCard extends StatefulWidget {
     super.key,
     required this.option,
     required this.onTap,
+    this.iconData,
+    this.isSelected = false,
   });
 
   final ModalOption option;
   final VoidCallback onTap;
+  final IconData? iconData;
+  final bool isSelected;
 
   @override
   State<EnhancedOptionCard> createState() => _EnhancedOptionCardState();
 }
 
-class _EnhancedOptionCardState extends State<EnhancedOptionCard>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _scaleAnimation;
-  late final Animation<double> _checkAnimation;
-  late final Animation<Color?> _colorAnimation;
-  late final Animation<Color?> _textColorAnimation;
-
-  bool _isPressed = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.1,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
-
-    _checkAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final colors = context.colors;
-
-    _colorAnimation = ColorTween(
-      begin: Colors.grey[100],
-      end: colors.textPrimary.withOpacity(0.1),
-    ).animate(_controller);
-
-    _textColorAnimation = ColorTween(
-      begin: Colors.black,
-      end: colors.textPrimary,
-    ).animate(_controller);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _handleTapDown() {
-    if (!_isPressed) {
-      setState(() => _isPressed = true);
-      _controller.forward();
-    }
-  }
-
-  void _handleTapUp() {
-    if (_isPressed) {
-      setState(() => _isPressed = false);
-      _controller.reverse();
-    }
-  }
-
+class _EnhancedOptionCardState extends State<EnhancedOptionCard> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final fontWeight = context.weight;
     final radius = context.radii;
+    final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return InkWell(
-      onTap: widget.onTap,
-      onTapDown: (_) => _handleTapDown(),
-      onTapUp: (_) => _handleTapUp(),
-      onTapCancel: _handleTapUp,
-      borderRadius: radius.medium,
-      splashColor: Colors.transparent,
-      highlightColor: Colors.transparent,
-      focusColor: Colors.transparent,
-      hoverColor: Colors.transparent,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return Container(
-            width: double.infinity,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Material(
+        color: widget.isSelected
+            ? colors.textPrimary.withOpacity(0.1)
+            : (isDark ? colors.surface : Colors.white),
+        borderRadius: radius.large,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            widget.onTap();
+          },
+          borderRadius: radius.large,
+          splashColor: colors.textPrimary.withOpacity(0.3),
+          highlightColor: colors.textPrimary.withOpacity(0.15),
+          child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: _colorAnimation.value,
-              borderRadius: radius.medium,
-              border: _isPressed
-                  ? Border.all(
-                      color: colors.textPrimary.withOpacity(0.1),
-                      width: 2,
-                    )
-                  : null,
-              boxShadow: _isPressed
-                  ? [
-                      BoxShadow(
-                        color: colors.textPrimary.withOpacity(0.2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
+              borderRadius: radius.large,
+              border: Border.all(
+                color: widget.isSelected
+                    ? colors.primary
+                    : (isDark
+                        ? colors.textPrimary.withOpacity(0.2)
+                        : Colors.grey.withOpacity(0.15)),
+                width: widget.isSelected ? 1.5 : 1.0,
+              ),
             ),
             child: Row(
               children: [
-                if (widget.option.icon != null)
-                  Transform.scale(
-                    scale: _scaleAnimation.value,
-                    child: widget.option.icon,
+                // Icon container
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: widget.isSelected
+                        ? colors.primary.withOpacity(0.15)
+                        : (isDark
+                            ? colors.textPrimary.withOpacity(0.1)
+                            : colors.textPrimary.withOpacity(0.05)),
+                    borderRadius: radius.medium,
                   ),
-                if (widget.option.icon != null) const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      DefaultTextStyle(
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: fontWeight.bold,
-                          color: _textColorAnimation.value,
-                        ),
-                        child: Text(widget.option.title),
-                      ),
-                      if (widget.option.subtitle != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          widget.option.subtitle!,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: colors.textPrimary,
-                          ),
-                        ),
-                      ],
-                    ],
+                  child: Icon(
+                    Icons.category_outlined,
+                    color: widget.isSelected ? colors.primary : colors.black,
+                    size: 24,
                   ),
                 ),
-                Transform.scale(
-                  scale: _checkAnimation.value,
-                  child: Opacity(
-                    opacity: _checkAnimation.value,
-                    child: Icon(Icons.check_circle, color: colors.primary),
+
+                const SizedBox(width: 16),
+
+                // Content section
+                Expanded(
+                  child: Text(
+                    widget.option.title,
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: widget.isSelected
+                          ? fontWeight.bold
+                          : fontWeight.medium,
+                      color: widget.isSelected ? colors.primary : colors.black,
+                      height: 1.2,
+                    ),
                   ),
+                ),
+
+                const SizedBox(width: 12),
+
+                // Arrow
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: widget.isSelected
+                      ? colors.primary
+                      : colors.textPrimary.withOpacity(0.7),
+                  size: 18,
                 ),
               ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }

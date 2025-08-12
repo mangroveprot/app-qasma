@@ -73,11 +73,11 @@ class GetStartedPageState extends State<GetStartedPage> {
 
   // helpers
   String _getTextValue(FormFieldConfig field) {
-    return textControllers[field.field_key]?.text ?? '';
+    return textControllers[field.field_key]?.text.trim() ?? '';
   }
 
   String _getDropdownValue(FormFieldConfig field) {
-    return dropdownControllers[field.field_key]?.value ?? '';
+    return dropdownControllers[field.field_key]?.value?.trim() ?? '';
   }
 
   void handleSubmit(BuildContext context) {
@@ -138,7 +138,9 @@ class GetStartedPageState extends State<GetStartedPage> {
     return BlocProvider(
       create: (context) => ButtonCubit(),
       child: Scaffold(
-        appBar: const CustomAppBar(leadingText: 'Back'),
+        appBar: const CustomAppBar(
+          leadingText: 'Back',
+        ),
         body: BlocListener<ButtonCubit, ButtonState>(
           listener: _handleButtonState,
           child: LayoutBuilder(

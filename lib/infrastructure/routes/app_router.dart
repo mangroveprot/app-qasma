@@ -1,14 +1,17 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/appointment/presentation/pages/appointment_history_page.dart';
 import '../../features/appointment/presentation/pages/book_appointment_page.dart';
 import '../../features/auth/presentation/pages/create_account_page.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/get_started_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/otp_verification_page.dart';
+import '../../features/auth/presentation/pages/reset_password_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/splash/splash_screen.dart';
+import '../../features/users/presentation/pages/my_profile_page.dart';
 import 'app_routes.dart';
 
 class AppRouter {
@@ -51,6 +54,10 @@ class AppRouter {
             path: Routes.forgot_password,
             builder: (context, state) => const ForgotPasswordPage(),
           ),
+          GoRoute(
+            path: Routes.reset_password,
+            builder: (context, state) => const ResetPassswordPage(),
+          ),
         ],
       ),
       // home
@@ -60,9 +67,24 @@ class AppRouter {
         routes: [],
       ),
       GoRoute(
-        path: Routes.book_appointment, // '/book-appointment'
+        path: Routes.appointment, // book-appointment
         builder: (context, state) => const BookAppointmentPage(),
-        routes: [],
+        routes: [
+          GoRoute(
+            path: Routes.appointment_history,
+            builder: (context, state) => const AppointmentHistory(),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: Routes.user_path, // user
+        builder: (context, state) => const MyProfilePage(),
+        routes: [
+          GoRoute(
+            path: Routes.user_profile,
+            builder: (context, state) => const MyProfilePage(),
+          ),
+        ],
       )
     ],
   );

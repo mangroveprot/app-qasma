@@ -1,25 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../theme/theme_extensions.dart';
+
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final String leadingText;
   final Color? backgroundColor;
+  final Future<void> Function(BuildContext context)? onBackPressed;
 
   const CustomAppBar({
     super.key,
     this.title = '',
     this.backgroundColor = Colors.transparent,
     this.leadingText = '',
+    this.onBackPressed,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final fontWeight = context.weight;
     return AppBar(
       title: Text(
         title,
-        style: const TextStyle(
-            color: Colors.black, fontSize: 16, fontWeight: FontWeight.w400),
+        style: TextStyle(
+            color: colors.black, fontSize: 14, fontWeight: fontWeight.regular),
       ),
       backgroundColor: backgroundColor,
       elevation: 0.0,
@@ -31,49 +37,43 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Widget _buildLeadingGesture(BuildContext context) {
+    final colors = context.colors;
+    final fontWeight = context.weight;
+    final radii = context.radii;
+    final lowColor = colors.black.withOpacity(0.8);
     return Row(
       children: [
         GestureDetector(
-          onTap: () {
-            context.pop();
+          onTap: () async {
+            if (onBackPressed != null) {
+              await onBackPressed!(context);
+            } else {
+              context.pop();
+            }
           },
           child: Container(
             margin: const EdgeInsets.all(10),
             alignment: Alignment.center,
-            width: 30,
+            width: 34,
             decoration: BoxDecoration(
-              // color: const Color(0xfff7f8f8),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: radii.small,
             ),
-            child: const Icon(Icons.arrow_back, color: Colors.black, size: 24),
+            child: Icon(Icons.arrow_back, color: lowColor, size: 24),
           ),
         ),
-        Text(
-          leadingText,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 14, color: Colors.black),
-        ),
+        if (leadingText.isNotEmpty)
+          Text(
+            leadingText,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 12,
+              color: lowColor,
+              fontWeight: fontWeight.medium,
+            ),
+          ),
       ],
     );
   }
-
-  // Widget _buildActionGesture(BuildContext context) {
-  //   return GestureDetector(
-  //     onTap: () {
-  //       log('Actions tapped!');
-  //     },
-  //     child: Container(
-  //       margin: const EdgeInsets.all(10),
-  //       alignment: Alignment.center,
-  //       width: 37,
-  //       decoration: BoxDecoration(
-  //         color: const Color(0xfff7f8f8),
-  //         borderRadius: BorderRadius.circular(10),
-  //       ),
-  //       child: const Icon(Icons.more_vert, color: Colors.black, size: 24),
-  //     ),
-  //   );
-  // }
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);

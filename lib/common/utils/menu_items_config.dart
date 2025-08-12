@@ -15,7 +15,6 @@ class MenuItemConfig {
 }
 
 class MenuKeys {
-  static const String appointments = 'appointments';
   static const String myProfile = 'my_profile';
   static const String history = 'history';
   static const String privacyPolicy = 'privacy_policy';
@@ -25,11 +24,6 @@ class MenuKeys {
 }
 
 const List<MenuItemConfig> menu_items = [
-  MenuItemConfig(
-    menu_key: MenuKeys.appointments,
-    title: 'Appointments',
-    icon: Icons.calendar_month_outlined,
-  ),
   MenuItemConfig(
     menu_key: MenuKeys.myProfile,
     title: 'My profile',

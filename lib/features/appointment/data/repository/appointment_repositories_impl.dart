@@ -5,6 +5,7 @@ import '../../../../infrastructure/injection/service_locator.dart';
 import '../../domain/repository/appointment_repositories.dart';
 import '../../domain/services/appointment_service.dart';
 import '../models/appointment_model.dart';
+import '../models/params/cancel_params.dart';
 
 class AppointmentRepositoryImpl extends AppointmentRepository {
   final AppointmentService _appointmentService = sl<AppointmentService>();
@@ -67,6 +68,21 @@ class AppointmentRepositoryImpl extends AppointmentRepository {
   Future<Either<AppError, AppointmentModel>> updateAppointment(
       AppointmentModel model) async {
     final Either result = await _appointmentService.updateAppointment(model);
+    return result.fold(
+      (error) {
+        return Left(error);
+      },
+      (data) {
+        return Right(data);
+      },
+    );
+  }
+
+  @override
+  Future<Either<AppError, bool>> cancelAppointment(
+      CancelParams cancelReq) async {
+    final Either result =
+        await _appointmentService.cancelAppointment(cancelReq);
     return result.fold(
       (error) {
         return Left(error);

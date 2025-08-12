@@ -11,7 +11,6 @@ import '../../../../common/widgets/toast/app_toast.dart';
 
 import '../../../../core/_base/_services/storage/shared_preference.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
-import '../../../../infrastructure/routes/app_routes.dart';
 import '../../../appointment_config/domain/usecases/sync_config_usecase.dart';
 import '../../../appointment_config/presentation/bloc/appointment_config_cubit.dart';
 import '../../data/models/appointment_model.dart';
@@ -48,6 +47,7 @@ class BookAppointmentPageState extends State<BookAppointmentPage> {
     if (_existingAppointment == null) {
       final extra = GoRouterState.of(context).extra as Map<String, dynamic>?;
       _existingAppointment = extra?['appointment'] as AppointmentModel?;
+
       if (_existingAppointment != null) {
         _populateFormWithExistingAppointment();
       }
@@ -78,29 +78,25 @@ class BookAppointmentPageState extends State<BookAppointmentPage> {
   void _populateFormWithExistingAppointment() {
     if (_existingAppointment == null) return;
 
-    // Populate description
     textControllers[field_description.field_key]?.text =
         _existingAppointment!.description;
 
-    // Populate appointment type
     dropdownControllers[field_appointmentType.field_key]?.value =
         _existingAppointment!.appointmentType;
 
-    // Populate date time (format as expected by the form)
-    final startTime = formatUtcToLocal(
-      utcTime: _existingAppointment!.scheduledStartAt.toString(),
-      style: DateTimeFormatStyle.timeOnly,
-    );
-    final endTime = formatUtcToLocal(
-      utcTime: _existingAppointment!.scheduledEndAt.toString(),
-      style: DateTimeFormatStyle.timeOnly,
-    );
-    final date = formatUtcToLocal(
-      utcTime: _existingAppointment!.scheduledStartAt.toString(),
-      style: DateTimeFormatStyle.dateOnly,
-    );
+    final startAt = _existingAppointment!.scheduledStartAt;
+    final endAt = _existingAppointment!.scheduledEndAt;
 
-    final dateTimeString = '$date $startTime - $endTime';
+    final String startDate =
+        "${startAt.year.toString().padLeft(4, '0')}-${startAt.month.toString().padLeft(2, '0')}-${startAt.day.toString().padLeft(2, '0')}";
+    final String startTime =
+        "${startAt.hour % 12 == 0 ? 12 : startAt.hour % 12}:${startAt.minute.toString().padLeft(2, '0')} ${startAt.hour >= 12 ? 'PM' : 'AM'}";
+
+    final String endTime =
+        "${endAt.hour % 12 == 0 ? 12 : endAt.hour % 12}:${endAt.minute.toString().padLeft(2, '0')} ${endAt.hour >= 12 ? 'PM' : 'AM'}";
+
+    final String dateTimeString = '$startDate | $startTime - $endTime';
+
     dropdownControllers[field_appointmentDateTime.field_key]?.value =
         dateTimeString;
   }
@@ -252,7 +248,7 @@ class BookAppointmentPageState extends State<BookAppointmentPage> {
           if (!_configLoaded) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               context.read<AppointmentConfigCubit>().loadAppointmentConfig(
-                    usecase: sl<SyncConfigUsacase>(),
+                    usecase: sl<SyncConfigUsecase>(),
                   );
               _configLoaded = true;
             });
@@ -312,7 +308,17 @@ class BookAppointmentPageState extends State<BookAppointmentPage> {
     await Future.delayed(const Duration(milliseconds: 1500));
 
     if (isSuccess && context.mounted) {
-      context.go(Routes.home_path);
+      final extra = GoRouterState.of(context).extra as Map<String, dynamic>?;
+      final onSuccess = extra?['onSuccess'] as Function()?;
+
+      if (onSuccess != null) {
+        try {
+          await onSuccess();
+        } catch (e) {
+          debugPrint('Error calling success callback: $e');
+        }
+      }
+      context.pop();
     }
   }
 }

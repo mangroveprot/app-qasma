@@ -294,11 +294,6 @@ class ApiClient {
       await AuthCubit.instance.performAutoLogout(reason: reason);
     } catch (e) {
       _logger.e('Error during auto logout: $e');
-      try {
-        await AuthCubit.instance.logout(isAutoLogout: true);
-      } catch (fallbackError) {
-        _logger.e('Fallback logout also failed: $fallbackError');
-      }
     } finally {
       Future.delayed(const Duration(seconds: 2), () {
         _isLoggingOut = false;

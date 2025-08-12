@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../../theme/theme_extensions.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
 import '../appointment_card_widget/appointment_card.dart';
+import 'home_history_button.dart';
 
 class HomeAppointmentList extends StatelessWidget {
   final List<AppointmentModel> appointments;
@@ -19,6 +20,7 @@ class HomeAppointmentList extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final weight = context.weight;
+
     return Column(
       children: [
         // label
@@ -34,16 +36,17 @@ class HomeAppointmentList extends StatelessWidget {
             ),
           ),
         ),
-
-        // appointments list
         Expanded(
           child: ListView.builder(
             physics: const BouncingScrollPhysics(
               parent: AlwaysScrollableScrollPhysics(),
             ),
-            //   padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-            itemCount: appointments.length,
+            itemCount: appointments.length + 1,
             itemBuilder: (context, index) {
+              if (index == appointments.length) {
+                return const HomeHistoryButton();
+              }
+
               return RepaintBoundary(
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 12),

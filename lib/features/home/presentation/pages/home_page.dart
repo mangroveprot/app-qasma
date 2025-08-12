@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/models/modal_option.dart';
 import '../../../../common/widgets/toast/app_toast.dart';
 import '../../../../infrastructure/routes/app_routes.dart';
@@ -28,7 +29,6 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
   bool get wantKeepAlive => true;
 
   void _handleNavigation(String route, {Object? extra}) {
-    // Use go() only for root navigation (like after logout)
     if (route == Routes.root || route == '/login') {
       if (extra != null) {
         context.go(route, extra: extra);
@@ -36,7 +36,6 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
         context.go(route);
       }
     } else {
-      // Use push() for all other navigation to maintain back stack
       if (extra != null) {
         context.push(route, extra: extra);
       } else {
@@ -73,6 +72,9 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
           ),
           BlocListener<UserCubit, UserCubitState>(
             listener: _handleUserState,
+          ),
+          BlocListener<ButtonCubit, ButtonState>(
+            listener: _handleButtonState,
           ),
           BlocListener<AppointmentConfigCubit, AppointmentConfigCubitState>(
             listener: _handleAppointmentConfigState,
@@ -123,6 +125,9 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
 
                     return HomeFab(
                       options: options,
+                      onAppointmentSuccess: () async {
+                        await controller.appoitnmentRefreshData();
+                      },
                     );
                   },
                 ),
@@ -149,8 +154,8 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
         final loadedState = state as AppointmentsLoadedState;
         if (loadedState.appointments.isEmpty) {
           AppToast.show(
-            message: 'No appointments found',
-            type: ToastType.error,
+            message: 'You dont have appointment yet!',
+            type: ToastType.original,
           );
         }
         break;
@@ -164,6 +169,35 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
     }
   }
 
+  Future<void> _handleButtonState(
+      BuildContext context, ButtonState state) async {
+    if (state is ButtonFailureState) {
+      if (state.errorMessages.isNotEmpty) {
+        AppToast.show(
+          message: state.errorMessages.first,
+          type: ToastType.error,
+        );
+      }
+
+      if (state.suggestions.isNotEmpty) {
+        Future.delayed(const Duration(seconds: 4), () {
+          AppToast.show(
+            message: state.suggestions.first,
+            type: ToastType.original,
+          );
+        });
+      }
+    }
+
+    if (state is ButtonSuccessState) {
+      AppToast.show(
+        message: 'Appointment has been canceled successfully.',
+        type: ToastType.success,
+      );
+      await controller.appoitnmentRefreshData();
+    }
+  }
+
   void _handleAppointmentConfigState(
       BuildContext context, AppointmentConfigCubitState state) {
     if (state is AppointmentConfigFailureState) {
@@ -172,11 +206,5 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
         type: ToastType.error,
       );
     }
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
   }
 }

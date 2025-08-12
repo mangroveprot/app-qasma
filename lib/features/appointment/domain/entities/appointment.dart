@@ -11,7 +11,10 @@ class Appointment extends Equatable {
   final String appointmentType;
   final String description;
   final String status;
-  final String checkInStatus;
+  final String? checkInStatus;
+  final DateTime? checkInTime;
+  final String? staffId;
+  final String? counselorId;
   final QRCode qrCode;
   final Cancellation cancellation;
   final DateTime? deletedAt;
@@ -30,7 +33,10 @@ class Appointment extends Equatable {
     required this.appointmentType,
     required this.description,
     required this.status,
-    required this.checkInStatus,
+    this.checkInTime,
+    this.checkInStatus,
+    this.staffId,
+    this.counselorId,
     required this.qrCode,
     required this.cancellation,
     this.deletedAt,
@@ -67,6 +73,9 @@ class Appointment extends Equatable {
         description,
         status,
         checkInStatus,
+        checkInTime,
+        staffId,
+        counselorId,
         qrCode,
         cancellation,
         deletedAt,

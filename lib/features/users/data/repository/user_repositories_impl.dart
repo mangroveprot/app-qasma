@@ -2,8 +2,9 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../common/error/app_error.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
-import '../../domain/repository/auth_repositories.dart';
+import '../../domain/repository/user_repositories.dart';
 import '../../domain/services/user_service.dart';
+import '../models/params/dynamic_param.dart';
 import '../models/user_model.dart';
 
 class UserRepositoryImpl extends UserRepository {
@@ -24,6 +25,28 @@ class UserRepositoryImpl extends UserRepository {
     return result.fold(
       (error) => Left(error),
       (user) => Right(user),
+    );
+  }
+
+  @override
+  Future<Either<AppError, bool>> update(DynamicParam param) async {
+    final result = await _userService.update(param);
+    return result.fold(
+      (error) => Left(error),
+      (user) => Right(user),
+    );
+  }
+
+  @override
+  Future<Either> syncUser() async {
+    final result = await _userService.syncUser();
+    return result.fold(
+      (error) {
+        return Left(error);
+      },
+      (data) {
+        return Right(data);
+      },
     );
   }
 }

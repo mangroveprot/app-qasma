@@ -1,6 +1,9 @@
 part of 'connection_cubit.dart';
 
-abstract class ConnectionCubitState {}
+abstract class ConnectionCubitState extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
 
 class ConnectionOnline extends ConnectionCubitState {}
 

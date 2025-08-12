@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import '../utils/constant.dart';
 
 class Field {
@@ -11,6 +9,11 @@ class Field {
 bool isPasswordValid(String password) {
   final regex = RegExp(r'^.{8,}$');
   return regex.hasMatch(password);
+}
+
+bool isValidEmail(String email) {
+  final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+  return emailRegex.hasMatch(email);
 }
 
 DateTime buildDateOfBirth({
@@ -126,21 +129,20 @@ String formatUtcToLocal({
   DateTimeFormatStyle style = DateTimeFormatStyle.dateAndTime,
 }) {
   try {
-    final utcDateTime = DateTime.parse(utcTime).toUtc();
-    final localDateTime = utcDateTime.toLocal();
+    final utcDateTime = DateTime.parse(utcTime);
 
     // Format time
-    int hour = localDateTime.hour;
-    final minute = localDateTime.minute.toString().padLeft(2, '0');
+    int hour = utcDateTime.hour;
+    final minute = utcDateTime.minute.toString().padLeft(2, '0');
     final period = hour >= 12 ? 'PM' : 'AM';
     hour = hour % 12;
     if (hour == 0) hour = 12;
     final timeStr = '$hour:$minute $period';
 
     // Format date (MonthName Day, Year)
-    final year = localDateTime.year;
-    final monthName = monthsList[localDateTime.month - 1];
-    final day = localDateTime.day.toString().padLeft(2, '0');
+    final year = utcDateTime.year;
+    final monthName = monthsList[utcDateTime.month - 1];
+    final day = utcDateTime.day.toString().padLeft(2, '0');
     final dateStr = '$monthName $day, $year';
 
     switch (style) {
@@ -155,18 +157,4 @@ String formatUtcToLocal({
   } catch (e) {
     return 'Invalid time format';
   }
-}
-
-// TODO: Make this functional
-Map<String, String> buildValidationFields(
-  List<Field> fields,
-  Map<String, TextEditingController> textControllers,
-) {
-  final values = <String, String>{};
-
-  for (final field in fields) {
-    values[field.field_key] = textControllers[field.field_key]?.text ?? '';
-  }
-
-  return values;
 }

@@ -1,8 +1,12 @@
+import 'package:dartz/dartz.dart';
+
 import '../../../../../core/_base/_bloc_cubit/base_cubit.dart';
 import '../../../../../common/error/app_error.dart';
 import '../../../../../core/_base/_services/db/database_service.dart';
 import '../../../../../core/_base/_services/storage/shared_preference.dart';
+import '../../../../../core/_usecase/usecase.dart';
 import '../../../../../infrastructure/injection/service_locator.dart';
+import '../../../data/models/logout_params.dart';
 
 part 'auth_cubit_state.dart';
 
@@ -12,7 +16,6 @@ class AuthCubit extends BaseCubit<AuthState> {
 
   AuthCubit() : super(const AuthInitialState());
 
-  // Singleton pattern to access from anywhere (especially ApiClient)
   static AuthCubit get instance {
     _instance ??= AuthCubit();
     return _instance!;
@@ -75,13 +78,28 @@ class AuthCubit extends BaseCubit<AuthState> {
     }
   }
 
-  Future<void> logout({bool isAutoLogout = false}) async {
+  Future<void> logout({
+    bool isAutoLogout = false,
+    required Usecase usecase,
+    required LogoutParams params,
+  }) async {
     emit(LogoutLoadingState(isAutoLogout: isAutoLogout));
     try {
-      // Clear all stored data
-      await _clearAuthData();
+      final Either result = await usecase.call(param: params);
 
-      emit(LogoutSuccessState(isAutoLogout: isAutoLogout));
+      result.fold(
+        (error) {
+          emit(LogoutFailureState(
+            errorMessages: error.allUserMessages,
+            suggestions: error.userSuggestions,
+          ));
+        },
+        (data) async {
+          await _clearAuthData();
+
+          emit(LogoutSuccessState(isAutoLogout: isAutoLogout));
+        },
+      );
     } catch (e) {
       emit(LogoutFailureState(
         errorMessages: [e.toString()],
@@ -90,7 +108,6 @@ class AuthCubit extends BaseCubit<AuthState> {
     }
   }
 
-  // Auto logout method called by ApiClient
   Future<void> performAutoLogout({String? reason}) async {
     if (_isAutoLoggingOut || state is AutoLogoutState) {
       return;
@@ -98,10 +115,8 @@ class AuthCubit extends BaseCubit<AuthState> {
 
     _isAutoLoggingOut = true;
     try {
-      // Clear stored data immediately
       await _clearAuthData();
 
-      // Emit auto logout state
       emit(AutoLogoutState(
         reason: reason ?? 'Session expired',
         errorMessages: [reason ?? 'Session expired'],
@@ -120,22 +135,18 @@ class AuthCubit extends BaseCubit<AuthState> {
     await sl<DatabaseService>().dropDatabase();
   }
 
-  // Method to check if user is authenticated
   bool get isAuthenticated {
     final refreshToken = SharedPrefs().getString('refreshToken');
     final currentUserId = SharedPrefs().getString('currentUserId');
     return refreshToken != null && currentUserId != null;
   }
 
-  // Reset to initial state (useful after handling auto logout)
   void resetToInitial() {
     emit(const AuthInitialState());
   }
 
-  // Override close to prevent singleton from being closed
   @override
   Future<void> close() {
-    // Don't close the singleton instance
     if (_instance == this) {
       return Future.value();
     }

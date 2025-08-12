@@ -64,7 +64,9 @@ class CreateAccountForm extends StatelessWidget {
               ),
             ),
             Spacing.verticalMedium,
-            RepaintBoundary(child: SubmitButton(onPressed: state.handleSubmit)),
+            RepaintBoundary(
+                child:
+                    SubmitButton(onPressed: () => state.handleSubmit(context))),
             Spacing.verticalMedium,
           ],
         ),

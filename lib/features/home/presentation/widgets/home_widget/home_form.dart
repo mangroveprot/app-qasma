@@ -136,10 +136,9 @@ class _LoadedContent extends StatelessWidget {
         // ElevatedButton(
         //     child: const Text('Go to Second Page'),
         //     onPressed: () {
-        //       AppToast.show(
-        //         message: 'APPPPPPPPP JSDFPIDNSPKFMS',
-        //         type: ToastType.original,
-        //         position: ToastPosition.bottom,
+        //       Navigator.push(
+        //         context,
+        //         MaterialPageRoute(builder: (context) => const MyProfilePage()),
         //       );
         //     }),
         HomeGreetingCard(
@@ -183,8 +182,6 @@ class _ErrorContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const HomeGreetingCard(),
-        Spacing.verticalSmall,
         Expanded(
           child: RefreshIndicator(
             onRefresh: onRefresh,
@@ -249,12 +246,6 @@ class _EmptyContent extends StatelessWidget {
                 ),
             textAlign: TextAlign.center,
           ),
-          Spacing.verticalSmall,
-          Text(
-            'Book your first appointment to get started',
-            style: TextStyle(color: colors.textPrimary),
-            textAlign: TextAlign.center,
-          ),
           Spacing.verticalMedium,
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -305,39 +296,59 @@ class _ScrollableContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      children: [
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.5,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, size: 48, color: Colors.grey),
-                const SizedBox(height: 16),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  subtitle,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey,
+    final colors = context.colors;
+    final fontWeight = context.weight;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            SizedBox(
+              height: constraints.maxHeight,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        icon,
+                        size: 64,
+                        color: colors.textPrimary,
                       ),
-                  textAlign: TextAlign.center,
+                      const SizedBox(height: 24),
+                      Text(
+                        title,
+                        style: TextStyle(
+                          color: colors.black.withOpacity(0.8),
+                          fontWeight: fontWeight.bold,
+                          fontSize: 18,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        subtitle,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: colors.textPrimary,
+                            ),
+                        textAlign: TextAlign.center,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (action != null) ...[
+                        const SizedBox(height: 24),
+                        action!,
+                      ],
+                    ],
+                  ),
                 ),
-                if (action != null) ...[
-                  const SizedBox(height: 16),
-                  action!,
-                ],
-              ],
+              ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 }

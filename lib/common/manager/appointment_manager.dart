@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import '../../features/appointment/domain/usecases/getall_appointments_usecase.dart';
 import '../../features/appointment/domain/usecases/sync_appointments_usecase.dart';
 import '../../features/appointment/presentation/bloc/appointments/appointments_cubit.dart';
@@ -27,12 +25,5 @@ class AppointmentManager {
       status: status,
       usecase: _getAllAppointmentsUseCase,
     );
-  }
-
-  Future<void> cancelAppointment(String appointmentId, String reason) async {
-    // TODO: Implement actual cancellation logic using proper domain service
-    // Example: await appointmentService.cancelAppointment(appointmentId, reason);
-    await Future.delayed(const Duration(milliseconds: 500));
-    debugPrint('Cancelled appointment $appointmentId with reason: $reason');
   }
 }

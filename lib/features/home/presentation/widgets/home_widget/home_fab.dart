@@ -11,7 +11,13 @@ import '../../../../../theme/theme_extensions.dart';
 
 class HomeFab extends StatelessWidget {
   final List<ModalOption> options;
-  const HomeFab({super.key, required this.options});
+  final VoidCallback? onAppointmentSuccess;
+
+  const HomeFab({
+    super.key,
+    required this.options,
+    this.onAppointmentSuccess,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -38,10 +44,16 @@ class HomeFab extends StatelessWidget {
                         options: options,
                       );
                       cubit.emitInitial();
+
                       if (category != null) {
                         context.push(
-                          Routes.book_appointment,
-                          extra: {'category': category},
+                          Routes.appointment,
+                          extra: {
+                            'category': category,
+                            'onSuccess': () async {
+                              onAppointmentSuccess?.call();
+                            },
+                          },
                         );
                       }
                     },

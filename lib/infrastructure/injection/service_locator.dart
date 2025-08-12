@@ -15,6 +15,7 @@ import '../../features/appointment/data/repository/appointment_repositories_impl
 import '../../features/appointment/data/services/appointment_service_impl.dart';
 import '../../features/appointment/domain/repository/appointment_repositories.dart';
 import '../../features/appointment/domain/services/appointment_service.dart';
+import '../../features/appointment/domain/usecases/cancel_appointment_usecase.dart';
 import '../../features/appointment/domain/usecases/create_new_appointment_usecase.dart';
 import '../../features/appointment/domain/usecases/get_slots_usecase.dart';
 import '../../features/appointment/domain/usecases/getall_appointments_usecase.dart';
@@ -29,8 +30,13 @@ import '../../features/appointment_config/domain/services/appointment_config_ser
 import '../../features/appointment_config/domain/usecases/get_config_usecase.dart';
 import '../../features/appointment_config/domain/usecases/sync_config_usecase.dart';
 import '../../features/auth/domain/services/auth_service.dart';
+import '../../features/auth/domain/usecases/forgot_password_usecase.dart';
+import '../../features/auth/domain/usecases/logout_usecase.dart';
+import '../../features/auth/domain/usecases/resend_otp_usecase.dart';
+import '../../features/auth/domain/usecases/reset_password_usecase.dart';
 import '../../features/auth/domain/usecases/signin_usecase.dart';
 import '../../features/auth/domain/usecases/signup_usecase.dart';
+import '../../features/auth/domain/usecases/verify_usecase.dart';
 import '../../features/users/data/models/user_model.dart';
 import '../../features/auth/data/repository/auth_impl_repositories.dart';
 import '../../features/auth/data/services/auth_service_impl.dart';
@@ -38,10 +44,12 @@ import '../../features/auth/domain/repository/auth_repositories.dart';
 import '../../features/users/data/models/user_table_model.dart';
 import '../../features/users/data/repository/user_repositories_impl.dart';
 import '../../features/users/data/services/user_service_impl.dart';
-import '../../features/users/domain/repository/auth_repositories.dart';
+import '../../features/users/domain/repository/user_repositories.dart';
 import '../../features/users/domain/services/user_service.dart';
 import '../../features/users/domain/usecases/get_user_usecase.dart';
 import '../../features/users/domain/usecases/is_register_usecase.dart';
+import '../../features/users/domain/usecases/sync_user_usecase.dart';
+import '../../features/users/domain/usecases/update_user_usecase.dart';
 
 final sl = GetIt.instance;
 
@@ -113,12 +121,13 @@ void _registerUserRepositories() {
   sl.registerLazySingleton<AbstractRepository<UserModel>>(
     () => RemoteRepository<UserModel>(
       localRepository: sl<LocalRepository<UserModel>>(),
-      endpoint: '/user',
+      endpoint: '/api/user',
       fromJson: UserModel.fromJson,
       toJson: (user) => user.toJson(),
       getId: (model) => model.idNumber,
       getItemPath: (id) => '/getProfile',
       deletePath: (id) => '/delete/$id',
+      includeId: true,
       syncField: SyncField<UserModel>(
         name: 'updateAt',
         accessor: (user) => user.updatedAt,
@@ -206,24 +215,37 @@ void _registerUseCases() {
   // Auth use cases
   sl
     ..registerLazySingleton<SigninUsecase>(() => SigninUsecase())
-    ..registerLazySingleton<SignupUsecase>(() => SignupUsecase());
+    ..registerLazySingleton<SignupUsecase>(() => SignupUsecase())
+    ..registerLazySingleton<ResendOTPUsecase>(() => ResendOTPUsecase())
+    ..registerLazySingleton<ResetPasswordUsecase>(() => ResetPasswordUsecase())
+    ..registerLazySingleton<LogoutUsecase>(() => LogoutUsecase())
+    ..registerLazySingleton<ForgotPasswordUsecase>(
+        () => ForgotPasswordUsecase())
+    ..registerLazySingleton<VerifyUsecase>(() => VerifyUsecase());
 
   // User use cases
-  sl.registerLazySingleton<IsRegisterUsecase>(() => IsRegisterUsecase());
-  sl.registerLazySingleton<GetUserUsecase>(() => GetUserUsecase());
+  sl
+    ..registerLazySingleton<SyncUserUsecase>(() => SyncUserUsecase())
+    ..registerLazySingleton<UpdateUserUsecase>(() => UpdateUserUsecase())
+    ..registerLazySingleton<IsRegisterUsecase>(() => IsRegisterUsecase())
+    ..registerLazySingleton<GetUserUsecase>(() => GetUserUsecase());
 
-  // Appointment usecases
-  sl.registerLazySingleton<GetAllAppointmentUsecase>(
-      () => GetAllAppointmentUsecase());
-  sl.registerLazySingleton<SyncAppointmentsUsecase>(
-      () => SyncAppointmentsUsecase());
-  sl.registerLazySingleton<GetSlotsUseCase>(() => GetSlotsUseCase());
-  sl.registerLazySingleton<UpdateAppointmentUsecase>(
-      () => UpdateAppointmentUsecase());
+  // Appointment use cases
+  sl
+    ..registerLazySingleton<CancelAppointmentUsecase>(
+        () => CancelAppointmentUsecase())
+    ..registerLazySingleton<GetAllAppointmentUsecase>(
+        () => GetAllAppointmentUsecase())
+    ..registerLazySingleton<SyncAppointmentsUsecase>(
+        () => SyncAppointmentsUsecase())
+    ..registerLazySingleton<GetSlotsUseCase>(() => GetSlotsUseCase())
+    ..registerLazySingleton<UpdateAppointmentUsecase>(
+        () => UpdateAppointmentUsecase())
+    ..registerLazySingleton<CreateNewAppointmentUsecase>(
+        () => CreateNewAppointmentUsecase());
 
-  // Appointment Config Usecases
-  sl.registerLazySingleton<GetConfigUseCase>(() => GetConfigUseCase());
-  sl.registerLazySingleton<SyncConfigUsacase>(() => SyncConfigUsacase());
-  sl.registerLazySingleton<CreateNewAppointmentUsecase>(
-      () => CreateNewAppointmentUsecase());
+  // Appointment config use cases
+  sl
+    ..registerLazySingleton<GetConfigUseCase>(() => GetConfigUseCase())
+    ..registerLazySingleton<SyncConfigUsecase>(() => SyncConfigUsecase());
 }

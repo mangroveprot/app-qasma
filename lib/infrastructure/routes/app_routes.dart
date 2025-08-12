@@ -2,8 +2,9 @@ class Routes {
   // paths
   static const String root = '/';
   static const String aut_path = '/auth';
+  static const String user_path = '/user';
   static const String home_path = '/home';
-  static const String book_appointment = '/book-appointment';
+  static const String appointment = '/appointment';
 
   // auth route names
   static const String create_account = 'create-account';
@@ -11,8 +12,13 @@ class Routes {
   static const String otp_verification = 'otp-verification';
   static const String login = 'login';
   static const String forgot_password = 'forgot-password';
+  static const String reset_password = 'reset-password';
+  static const String user_profile = 'user-profile';
 
   // home route names
+
+  // appointment routes names
+  static const String appointment_history = 'appointment-history';
 
   static String buildPath(String basePath, String routeName) {
     if (basePath.isEmpty || routeName.isEmpty) {
@@ -34,25 +40,5 @@ class Routes {
         routeName.startsWith('/') ? routeName.substring(1) : routeName;
 
     return '$normalizedBasePath/$normalizedRouteName';
-  }
-
-  static String composePath(String basePath, [List<String>? paths]) {
-    final List<String> segments = [basePath];
-    if (paths != null) {
-      segments.addAll(paths);
-    }
-    return nested(segments);
-  }
-
-  /// Example:
-  /// ```dart
-  /// RouteHelper.nested(['auth', 'user', 'profile']); // Returns: '/auth/user/profile'
-  /// ```
-  static String nested(List<String> segments) {
-    if (segments.isEmpty) {
-      throw ArgumentError('Segments list cannot be empty');
-    }
-
-    return '/${segments.join('/')}';
   }
 }

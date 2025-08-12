@@ -5,7 +5,6 @@ import '../../../../../common/helpers/spacing.dart';
 import '../../../../../theme/theme_extensions.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
 import 'card_cancel_button.dart';
-import 'card_qrcode_section.dart';
 import 'card_reschedule_button.dart';
 import 'status_chip.dart';
 
@@ -13,11 +12,12 @@ class AppointmentCard extends StatefulWidget {
   final AppointmentModel appointment;
   final VoidCallback onCancel;
   final VoidCallback onReschedule;
-  const AppointmentCard(
-      {super.key,
-      required this.appointment,
-      required this.onCancel,
-      required this.onReschedule});
+  const AppointmentCard({
+    super.key,
+    required this.appointment,
+    required this.onCancel,
+    required this.onReschedule,
+  });
 
   @override
   State<AppointmentCard> createState() => _AppointmentCardState();
@@ -35,13 +35,14 @@ class _AppointmentCardState extends State<AppointmentCard> {
 
     final _divider = Container(
       height: 1,
-      color: textPrimay,
+      color: textPrimay.withOpacity(0.1),
     );
 
     final _labelTextStyle =
         TextStyle(fontSize: 14, color: colors.black, fontWeight: weight.medium);
+
     final _subtitleTextStyle = TextStyle(
-      fontSize: 14,
+      fontSize: 12,
       color: textPrimay,
     );
 
@@ -52,7 +53,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
     );
 
     return Card(
-      elevation: 2,
+      elevation: 4,
       color: colors.white,
       surfaceTintColor: colors.white,
       shadowColor: colors.black,
@@ -74,18 +75,42 @@ class _AppointmentCardState extends State<AppointmentCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        formatUtcToLocal(
-                            utcTime:
-                                widget.appointment.scheduledStartAt.toString(),
-                            style: DateTimeFormatStyle.dateOnly),
-                        style: _titleTextStyle,
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_today_outlined,
+                            size: 16,
+                            color: colors.black,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            formatUtcToLocal(
+                                utcTime: widget.appointment.scheduledStartAt
+                                    .toString(),
+                                style: DateTimeFormatStyle.dateOnly),
+                            style: _titleTextStyle,
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 2),
-                      Text(
-                        '${formatUtcToLocal(utcTime: widget.appointment.scheduledStartAt.toString(), style: DateTimeFormatStyle.timeOnly)} - '
-                        '${formatUtcToLocal(utcTime: widget.appointment.scheduledEndAt.toString(), style: DateTimeFormatStyle.timeOnly)}',
-                        style: _subtitleTextStyle,
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.access_time,
+                            size: 16,
+                            color: colors.textPrimary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '${formatUtcToLocal(utcTime: widget.appointment.scheduledStartAt.toString(), style: DateTimeFormatStyle.timeOnly)} - '
+                            '${formatUtcToLocal(
+                              utcTime:
+                                  widget.appointment.scheduledEndAt.toString(),
+                              style: DateTimeFormatStyle.timeOnly,
+                            )}',
+                            style: _subtitleTextStyle,
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -108,50 +133,98 @@ class _AppointmentCardState extends State<AppointmentCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        'Appointment Category:',
-                        style: _labelTextStyle,
-                      ),
-                      Text(
-                        widget.appointment.appointmentCategory,
-                        style: _subtitleTextStyle,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.category_outlined,
+                            size: 16,
+                            color: colors.textPrimary,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                style: DefaultTextStyle.of(context).style,
+                                children: [
+                                  TextSpan(
+                                    text: 'Category: ',
+                                    style: _labelTextStyle,
+                                  ),
+                                  TextSpan(
+                                    text: capitalizeWords(
+                                        widget.appointment.appointmentCategory),
+                                    style: _subtitleTextStyle,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       Spacing.verticalSmall,
-                      RichText(
-                        text: TextSpan(
-                          style:
-                              DefaultTextStyle.of(context).style, // base style
-                          children: [
-                            TextSpan(
-                                text: 'Description: ', style: _labelTextStyle),
-                            TextSpan(
-                                text: widget.appointment.description,
-                                style: _subtitleTextStyle),
-                          ],
-                        ),
+
+                      // Description with icon
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.description_outlined,
+                            size: 16,
+                            color: colors.textPrimary,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                style: DefaultTextStyle.of(context)
+                                    .style, // base style
+                                children: [
+                                  TextSpan(
+                                      text: 'Description: ',
+                                      style: _labelTextStyle),
+                                  TextSpan(
+                                      text: widget.appointment.description,
+                                      style: _subtitleTextStyle),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       Spacing.verticalXSmall,
-                      RichText(
-                        text: TextSpan(
-                          style:
-                              DefaultTextStyle.of(context).style, // base style
-                          children: [
-                            TextSpan(
-                                text: 'Appointment Type: ',
-                                style: _labelTextStyle),
-                            TextSpan(
-                                text: widget.appointment.appointmentType,
-                                style: _subtitleTextStyle),
-                          ],
-                        ),
+
+                      // Appointment Type with icon
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.label_important_outline,
+                            size: 16,
+                            color: colors.textPrimary,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                style: DefaultTextStyle.of(context)
+                                    .style, // base style
+                                children: [
+                                  TextSpan(
+                                      text: 'Appointment Type: ',
+                                      style: _labelTextStyle),
+                                  TextSpan(
+                                      text: widget.appointment.appointmentType,
+                                      style: _subtitleTextStyle),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-
-                Spacing.horizontalMedium,
-
-                const CardQRCodeSection(),
               ],
             ),
 
@@ -169,9 +242,9 @@ class _AppointmentCardState extends State<AppointmentCard> {
               child: Center(
                 child: Container(
                   padding:
-                      const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                      const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
                   decoration: BoxDecoration(
-                    color: colors.textPrimary.withOpacity(0.05),
+                    //   color: colors.textPrimary.withOpacity(0.4),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -181,7 +254,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
                       Text(
                         _showActions ? 'See less' : 'See more',
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 12,
                           color: colors.textPrimary,
                           fontWeight: weight.medium,
                         ),
@@ -192,7 +265,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
                             ? Icons.keyboard_arrow_up
                             : Icons.keyboard_arrow_down,
                         color: colors.textPrimary,
-                        size: 20,
+                        size: 14,
                       ),
                     ],
                   ),
@@ -202,11 +275,12 @@ class _AppointmentCardState extends State<AppointmentCard> {
 
             if (_showActions) ...[
               Spacing.verticalMedium,
-              // Action Buttons
+              // action Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   CardRescheduleButton(onPressed: widget.onReschedule),
+                  const SizedBox(width: 8),
                   CardCancelButton(onPressed: widget.onCancel),
                 ],
               ),

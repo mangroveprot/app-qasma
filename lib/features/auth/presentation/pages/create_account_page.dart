@@ -59,7 +59,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
 
   late final Map<String, TextEditingController> textControllers;
   late final Map<String, ValueNotifier<String?>> dropdownControllers;
-  late final Map<String, dynamic> _routeData;
+  Map<String, dynamic>? _routeData;
   late final FormCubit formCubit;
 
   @override
@@ -87,6 +87,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   void _extractRouteData() {
+    if (_routeData != null) return;
     final extra = GoRouterState.of(context).extra;
     if (extra != null && extra is Map<String, dynamic>) {
       _routeData = {
@@ -124,10 +125,10 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   String _getRouteValue(FormFieldConfig field) {
-    return _routeData[field.field_key] ?? '';
+    return _routeData?[field.field_key] ?? '';
   }
 
-  void handleSubmit() {
+  void handleSubmit(BuildContext context) {
     final isValid = formCubit.validateAll(
       _buildValidationFields(),
       optionalFields: _optionalFields.map((field) => field.field_key).toList(),
@@ -135,10 +136,10 @@ class CreateAccountPageState extends State<CreateAccountPage> {
 
     if (!isValid) return;
 
-    _performSignup();
+    _performSignup(context);
   }
 
-  void _performSignup() {
+  void _performSignup(BuildContext context) {
     final dateOfBirth = buildDateOfBirth(
       year: _getDropdownValue(field_year),
       month: _getDropdownValue(field_month),
@@ -178,7 +179,6 @@ class CreateAccountPageState extends State<CreateAccountPage> {
 
   @override
   void deactivate() {
-    // if the page is closed then clear the error from cubit
     context.read<FormCubit>().clearAll();
     super.deactivate();
   }
@@ -200,18 +200,23 @@ class CreateAccountPageState extends State<CreateAccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CustomAppBar(leadingText: 'Back'),
-      body: BlocListener<ButtonCubit, ButtonState>(
-        listener: _handleButtonState,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SizedBox(
-              width: constraints.maxWidth,
-              height: constraints.maxHeight,
-              child: CreateAccountForm(state: this),
-            );
-          },
+    return BlocProvider(
+      create: (context) => ButtonCubit(),
+      child: Scaffold(
+        appBar: const CustomAppBar(
+          leadingText: 'Back',
+        ),
+        body: BlocListener<ButtonCubit, ButtonState>(
+          listener: _handleButtonState,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SizedBox(
+                width: constraints.maxWidth,
+                height: constraints.maxHeight,
+                child: CreateAccountForm(state: this),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -229,11 +234,15 @@ class CreateAccountPageState extends State<CreateAccountPage> {
 
     if (state is ButtonSuccessState) {
       final data = state.data;
+      final accountVerification = OtpPurposes.accountVerification;
 
       if (data is UserModel) {
         context.push(
           Routes.buildPath(Routes.aut_path, Routes.otp_verification),
-          extra: {field_email.field_key: data.email},
+          extra: {
+            field_email.field_key: data.email,
+            accountVerification: accountVerification
+          },
         );
       }
     }

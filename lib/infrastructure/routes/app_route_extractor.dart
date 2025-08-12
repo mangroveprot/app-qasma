@@ -37,4 +37,11 @@ class AppRouteExtractor {
   static dynamic getRawExtra(dynamic extra) {
     return extra;
   }
+
+  static String extractFieldByKey(dynamic extra, String key) {
+    if (extra != null && extra is Map<String, dynamic>) {
+      return extra[key]?.toString() ?? '';
+    }
+    return '';
+  }
 }

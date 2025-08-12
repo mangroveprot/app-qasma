@@ -21,7 +21,7 @@ class ForgotPasswordForm extends StatelessWidget {
               emailController:
                   state.textControllers[field_idNumber_email.field_key]!),
           Spacing.verticalLarge,
-          NextButton(onPressed: state.handleSubmit)
+          NextButton(onPressed: () => state.handleSubmit(context))
         ],
       ),
     );

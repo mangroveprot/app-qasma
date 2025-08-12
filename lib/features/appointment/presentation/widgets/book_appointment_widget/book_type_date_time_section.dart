@@ -23,315 +23,405 @@ class BookTypeDataTimeSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    final radii = context.radii;
-    final weight = context.weight;
-
     return BlocBuilder<SlotsCubit, SlotsCubitState>(
-      builder: (context, state) {
-        List<String> availableSlots = [];
-        final isLoading = state is SlotsLoadingState;
-
-        if (state is SlotsLoadedState) {
-          availableSlots = state.formattedSlots;
-        }
-
+      builder: (context, slotsState) {
         return BlocBuilder<AppointmentConfigCubit, AppointmentConfigCubitState>(
           builder: (context, configState) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Appointment Type
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8, left: 4),
-                  child: Row(
-                    children: [
-                      Text(
-                        'Appointment Type',
-                        style: TextStyle(
-                          color: colors.textPrimary,
-                          fontSize: 14,
-                          fontWeight: weight.medium,
-                        ),
-                      ),
-                      Text(
-                        ' *',
-                        style: TextStyle(
-                          color: colors.error,
-                          fontSize: 14,
-                          fontWeight: weight.medium,
-                        ),
-                      ),
-                    ],
-                  ),
+                _AppointmentTypeDropdown(
+                  controller:
+                      dropdownControllers[field_appointmentType.field_key]!,
+                  category: category,
+                  onTypeSelected: (type) =>
+                      _onAppointmentTypeSelected(context, type),
                 ),
-                const SizedBox(height: 8),
-                BlocSelector<FormCubit, FormValidationState, bool>(
-                  selector: (state) =>
-                      state.hasError(field_appointmentType.field_key),
-                  builder: (context, hasError) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ValueListenableBuilder<String?>(
-                          valueListenable: dropdownControllers[
-                              field_appointmentType.field_key]!,
-                          builder: (context, value, _) {
-                            final configCubit =
-                                context.read<AppointmentConfigCubit>();
-                            final appointmentTypes = category != null
-                                ? configCubit.getTypesByCategory(category!)
-                                : <String>[];
-
-                            return Container(
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: colors.white.withOpacity(0.8),
-                                borderRadius: radii.small,
-                                border: Border.all(
-                                  color: hasError
-                                      ? colors.error
-                                      : colors.accent.withOpacity(0.4),
-                                  width: 1.0,
-                                ),
-                              ),
-                              child: appointmentTypes.isEmpty
-                                  ? Container(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: Text(
-                                        'No types available for this category',
-                                        style: TextStyle(
-                                          color: Colors.grey.shade600,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    )
-                                  : DropdownButtonFormField<String>(
-                                      value: value,
-                                      hint: const Text(
-                                        'Select appointment type',
-                                        style: TextStyle(
-                                          color: Colors.grey,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      items: appointmentTypes
-                                          .map<DropdownMenuItem<String>>(
-                                              (String type) {
-                                        return DropdownMenuItem<String>(
-                                          value: type,
-                                          child: Text(
-                                            type,
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
-                                      onChanged: (newValue) async {
-                                        if (newValue != null) {
-                                          dropdownControllers[
-                                                  field_appointmentType
-                                                      .field_key]!
-                                              .value = newValue;
-                                          dropdownControllers[
-                                                  field_appointmentDateTime
-                                                      .field_key]!
-                                              .value = null;
-
-                                          context
-                                              .read<FormCubit>()
-                                              .clearFieldError(
-                                                  field_appointmentType
-                                                      .field_key);
-
-                                          // Get duration for the selected type
-                                          final duration = category != null
-                                              ? configCubit
-                                                  .getDurationByTypeInCategory(
-                                                      category!, newValue)
-                                              : 10;
-
-                                          print(duration);
-
-                                          context.read<SlotsCubit>().loadSlots(
-                                                duration:
-                                                    duration?.toString() ??
-                                                        '10',
-                                                usecase:
-                                                    await sl<GetSlotsUseCase>(),
-                                              );
-                                        }
-                                      },
-                                      decoration: const InputDecoration(
-                                        contentPadding: EdgeInsets.all(12.0),
-                                        border: InputBorder.none,
-                                      ),
-                                    ),
-                            );
-                          },
-                        ),
-                        if (hasError)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8, left: 4),
-                            child: Text(
-                              'This field is required',
-                              style: TextStyle(
-                                color: colors.error,
-                                fontSize: 12,
-                                fontWeight: weight.regular,
-                              ),
-                            ),
-                          ),
-                      ],
-                    );
-                  },
-                ),
-
                 const SizedBox(height: 20),
-
-                // Date & Time
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8, left: 4),
-                  child: Row(
-                    children: [
-                      Text(
-                        'Date & Time',
-                        style: TextStyle(
-                          color: colors.textPrimary,
-                          fontSize: 14,
-                          fontWeight: weight.medium,
-                        ),
-                      ),
-                      Text(
-                        ' *',
-                        style: TextStyle(
-                          color: colors.error,
-                          fontSize: 14,
-                          fontWeight: weight.medium,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                BlocSelector<FormCubit, FormValidationState, bool>(
-                  selector: (state) =>
-                      state.hasError(field_appointmentDateTime.field_key),
-                  builder: (context, hasError) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ValueListenableBuilder<String?>(
-                          valueListenable: dropdownControllers[
-                              field_appointmentDateTime.field_key]!,
-                          builder: (context, value, _) {
-                            if (isLoading) {
-                              return Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 14),
-                                decoration: BoxDecoration(
-                                  color: colors.white.withOpacity(0.8),
-                                  borderRadius: radii.small,
-                                  border: Border.all(
-                                    color: colors.accent.withOpacity(0.4),
-                                    width: 1.0,
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(
-                                          strokeWidth: 2),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Text(
-                                      'Loading slots...',
-                                      style: TextStyle(
-                                          color: Colors.grey.shade600),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }
-
-                            return Container(
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: colors.white.withOpacity(0.8),
-                                borderRadius: radii.small,
-                                border: Border.all(
-                                  color: hasError
-                                      ? colors.error
-                                      : colors.accent.withOpacity(0.4),
-                                  width: 1.0,
-                                ),
-                              ),
-                              child: DropdownButtonFormField<String>(
-                                value: value,
-                                hint: const Text(
-                                  'Select date and time',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                items: availableSlots.map((String slot) {
-                                  return DropdownMenuItem<String>(
-                                    value: slot,
-                                    child: Text(
-                                      slot,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                                onChanged: (newValue) {
-                                  dropdownControllers[
-                                          field_appointmentDateTime.field_key]!
-                                      .value = newValue;
-
-                                  // Clear error when user makes a selection
-                                  if (newValue != null) {
-                                    context.read<FormCubit>().clearFieldError(
-                                        field_appointmentDateTime.field_key);
-                                  }
-                                },
-                                menuMaxHeight: 400,
-                                decoration: const InputDecoration(
-                                  contentPadding: EdgeInsets.all(12.0),
-                                  border: InputBorder.none,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        if (hasError)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8, left: 4),
-                            child: Text(
-                              'This field is required',
-                              style: TextStyle(
-                                color: colors.error,
-                                fontSize: 12,
-                                fontWeight: weight.regular,
-                              ),
-                            ),
-                          ),
-                      ],
-                    );
-                  },
+                _DateTimeDropdown(
+                  controller:
+                      dropdownControllers[field_appointmentDateTime.field_key]!,
+                  appointmentTypeController:
+                      dropdownControllers[field_appointmentType.field_key]!,
+                  slotsState: slotsState,
+                  category: category,
                 ),
               ],
             );
           },
         );
       },
+    );
+  }
+
+  Future<void> _onAppointmentTypeSelected(
+      BuildContext context, String type) async {
+    // Clear date/time selection when type changes
+    dropdownControllers[field_appointmentDateTime.field_key]!.value = null;
+
+    // Clear form errors
+    context.read<FormCubit>().clearFieldError(field_appointmentType.field_key);
+
+    // Load slots for the selected appointment type
+    final configCubit = context.read<AppointmentConfigCubit>();
+    final duration = category != null
+        ? configCubit.getDurationByTypeInCategory(category!, type) ?? 10
+        : 10;
+
+    context.read<SlotsCubit>().loadSlots(
+          duration: duration.toString(),
+          usecase: await sl<GetSlotsUseCase>(),
+        );
+  }
+}
+
+class _AppointmentTypeDropdown extends StatelessWidget {
+  final ValueNotifier<String?> controller;
+  final String? category;
+  final Function(String) onTypeSelected;
+
+  const _AppointmentTypeDropdown({
+    required this.controller,
+    this.category,
+    required this.onTypeSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _FieldLabel(text: 'Appointment Type'),
+        const SizedBox(height: 8),
+        BlocSelector<FormCubit, FormValidationState, bool>(
+          selector: (state) => state.hasError(field_appointmentType.field_key),
+          builder: (context, hasError) {
+            return ValueListenableBuilder<String?>(
+              valueListenable: controller,
+              builder: (context, value, _) {
+                final appointmentTypes = _getAppointmentTypes(context);
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _CustomDropdown<String>(
+                      value: value,
+                      hint: 'Select appointment type',
+                      items: appointmentTypes,
+                      hasError: hasError,
+                      onChanged: (newValue) {
+                        if (newValue != null) {
+                          controller.value = newValue;
+                          onTypeSelected(newValue);
+                        }
+                      },
+                      emptyMessage: 'No types available for this category',
+                    ),
+                    if (hasError)
+                      const _ErrorText(text: 'This field is required'),
+                  ],
+                );
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  List<String> _getAppointmentTypes(BuildContext context) {
+    if (category == null) return [];
+
+    final configCubit = context.read<AppointmentConfigCubit>();
+    return configCubit.getTypesByCategory(category!);
+  }
+}
+
+class _DateTimeDropdown extends StatelessWidget {
+  final ValueNotifier<String?> controller;
+  final ValueNotifier<String?> appointmentTypeController;
+  final SlotsCubitState slotsState;
+  final String? category;
+
+  const _DateTimeDropdown({
+    required this.controller,
+    required this.appointmentTypeController,
+    required this.slotsState,
+    this.category,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _FieldLabel(text: 'Date & Time'),
+        const SizedBox(height: 8),
+        BlocSelector<FormCubit, FormValidationState, bool>(
+          selector: (state) =>
+              state.hasError(field_appointmentDateTime.field_key),
+          builder: (context, hasError) {
+            return ValueListenableBuilder<String?>(
+              valueListenable: controller,
+              builder: (context, value, _) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildDateTimeField(context, value, hasError),
+                    if (hasError)
+                      const _ErrorText(text: 'This field is required'),
+                  ],
+                );
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateTimeField(
+      BuildContext context, String? value, bool hasError) {
+    if (slotsState is SlotsLoadingState) {
+      return _LoadingContainer();
+    }
+
+    final availableSlots = slotsState is SlotsLoadedState
+        ? (slotsState as SlotsLoadedState).formattedSlots
+        : <String>[];
+
+    final uniqueSlots = availableSlots.toSet().toList();
+
+    final List<String> dropdownItems = List.from(uniqueSlots);
+
+    if (value != null && !dropdownItems.contains(value)) {
+      dropdownItems.insert(0, value);
+    }
+
+    final hasOnlyCurrentValue =
+        dropdownItems.length <= 1 && value != null && uniqueSlots.isEmpty;
+
+    final canFetchSlots =
+        appointmentTypeController.value != null && category != null;
+
+    return _CustomDropdown<String>(
+      value: value,
+      hint: 'Select date and time',
+      items: dropdownItems,
+      hasError: hasError,
+      menuMaxHeight: 400,
+      onTap: (hasOnlyCurrentValue && canFetchSlots)
+          ? () => _fetchSlotsForRescheduling(context)
+          : null,
+      onChanged: (newValue) {
+        controller.value = newValue;
+        if (newValue != null) {
+          context
+              .read<FormCubit>()
+              .clearFieldError(field_appointmentDateTime.field_key);
+        }
+      },
+      emptyMessage: (hasOnlyCurrentValue && canFetchSlots)
+          ? 'Tap to load more available slots'
+          : 'No slots available',
+    );
+  }
+
+  Future<void> _fetchSlotsForRescheduling(BuildContext context) async {
+    final appointmentType = appointmentTypeController.value;
+    if (appointmentType == null || category == null) return;
+
+    // Get duration for the selected type
+    final configCubit = context.read<AppointmentConfigCubit>();
+    final duration =
+        configCubit.getDurationByTypeInCategory(category!, appointmentType) ??
+            10;
+
+    // Load available slots
+    context.read<SlotsCubit>().loadSlots(
+          duration: duration.toString(),
+          usecase: await sl<GetSlotsUseCase>(),
+        );
+  }
+}
+
+class _FieldLabel extends StatelessWidget {
+  final String text;
+
+  const _FieldLabel({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final weight = context.weight;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8, left: 4),
+      child: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: text,
+              style: TextStyle(
+                color: colors.textPrimary,
+                fontSize: 14,
+                fontWeight: weight.medium,
+              ),
+            ),
+            TextSpan(
+              text: ' *',
+              style: TextStyle(
+                color: colors.error,
+                fontSize: 14,
+                fontWeight: weight.medium,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CustomDropdown<T> extends StatelessWidget {
+  final T? value;
+  final String hint;
+  final List<T> items;
+  final bool hasError;
+  final Function(T?) onChanged;
+  final String? emptyMessage;
+  final double? menuMaxHeight;
+  final VoidCallback? onTap;
+
+  const _CustomDropdown({
+    this.value,
+    required this.hint,
+    required this.items,
+    this.hasError = false,
+    required this.onChanged,
+    this.emptyMessage,
+    this.menuMaxHeight,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final radii = context.radii;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: colors.white.withOpacity(0.8),
+        borderRadius: radii.small,
+        border: Border.all(
+          color: hasError ? colors.error : colors.accent.withOpacity(0.4),
+          width: 1.0,
+        ),
+      ),
+      child: items.isEmpty && emptyMessage != null
+          ? _EmptyState(message: emptyMessage!)
+          : DropdownButtonFormField<T>(
+              value: value,
+              hint: Text(
+                hint,
+                style: const TextStyle(color: Colors.grey, fontSize: 14),
+              ),
+              items: items
+                  .map((item) => DropdownMenuItem<T>(
+                        value: item,
+                        child: Text(
+                          item.toString(),
+                          style: TextStyle(
+                            fontSize: item.toString().length > 10 ? 12.0 : 14.0,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ))
+                  .toList(),
+              onTap: onTap,
+              onChanged: onChanged,
+              menuMaxHeight: menuMaxHeight,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.all(12.0),
+                border: InputBorder.none,
+              ),
+            ),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  final String message;
+
+  const _EmptyState({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12.0),
+      child: Text(
+        message,
+        style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+      ),
+    );
+  }
+}
+
+class _LoadingContainer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final radii = context.radii;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: colors.white.withOpacity(0.8),
+        borderRadius: radii.small,
+        border: Border.all(
+          color: colors.accent.withOpacity(0.4),
+          width: 1.0,
+        ),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            'Loading slots...',
+            style: TextStyle(color: Colors.grey.shade600),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ErrorText extends StatelessWidget {
+  final String text;
+
+  const _ErrorText({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final weight = context.weight;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, left: 4),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: colors.error,
+          fontSize: 12,
+          fontWeight: weight.regular,
+        ),
+      ),
     );
   }
 }

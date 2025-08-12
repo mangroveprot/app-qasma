@@ -145,3 +145,8 @@ const FormFieldConfig field_description = FormFieldConfig(
   name: 'Description',
   hint: 'Write something here...',
 );
+const FormFieldConfig field_code = FormFieldConfig(
+  field_key: 'code',
+  name: 'Code',
+  hint: 'Enter code here',
+);

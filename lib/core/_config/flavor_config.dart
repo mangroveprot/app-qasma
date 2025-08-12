@@ -9,15 +9,32 @@ class FlavorValues {
   final String databaseName;
 
   FlavorValues(Flavor flavor)
-    : baseUrl = dotenv.env['API_BASE_URL'] ?? 'https://api.example.com',
-      appTitle =
-          dotenv.env['APP_TITLE'] ??
-          (flavor == Flavor.production ? 'App' : 'App Dev'),
-      enableLogging =
-          flavor == Flavor.production
-              ? (dotenv.env['ENABLE_LOGGING']?.toLowerCase() == 'true')
-              : true, // Always true for dev
-      databaseName = dotenv.env['DATABASE_NAME'] ?? 'app_database';
+      : baseUrl =
+            _getEnvVar('API_BASE_URL', flavor) ?? 'https://api.example.com',
+        appTitle = _getEnvVar('APP_TITLE', flavor) ??
+            (flavor == Flavor.production ? 'App' : 'App Dev'),
+        enableLogging = flavor == Flavor.production
+            ? (_getEnvVar('ENABLE_LOGGING', flavor)?.toLowerCase() == 'true')
+            : true, // Always true for dev
+        databaseName = _getEnvVar('DATABASE_NAME', flavor) ?? 'app_database';
+
+  static String? _getEnvVar(String key, Flavor flavor) {
+    try {
+      final value = dotenv.env[key];
+      if (value == null || value.isEmpty) {
+        // Log that the environment variable is missing
+        print(
+            'WARNING: Environment variable $key is missing or empty for $flavor');
+        return null;
+      }
+      return value;
+    } catch (e) {
+      // Log any errors when accessing environment variables
+      print(
+          'ERROR: Failed to access environment variable $key for $flavor: $e');
+      return null;
+    }
+  }
 }
 
 class FlavorConfig {

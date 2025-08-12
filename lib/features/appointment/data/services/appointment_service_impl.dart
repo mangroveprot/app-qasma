@@ -12,6 +12,7 @@ import '../../../../core/_config/url_provider.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
 import '../../domain/services/appointment_service.dart';
 import '../models/appointment_model.dart';
+import '../models/params/cancel_params.dart';
 
 class AppointmentServiceImpl extends BaseService<AppointmentModel>
     implements AppointmentService {
@@ -239,6 +240,69 @@ class AppointmentServiceImpl extends BaseService<AppointmentModel>
 
         if (apiResponse.isSuccess && apiResponse.document != null) {
           return Right(apiResponse.document!);
+        } else {
+          return Left(apiResponse.error ??
+              AppError.create(
+                message: 'Failed to update appointment',
+                type: ErrorType.server,
+              ));
+        }
+      } else {
+        return Left(AppError.create(
+          message: response.data?['message'] ?? 'Failed to update appointment',
+          type: ErrorType.server,
+        ));
+      }
+    } catch (e, stack) {
+      final error = e is AppError
+          ? e
+          : AppError.create(
+              message: 'Unexpected error during updating appointment',
+              type: ErrorType.unknown,
+              originalError: e,
+              stackTrace: stack,
+            );
+      return Left(error);
+    }
+  }
+
+  @override
+  Future<Either<AppError, bool>> cancelAppointment(
+      CancelParams cancelReq) async {
+    try {
+      final response = await _apiClient.patch(
+        _urlProviderConfig.cancelAppointment,
+        data: cancelReq.toJson(),
+        requiresAuth: true,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final apiResponse = ApiResponse.fromJson(
+          response.data,
+          (json) => AppointmentModel.fromJson(json),
+        );
+
+        try {
+          if (apiResponse.document != null) {
+            final localRepo = sl<LocalRepository<AppointmentModel>>();
+            await localRepo.saveItem(apiResponse.document);
+          } else {
+            _logger.w('Document is null, skipping update operation');
+          }
+        } catch (e, stackTrace) {
+          _logger.e('Failed to update appointment data locally', e, stackTrace);
+
+          return Left(AppError.create(
+            message:
+                'Something went wrong while updating your data. Please contact the administrator.',
+            type: ErrorType.database,
+            originalError: e,
+            stackTrace: stackTrace,
+          ));
+        }
+
+        if (apiResponse.isSuccess) {
+          return const Right(true);
         } else {
           return Left(apiResponse.error ??
               AppError.create(

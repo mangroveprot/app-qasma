@@ -1,35 +1,65 @@
-import '../../../../common/utils/model_utils.dart';
 import '../../domain/entities/other_info.dart';
 
 class OtherInfoModel extends OtherInfo {
   const OtherInfoModel({super.course, super.yearLevel, super.block});
 
-  // convert from for API
+  static String _getString(
+    Map<String, dynamic> map,
+    String key1, [
+    String? key2,
+  ]) {
+    if (map.containsKey(key1)) {
+      final value = map[key1];
+      if (value != null) return value.toString();
+    }
+
+    if (key2 != null && map.containsKey(key2)) {
+      final value = map[key2];
+      if (value != null) return value.toString();
+    }
+
+    return '';
+  }
+
   factory OtherInfoModel.fromMap(Map<String, dynamic> map) {
     return OtherInfoModel(
-      course: ModelUtils.getValue(map, 'course'),
-      yearLevel: ModelUtils.getValue(map, 'year_level'),
-      block: ModelUtils.getValue(map, 'block'),
+      course: _getString(map, 'course'),
+      yearLevel: _getString(map, 'yearLevel', 'year_level'),
+      block: _getString(map, 'block'),
     );
   }
 
-  // for sqlite
   @override
   Map<String, dynamic> toMap() {
-    return {'course': course, 'year_level': yearLevel, 'block': block};
+    return {'course': course, 'yearLevel': yearLevel, 'block': block};
   }
 
-  // convert to entity
   OtherInfo toEntity() {
     return OtherInfo(course: course, yearLevel: yearLevel, block: block);
   }
 
-  // convert from entity
   factory OtherInfoModel.fromEntity(OtherInfo entity) {
     return OtherInfoModel(
       course: entity.course,
       yearLevel: entity.yearLevel,
       block: entity.block,
     );
+  }
+
+  OtherInfoModel copyWith({
+    String? course,
+    String? yearLevel,
+    String? block,
+  }) {
+    return OtherInfoModel(
+      course: course ?? this.course,
+      yearLevel: yearLevel ?? this.yearLevel,
+      block: block ?? this.block,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'OtherInfoModel(course: $course, yearLevel: $yearLevel, block: $block)';
   }
 }

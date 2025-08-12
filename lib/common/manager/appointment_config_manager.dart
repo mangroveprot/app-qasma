@@ -3,10 +3,10 @@ import '../../features/appointment_config/presentation/bloc/appointment_config_c
 import '../../infrastructure/injection/service_locator.dart';
 
 class AppointmentConfigManager {
-  late final SyncConfigUsacase _syncConfigUsacase;
+  late final SyncConfigUsecase _syncConfigUsacase;
 
   AppointmentConfigManager() {
-    _syncConfigUsacase = sl<SyncConfigUsacase>();
+    _syncConfigUsacase = sl<SyncConfigUsecase>();
   }
 
   void loadAllAppointmentsConfig(AppointmentConfigCubit cubit) {

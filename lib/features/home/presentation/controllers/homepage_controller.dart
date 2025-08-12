@@ -8,14 +8,18 @@ import '../../../../common/manager/auth_manager.dart';
 import '../../../../common/manager/user_manager.dart';
 import '../../../../common/utils/constant.dart';
 import '../../../../common/utils/menu_items_config.dart';
+import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/button_text/custom_text_button.dart';
 import '../../../../common/widgets/custom_modal/custom_modal.dart';
 import '../../../../common/widgets/modal.dart';
 import '../../../../common/widgets/models/modal_option.dart';
-import '../../../../common/widgets/toast/app_toast.dart';
 import '../../../../core/_base/_services/storage/shared_preference.dart';
+import '../../../../infrastructure/injection/service_locator.dart';
 import '../../../../infrastructure/routes/app_routes.dart';
 import '../../../../theme/theme_extensions.dart';
+import '../../../appointment/data/models/cancellation_model.dart';
+import '../../../appointment/data/models/params/cancel_params.dart';
+import '../../../appointment/domain/usecases/cancel_appointment_usecase.dart';
 import '../../../appointment/presentation/bloc/appointments/appointments_cubit.dart';
 import '../../../appointment_config/presentation/bloc/appointment_config_cubit.dart';
 import '../../../users/presentation/bloc/user_cubit.dart';
@@ -26,6 +30,7 @@ class HomePageController {
   late final AppointmentsCubit _appointmentsCubit;
   late final UserCubit _userCubit;
   late final AppointmentConfigCubit _appointmentConfigCubit;
+  late final ButtonCubit _buttonCubit;
 
   // Managers
   late final AppointmentManager _appointmentManager;
@@ -47,6 +52,9 @@ class HomePageController {
         BlocProvider<AppointmentConfigCubit>(
           create: (context) => _appointmentConfigCubit,
         ),
+        BlocProvider<ButtonCubit>(
+          create: (context) => _buttonCubit,
+        ),
       ];
 
   void initialize({Function(String route, {Object? extra})? onNavigate}) {
@@ -67,6 +75,7 @@ class HomePageController {
     _appointmentsCubit = AppointmentsCubit();
     _userCubit = UserCubit();
     _appointmentConfigCubit = AppointmentConfigCubit();
+    _buttonCubit = ButtonCubit();
   }
 
   void _loadInitialData() {
@@ -93,6 +102,10 @@ class HomePageController {
 
   Future<void> appoitnmentRefreshData() async {
     await _appointmentManager.refreshAppointments(_appointmentsCubit);
+  }
+
+  Future<void> userRefreshData() async {
+    await _userManager.refreshUser(_userCubit);
   }
 
   Future<void> appointConfigRefreshData() async {
@@ -130,35 +143,34 @@ class HomePageController {
 
   Future<void> handleCancelAppointment(
       String appointmentId, BuildContext context) async {
+    final currentUserId = SharedPrefs().getString('currentUserId');
     final shouldCancel =
         await _showCancellationConfirmation(context, appointmentId);
     if (!shouldCancel) return;
 
-    final reason = await _showReasonSelection(context, appointmentId);
-    if (reason == null) return;
+    await CustomModal.showRadioSelectionModal<String>(
+      context,
+      options: reasonOptionList,
+      title: 'Select Cancellation Reason',
+      onConfirm: (String reason) async {
+        final _cancellationData = CancelParams(
+            appointmentId: appointmentId,
+            cancellation: CancellationModel(
+              cancelledAt: DateTime.now(),
+              cancelledById: currentUserId,
+              reason: reason,
+            ));
 
-    try {
-      await _appointmentManager.cancelAppointment(appointmentId, reason);
-      await appoitnmentRefreshData();
-
-      if (context.mounted) {
-        AppToast.show(
-          message: 'Appointment cancelled successfully',
-          type: ToastType.success,
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        AppToast.show(
-          message: 'Failed to cancel appointment',
-          type: ToastType.error,
-        );
-      }
-    }
+        await context.read<ButtonCubit>().execute(
+              usecase: sl<CancelAppointmentUsecase>(),
+              params: _cancellationData,
+            );
+        return '';
+      },
+    );
   }
 
   void handleRescheduleAppointment(String appointmentId) {
-    // Find the appointment in the current list
     final appointments = _appointmentsCubit.state;
     AppointmentModel? appointmentToReschedule;
 
@@ -174,8 +186,13 @@ class HomePageController {
 
     if (appointmentToReschedule != null) {
       _navigationCallback?.call(
-        Routes.book_appointment,
-        extra: {'appointment': appointmentToReschedule},
+        Routes.appointment,
+        extra: {
+          'appointment': appointmentToReschedule,
+          'onSuccess': () async {
+            await appoitnmentRefreshData();
+          },
+        },
       );
     } else {
       debugPrint('Appointment not found for rescheduling: $appointmentId');
@@ -207,15 +224,20 @@ class HomePageController {
 
   Map<String, VoidCallback> _getMenuHandlers(BuildContext context) {
     return {
-      MenuKeys.appointments: () => _navigationCallback?.call('/appointments'),
-      MenuKeys.myProfile: () => _navigationCallback?.call('/profile'),
-      MenuKeys.history: () => _navigationCallback?.call('/history'),
+      MenuKeys.myProfile: () => handleMyProfile(),
+      MenuKeys.history: () => _navigationCallback?.call(
+            Routes.buildPath(Routes.appointment, Routes.appointment_history),
+          ),
       MenuKeys.privacyPolicy: () => _navigationCallback?.call('/privacy'),
       MenuKeys.termsAndCondition: () => _navigationCallback?.call('/terms'),
       MenuKeys.settings: () => _navigationCallback?.call('/settings'),
       MenuKeys.logout: () => _handleLogout(context), // context is now valid
     };
   }
+
+  // ============================================================================
+  // Modals
+  // ============================================================================
 
   Future<bool> _showCancellationConfirmation(
       BuildContext context, String appointmentId) async {
@@ -252,20 +274,51 @@ class HomePageController {
         false;
   }
 
-  Future<String?> _showReasonSelection(
-      BuildContext context, String appointmentId) async {
-    return await CustomModal.showRadioSelectionModal<String>(
-      context,
-      options: reasonOptionList,
-      title: 'Select Cancellation Reason',
-      onConfirm: (String reason) async {
-        await _appointmentManager.cancelAppointment(appointmentId, reason);
-        return reason;
-      },
-    );
+  Future<bool> _showLogoutConfirmation(BuildContext context) async {
+    final colors = context.colors;
+    final radii = context.radii;
+    final fontWeight = context.weight;
+
+    return await CustomModal.showCenteredModal<bool>(
+          context,
+          title: 'Are you sure to logout?',
+          icon: CustomModal.warningIcon(
+              iconColor: colors.error,
+              backgroundColor: colors.error.withOpacity(0.1),
+              size: 58,
+              iconSize: 28),
+          actions: [
+            CustomTextButton(
+              onPressed: () async {
+                context.pop(true);
+              },
+              text: 'Yes',
+              textColor: colors.white,
+              fontSize: 14,
+              fontWeight: fontWeight.medium,
+              backgroundColor: colors.error,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              borderRadius: radii.large,
+              width: 100,
+              height: 44,
+            ),
+            ModalUI.secondaryButton(
+                text: 'No',
+                onPressed: () {
+                  context.pop(false);
+                }),
+          ],
+        ) ??
+        false;
   }
 
   Future<void> _handleLogout(BuildContext context) async {
+    final shouldLogout = await _showLogoutConfirmation(context);
+    if (!shouldLogout) return;
+    await _peformLogout(context);
+  }
+
+  Future<void> _peformLogout(BuildContext context) async {
     try {
       await AuthManager.logout(context);
       context.go(Routes.root);
@@ -274,9 +327,26 @@ class HomePageController {
     }
   }
 
-  void dispose() {
-    _appointmentsCubit.close();
-    _userCubit.close();
-    _appointmentConfigCubit.close();
+  void handleBookNewAppointment(String category) {
+    _navigationCallback?.call(
+      Routes.appointment,
+      extra: {
+        'category': category,
+        'onSuccess': () async {
+          await appoitnmentRefreshData();
+        },
+      },
+    );
+  }
+
+  void handleMyProfile() {
+    _navigationCallback?.call(
+      Routes.buildPath(Routes.user_path, Routes.user_profile),
+      extra: {
+        'onSuccess': () async {
+          await userRefreshData();
+        },
+      },
+    );
   }
 }

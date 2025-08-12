@@ -1,8 +1,23 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 
 import '../widgets/models/modal_option.dart';
 
 int YEARS_TO_GENERATE = 50;
+
+class Status {
+  final String status;
+  Status({
+    required this.status,
+  });
+}
+
+class StatusType {
+  static Status pending = Status(status: 'pending');
+  static Status completed = Status(status: 'completed');
+  static Status cancelled = Status(status: 'cancelled');
+  static Status approved = Status(status: 'approved');
+}
 
 const Map<String, dynamic> name = {
   'name': 'First Name',
@@ -37,7 +52,7 @@ const List<String> blockList = [
 
 const List<String> yearLevelList = ['1', '2', '3', '4'];
 
-const List<String> genderList = ['Male', 'Female', 'LGBTQ+ ultra'];
+const List<String> genderList = ['Male', 'Female', 'other'];
 
 final currentYear = DateTime.now().year;
 final yearsList = List.generate(
@@ -121,3 +136,8 @@ final List<ModalOption> reasonOptionList = [
     requiresInput: true,
   ),
 ];
+
+class OtpPurposes {
+  static const String accountVerification = 'ACCOUNT_VERIFICATION';
+  static const String passwordReset = 'FORGOT_PASSWORD';
+}

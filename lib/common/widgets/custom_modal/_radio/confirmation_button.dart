@@ -55,11 +55,12 @@ class ConfirmationButton extends StatelessWidget {
                   },
             width: double.infinity,
             labelText: labelText,
-            backgroundColor: backgroundColor ??
-                (enabled ? colors.primary : colors.textPrimary),
+            backgroundColor:
+                backgroundColor ?? (enabled ? colors.primary : colors.surface),
+            disabledBackgroundColor: colors.surface,
             borderRadius: radius.large,
             labelTextColor: colors.white,
-            loadingSpinnerColor: colors.white,
+            loadingSpinnerColor: colors.textPrimary,
           ),
         ),
         const SizedBox(height: 12),

@@ -18,86 +18,71 @@ class BookAppointmentForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    final boxShadows = context.shadows;
-
-    final mainContainerDecoration = BoxDecoration(
-      color: colors.white,
-      borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(16),
-        topRight: Radius.circular(16),
-      ),
-      boxShadow: [boxShadows.light],
-    );
-
     return BlocProvider(
       create: (context) => SlotsCubit(),
       child: BlocListener<SlotsCubit, SlotsCubitState>(
-        listener: (context, slotsState) {
-          if (slotsState is SlotsFailureState) {
-            AppToast.show(
-                message: slotsState.errorMessages.first, type: ToastType.error);
-          }
-        },
-        child: Column(
-          children: [
-            Expanded(
-              child: Container(
-                margin: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                decoration: mainContainerDecoration,
-                child: Column(
-                  children: [
-                    // Main content area
-                    Expanded(
-                      child: CustomScrollView(
-                        physics: const ClampingScrollPhysics(),
-                        slivers: [
-                          SliverPadding(
-                            padding: const EdgeInsets.all(20),
-                            sliver: SliverList(
-                              delegate: SliverChildListDelegate([
-                                // Category Section
-                                BookCategorySection(
-                                  category: state.category ?? '',
-                                ),
-                                Spacing.verticalLarge,
+        listener: _handleSlotsState,
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+          decoration: _buildContainerDecoration(context),
+          child: Column(
+            children: [
+              Expanded(child: _buildScrollableContent()),
+              _buildBottomButtons(context),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-                                // Appointment Type and DateTime Section
-                                RepaintBoundary(
-                                  child: BookTypeDataTimeSection(
-                                    textControllers: state.textControllers,
-                                    dropdownControllers:
-                                        state.dropdownControllers,
-                                    category: state.category,
-                                  ),
-                                ),
-                                Spacing.verticalMedium,
-                                BookDescriptionSection(
-                                  textControllers: state.textControllers,
-                                ),
-                              ]),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+  void _handleSlotsState(BuildContext context, SlotsCubitState slotsState) {
+    if (slotsState is SlotsFailureState) {
+      AppToast.show(
+        message: slotsState.errorMessages.first,
+        type: ToastType.error,
+      );
+    }
+  }
 
-                    // buttons section
-                    SafeArea(
-                      top: false,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: BookAppointmentButtons(
-                          onPressed: () => state.handleSubmit(context),
-                          isRescheduling: state.isRescheduling,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+  BoxDecoration _buildContainerDecoration(BuildContext context) {
+    final colors = context.colors;
+    final shadows = context.shadows;
+
+    return BoxDecoration(
+      color: colors.white,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+      boxShadow: [shadows.light],
+    );
+  }
+
+  Widget _buildScrollableContent() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          BookCategorySection(category: state.category ?? ''),
+          Spacing.verticalLarge,
+          BookTypeDataTimeSection(
+            textControllers: state.textControllers,
+            dropdownControllers: state.dropdownControllers,
+            category: state.category,
+          ),
+          Spacing.verticalMedium,
+          BookDescriptionSection(textControllers: state.textControllers),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomButtons(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: BookAppointmentButtons(
+          onPressed: () => state.handleSubmit(context),
+          isRescheduling: state.isRescheduling,
         ),
       ),
     );

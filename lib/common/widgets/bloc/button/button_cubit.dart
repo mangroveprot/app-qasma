@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-
 import '../../../../core/_base/_bloc_cubit/base_cubit.dart';
 import '../../../../core/_usecase/usecase.dart';
 import '../../../error/app_error.dart';
@@ -43,30 +42,31 @@ class ButtonCubit extends BaseCubit<ButtonState> {
     );
   }
 
-  Future<void> execute({dynamic params, required Usecase usecase}) async {
-    emitLoading();
+  Future<void> execute(
+      {dynamic params, required Usecase usecase, String? buttonId}) async {
+    emit(ButtonLoadingState(buttonId));
     await Future.delayed(const Duration(seconds: 2));
+
     try {
       final Either result = await usecase.call(param: params);
 
       result.fold(
         (error) {
-          emitError(
-            errorMessages: error.messages,
-            suggestions: error.suggestions,
-            error: error,
-          );
+          emit(ButtonFailureState(
+            errorMessages: error.allUserMessages,
+            suggestions: error.userSuggestions,
+            buttonId: buttonId,
+          ));
         },
         (data) {
-          emit(ButtonSuccessState(data));
+          emit(ButtonSuccessState(data, buttonId));
         },
       );
-    } catch (e, stackTrace) {
-      emitError(
+    } catch (e) {
+      emit(ButtonFailureState(
         errorMessages: [e.toString()],
-        error: e,
-        stackTrace: stackTrace,
-      );
+        buttonId: buttonId,
+      ));
     }
   }
 }

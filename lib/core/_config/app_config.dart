@@ -14,7 +14,9 @@ class AppConfig {
       );
       _logger.i('Base URL: $baseUrl');
       _logger.i('Logging enabled: $shouldShowLogs');
+      _logger.i('App Title: $appTitle');
     } catch (e, stackTrace) {
+      _logger.e('Error initializing AppConfig: $e');
       AppError.create(
         message: 'Error initializing AppConfig',
         type: ErrorType.configuration,
@@ -35,10 +37,10 @@ class AppConfig {
   static bool get isDevelopment => FlavorConfig.isDevelopment();
 
   static Map<String, dynamic> get headers => {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'x-app-flavor': FlavorConfig.instance.flavor.toString().split('.').last,
-  };
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'x-app-flavor': FlavorConfig.instance.flavor.toString().split('.').last,
+      };
 
   // Timeouts (in milliseconds)
   static const int connectTimeout = 30000;

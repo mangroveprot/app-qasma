@@ -6,7 +6,24 @@ class TimeSlotModel extends TimeSlot {
     required super.end,
   });
 
-  // to db (sqflite)
+  static String _getString(
+    Map<String, dynamic> map,
+    String key1, [
+    String? key2,
+  ]) {
+    if (map.containsKey(key1)) {
+      final value = map[key1];
+      if (value != null) return value.toString();
+    }
+
+    if (key2 != null && map.containsKey(key2)) {
+      final value = map[key2];
+      if (value != null) return value.toString();
+    }
+
+    return '';
+  }
+
   Map<String, dynamic> toDb() {
     return {
       'start': start,
@@ -14,11 +31,10 @@ class TimeSlotModel extends TimeSlot {
     };
   }
 
-  // from localdb (sqflite)
   factory TimeSlotModel.fromDb(Map<String, dynamic> map) {
     return TimeSlotModel(
-      start: map['start']?.toString() ?? '',
-      end: map['end']?.toString() ?? '',
+      start: _getString(map, 'start'),
+      end: _getString(map, 'end'),
     );
   }
 
@@ -29,15 +45,13 @@ class TimeSlotModel extends TimeSlot {
     };
   }
 
-  // From API (JSON format)
   factory TimeSlotModel.fromMap(Map<String, dynamic> json) {
     return TimeSlotModel(
-      start: json['start']?.toString() ?? '',
-      end: json['end']?.toString() ?? '',
+      start: _getString(json, 'start'),
+      end: _getString(json, 'end'),
     );
   }
 
-  // Convert to entity
   TimeSlot toEntity() {
     return TimeSlot(
       start: start,
@@ -45,11 +59,15 @@ class TimeSlotModel extends TimeSlot {
     );
   }
 
-  // Create from entity
   factory TimeSlotModel.fromEntity(TimeSlot entity) {
     return TimeSlotModel(
       start: entity.start,
       end: entity.end,
     );
+  }
+
+  @override
+  String toString() {
+    return 'TimeSlotModel(start: $start, end: $end)';
   }
 }

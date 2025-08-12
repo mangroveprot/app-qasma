@@ -46,14 +46,14 @@ class UserCubit extends BaseCubit<UserCubitState> {
 
   // Load user by idNumber (idNumber or email)
   Future<void> loadUser({
-    required String idNumber,
+    dynamic params,
     required Usecase usecase,
     bool isRefreshing = false,
   }) async {
     emitLoading(isRefreshing: isRefreshing);
 
     try {
-      final Either result = await usecase.call(param: idNumber);
+      final Either result = await usecase.call(param: params);
 
       result.fold(
         (error) {
@@ -77,13 +77,48 @@ class UserCubit extends BaseCubit<UserCubitState> {
     }
   }
 
+  Future<void> onRefreshUser({
+    dynamic params,
+    required Usecase usecase,
+    bool isRefreshing = false,
+  }) async {
+    emitLoading(isRefreshing: isRefreshing);
+
+    try {
+      final Either result = await usecase.call(param: params);
+
+      print({'==============', result});
+
+      result.fold(
+        (error) {
+          emitError(
+            errorMessages: error.messages ?? ['Failed to load user'],
+            suggestions: error.suggestions,
+            error: error,
+          );
+        },
+        (data) {
+          final UserModel user = data.first as UserModel;
+          print({'=========================', user});
+          emit(UserLoadedState(user));
+        },
+      );
+    } catch (e, stackTrace) {
+      emitError(
+        errorMessages: ['Failed to load user: ${e.toString()}'],
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
   // Refresh user data
   Future<void> refreshUser({
-    required String idNumber,
+    dynamic params,
     required Usecase usecase,
   }) async {
-    await loadUser(
-      idNumber: idNumber,
+    await onRefreshUser(
+      params: params,
       usecase: usecase,
       isRefreshing: true,
     );

@@ -5,17 +5,33 @@ class ReminderModel extends Reminder {
     required super.message,
   });
 
-  // to db (sqlite)
+  static String _getString(
+    Map<String, dynamic> map,
+    String key1, [
+    String? key2,
+  ]) {
+    if (map.containsKey(key1)) {
+      final value = map[key1];
+      if (value != null) return value.toString();
+    }
+
+    if (key2 != null && map.containsKey(key2)) {
+      final value = map[key2];
+      if (value != null) return value.toString();
+    }
+
+    return '';
+  }
+
   Map<String, dynamic> toDb() {
     return {
       'message': message,
     };
   }
 
-  // from localdb (sqlite)
   factory ReminderModel.fromDb(Map<String, dynamic> map) {
     return ReminderModel(
-      message: map['message']?.toString() ?? '',
+      message: _getString(map, 'message'),
     );
   }
 
@@ -25,24 +41,26 @@ class ReminderModel extends Reminder {
     };
   }
 
-  // From API (JSON format)
   factory ReminderModel.fromMap(Map<String, dynamic> json) {
     return ReminderModel(
-      message: json['message']?.toString() ?? '',
+      message: _getString(json, 'message'),
     );
   }
 
-  // Convert to entity
   Reminder toEntity() {
     return Reminder(
       message: message,
     );
   }
 
-  // Create from entity
   factory ReminderModel.fromEntity(Reminder entity) {
     return ReminderModel(
       message: entity.message,
     );
+  }
+
+  @override
+  String toString() {
+    return 'ReminderModel(message: $message)';
   }
 }

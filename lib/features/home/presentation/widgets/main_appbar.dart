@@ -37,7 +37,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
                 Builder(
                   builder: (BuildContext scaffoldContext) {
                     return SizedBox(
-                      width: 48,
+                      width: 54,
                       height: 48,
                       child: Material(
                         color: Colors.transparent,
@@ -78,7 +78,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
                   },
                 ),
 
-                // Title
+                // Title (Centered)
                 Expanded(
                   child: Center(
                     child: Text(
@@ -92,6 +92,8 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                   ),
                 ),
+
+                /*
 
                 // Notification Bell
                 SizedBox(
@@ -118,6 +120,14 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
                       ),
                     ),
                   ),
+                ),
+
+                */
+
+                // Transparent spacer to balance the hamburger menu
+                const SizedBox(
+                  width: 54,
+                  height: 48,
                 ),
               ],
             ),

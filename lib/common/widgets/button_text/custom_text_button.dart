@@ -26,6 +26,7 @@ class CustomTextButton extends StatelessWidget {
   final double? iconSize;
   final Color? iconColor;
   final double? iconSpacing;
+  final String? buttonId; // Add this line
 
   const CustomTextButton({
     Key? key,
@@ -48,13 +49,14 @@ class CustomTextButton extends StatelessWidget {
     this.iconSize,
     this.iconColor,
     this.iconSpacing,
+    this.buttonId, // Add this line
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ButtonCubit, ButtonState>(
       builder: (context, state) {
-        final isLoading = state is ButtonLoadingState;
+        final isLoading = _shouldShowLoading(state);
         final colorToUse = context.colors.textPrimary;
 
         return Container(
@@ -91,10 +93,13 @@ class CustomTextButton extends StatelessWidget {
                     children: [
                       if (iconData != null &&
                           iconPosition == Position.left) ...[
-                        Icon(
-                          iconData,
-                          size: iconSize,
-                          color: iconColor ?? textColor ?? colorToUse,
+                        Padding(
+                          padding: EdgeInsets.only(left: iconSpacing ?? 8),
+                          child: Icon(
+                            iconData,
+                            size: iconSize,
+                            color: iconColor ?? textColor ?? colorToUse,
+                          ),
                         ),
                         SizedBox(width: iconSpacing ?? 4),
                       ],
@@ -122,5 +127,16 @@ class CustomTextButton extends StatelessWidget {
         );
       },
     );
+  }
+
+  bool _shouldShowLoading(ButtonState state) {
+    if (state is! ButtonLoadingState) return false;
+
+    // If no buttonId on state = all buttons load
+    // If no buttonId on widget = react to all states
+    // If both have IDs = only load if they match
+    return state.buttonId == null ||
+        buttonId == null ||
+        state.buttonId == buttonId;
   }
 }

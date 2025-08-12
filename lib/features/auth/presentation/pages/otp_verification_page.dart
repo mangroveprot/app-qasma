@@ -2,12 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../common/utils/button_ids.dart';
+import '../../../../common/utils/constant.dart';
 import '../../../../common/utils/form_field_config.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/bloc/form/form_cubit.dart';
 import '../../../../common/widgets/custom_app_bar.dart';
 import '../../../../common/widgets/toast/app_toast.dart';
+import '../../../../infrastructure/injection/service_locator.dart';
 import '../../../../infrastructure/routes/app_route_extractor.dart';
+import '../../../../infrastructure/routes/app_routes.dart';
+import '../../data/models/resend_otp_params.dart';
+import '../../data/models/verify_params.dart';
+import '../../domain/usecases/resend_otp_usecase.dart';
+import '../../domain/usecases/verify_usecase.dart';
 import '../widgets/otp_verrification_widget/otp_verification_form.dart';
 
 class OtpVerificationPage extends StatefulWidget {
@@ -20,8 +28,10 @@ class OtpVerificationPage extends StatefulWidget {
 class OtpVerificationPageState extends State<OtpVerificationPage> {
   final List<TextEditingController> controllers = [];
   final List<FocusNode> focusNodes = [];
-  late Map<String, dynamic> _routeData;
+  Map<String, dynamic>? _routeData;
   final otp_field_key = field_otp_verification.field_key;
+  bool isResend = false;
+  bool isResetPassword = false;
 
   static const List<FormFieldConfig> _routeFields = [field_email];
 
@@ -41,17 +51,26 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
   }
 
   void _extractRouteData() {
+    if (_routeData != null) return;
     final extra = GoRouterState.of(context).extra;
+    if (AppRouteExtractor.extractFieldByKey(extra, OtpPurposes.passwordReset)
+        .isNotEmpty) {
+      isResetPassword = true;
+    } else if (AppRouteExtractor.extractFieldByKey(
+            extra, OtpPurposes.accountVerification)
+        .isNotEmpty) {
+      isResetPassword = false;
+    }
+
     _routeData = AppRouteExtractor.extractFieldData(extra, _routeFields);
   }
 
   String getRouteValue(FormFieldConfig field) {
-    return _routeData[field.field_key] ?? '';
+    return _routeData?[field.field_key] ?? '';
   }
 
   @override
   void deactivate() {
-    // if the page is closed then clear the error from cubit
     context.read<FormCubit>().clearAll();
     super.deactivate();
   }
@@ -84,6 +103,16 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
         controllers.every((controller) => controller.text.isNotEmpty);
   }
 
+  String get otpPurposes {
+    String purposes = '';
+    if (isResetPassword) {
+      purposes = OtpPurposes.passwordReset;
+    } else if (_routeData != null && _routeData!.isNotEmpty) {
+      purposes = OtpPurposes.accountVerification;
+    }
+    return purposes;
+  }
+
   void onOtpChanged(int index, String value) {
     if (!mounted) return;
 
@@ -97,18 +126,16 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
     context.read<FormCubit>().clearAll();
   }
 
-  void onSubmitted(int index) {
+  void onSubmitted(BuildContext context, int index) {
     if (index < 5) {
       focusNodes[index + 1].requestFocus();
     } else if (isOtpComplete) {
-      handleVerifyOTP();
+      handleVerifyOTP(context);
     }
   }
 
-  void handleVerifyOTP() {
-    // TODO: Implement OTP verification logic
+  void handleVerifyOTP(BuildContext context) {
     if (!isOtpComplete) {
-      // Set error for incomplete OTP
       context.read<FormCubit>().setFieldError(
             otp_field_key,
             'Please enter complete 6-digit code',
@@ -116,11 +143,22 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
       return;
     }
 
-    // Get email from route parameters for verification
-    final email = getRouteValue(field_email);
+    _performVerifyAccount(context);
   }
 
-  void handleResendOTP() {
+  void _performVerifyAccount(BuildContext context) {
+    final email = getRouteValue(field_email);
+    final params = VerifyParams(email: email, code: otpCode);
+
+    context.read<ButtonCubit>().execute(
+          usecase: sl<VerifyUsecase>.call(),
+          params: params,
+          buttonId: ButtonsUniqeKeys.verify.id,
+        );
+    isResend = false;
+  }
+
+  void handleResendOTP(BuildContext context) {
     if (!mounted) return;
 
     for (var controller in controllers) {
@@ -133,23 +171,47 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
       focusNodes[0].requestFocus();
     }
 
-    // TODO: Handle resend OTP logic
+    _performResend(context);
+  }
+
+  Future<void> _performResend(BuildContext context) async {
+    final email = getRouteValue(field_email);
+
+    final params = ResendOtpParams(
+      email: email,
+      purposes: otpPurposes,
+    );
+
+    context.read<ButtonCubit>().execute(
+          usecase: sl<ResendOTPUsecase>(),
+          params: params,
+          buttonId: ButtonsUniqeKeys.resend.id,
+        );
+    isResend = true;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CustomAppBar(leadingText: 'Back'),
-      body: BlocListener<ButtonCubit, ButtonState>(
-        listener: _handleButtonState,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SizedBox(
-              width: constraints.maxWidth,
-              height: constraints.maxHeight,
-              child: OtpVerificationForm(state: this),
-            );
-          },
+    return BlocProvider(
+      create: (context) => ButtonCubit(),
+      child: Scaffold(
+        appBar: CustomAppBar(
+          leadingText: '',
+          title: isResetPassword
+              ? 'Reset Password Verification'
+              : 'Account Verification',
+        ),
+        body: BlocListener<ButtonCubit, ButtonState>(
+          listener: _handleButtonState,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SizedBox(
+                width: constraints.maxWidth,
+                height: constraints.maxHeight,
+                child: OtpVerificationForm(state: this),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -166,7 +228,35 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
     }
 
     if (state is ButtonSuccessState) {
-      // OTP verification successful - handle navigation or other success logic
+      if (isResend) {
+        AppToast.show(
+          message: 'OTP has been resent to your email',
+          type: ToastType.success,
+        );
+      }
+
+      if (!isResend) {
+        if (otpPurposes == OtpPurposes.passwordReset) {
+          final email = getRouteValue(field_email);
+          AppToast.show(
+            message:
+                'Successfully verified. You will be redirected to reset password page.',
+            type: ToastType.success,
+          );
+          context.go(
+            Routes.buildPath(Routes.aut_path, Routes.reset_password),
+            extra: {field_email.field_key: email},
+          );
+          return;
+        }
+
+        AppToast.show(
+          message:
+              'Account is verified successfully. You will be redirected to login.',
+          type: ToastType.success,
+        );
+        context.go(Routes.buildPath(Routes.aut_path, Routes.login));
+      }
     }
   }
 }
