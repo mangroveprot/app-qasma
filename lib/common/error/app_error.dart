@@ -80,11 +80,31 @@ class AppError {
   }
 
   String get userMessage {
+    if (shouldIgnoreError()) {
+      return '';
+    }
+
     if (message != null && _isUserFriendly(message!)) {
       return message!;
     }
 
     return _getUserFriendlyMessage();
+  }
+
+  bool shouldIgnoreError() {
+    if (message != null && message!.toLowerCase().contains('jwt expired')) {
+      return true;
+    }
+
+    if (messages != null && messages!.isNotEmpty) {
+      for (final msg in messages!) {
+        if (msg.toLowerCase().contains('jwt expired')) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   bool _isUserFriendly(String msg) {
