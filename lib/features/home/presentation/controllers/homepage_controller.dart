@@ -96,9 +96,7 @@ class HomePageController {
         .loadAllAppointmentsConfig(_appointmentConfigCubit);
   }
 
-  // ============================================================================
-  // PUBLIC METHODS - Called by UI components
-  // ============================================================================
+  // PUBLIC METHODS
 
   Future<void> appoitnmentRefreshData() async {
     await _appointmentManager.refreshAppointments(_appointmentsCubit);
@@ -218,9 +216,7 @@ class HomePageController {
     debugPrint('Notification bell tapped');
   }
 
-  // ============================================================================
   // PRIVATE METHODS
-  // ============================================================================
 
   Map<String, VoidCallback> _getMenuHandlers(BuildContext context) {
     return {
@@ -228,16 +224,26 @@ class HomePageController {
       MenuKeys.history: () => _navigationCallback?.call(
             Routes.buildPath(Routes.appointment, Routes.appointment_history),
           ),
-      MenuKeys.privacyPolicy: () => _navigationCallback?.call('/privacy'),
-      MenuKeys.termsAndCondition: () => _navigationCallback?.call('/terms'),
-      MenuKeys.settings: () => _navigationCallback?.call('/settings'),
-      MenuKeys.logout: () => _handleLogout(context), // context is now valid
+      MenuKeys.privacyPolicy: () => _navigationCallback?.call(Routes.buildPath(
+            Routes.preference_path,
+            Routes.privacy_policy,
+          )),
+      MenuKeys.termsAndCondition: () =>
+          _navigationCallback?.call(Routes.buildPath(
+            Routes.preference_path,
+            Routes.terms_conditons,
+          )),
+      MenuKeys.settings: () =>
+          _navigationCallback?.call(Routes.preference_path),
+      MenuKeys.about: () => _navigationCallback?.call(Routes.buildPath(
+            Routes.preference_path,
+            Routes.about,
+          )),
+      MenuKeys.logout: () => _handleLogout(context),
     };
   }
 
-  // ============================================================================
   // Modals
-  // ============================================================================
 
   Future<bool> _showCancellationConfirmation(
       BuildContext context, String appointmentId) async {

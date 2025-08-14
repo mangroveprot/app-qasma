@@ -12,6 +12,7 @@ import '../../../../core/_config/url_provider.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
 import '../../../users/data/models/user_model.dart';
 import '../../domain/services/auth_service.dart';
+import '../models/change_password_params.dart';
 import '../models/logout_params.dart';
 import '../models/resend_otp_params.dart';
 import '../models/reset_password_params.dart';
@@ -56,6 +57,7 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
           final idNumber = userData['idNumber'] as String?;
           if (idNumber != null) {
             await SharedPrefs().setString('currentUserId', idNumber);
+            await SharedPrefs().setBool('privacyPolicyAccepted', false);
           }
           final userModel = UserModel.fromJson(userData);
 
@@ -286,6 +288,39 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
         _urlProviderConfig.logoutUrl,
         data: logoutReq.toJson(),
         requiresAuth: false,
+      );
+
+      final apiResponse = ApiResponse.fromJson(
+        response.data,
+        (json) => json,
+      );
+
+      if (apiResponse.isSuccess) {
+        return const Right(true);
+      } else {
+        return Left(apiResponse.error!);
+      }
+    } catch (e, stack) {
+      final error = e is AppError
+          ? e
+          : AppError.create(
+              message: 'Unexpected error during signup',
+              type: ErrorType.unknown,
+              originalError: e,
+              stackTrace: stack,
+            );
+      return Left(error);
+    }
+  }
+
+  @override
+  Future<Either<AppError, bool>> changePassword(
+      ChangePasswordParams changePasswordReq) async {
+    try {
+      final response = await _apiClient.post(
+        _urlProviderConfig.changePasswordUrl,
+        data: changePasswordReq.toJson(),
+        requiresAuth: true,
       );
 
       final apiResponse = ApiResponse.fromJson(

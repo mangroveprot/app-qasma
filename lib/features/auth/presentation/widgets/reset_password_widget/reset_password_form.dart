@@ -15,7 +15,6 @@ class ResetPasswordForm extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          // Scrollable area with form fields
           Expanded(
             child: SingleChildScrollView(
               clipBehavior: Clip.none,

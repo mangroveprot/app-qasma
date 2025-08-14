@@ -1,223 +1,175 @@
 import 'package:flutter/material.dart';
 
-class CustomInputDropdown extends StatefulWidget {
-  final String label;
-  final String? value;
-  final List<String> options;
-  final Future<void> Function(String?) onChanged;
-  final String placeholder;
+import '../../theme/theme_extensions.dart';
 
-  const CustomInputDropdown({
-    Key? key,
+class CustomInputDropdownField extends StatelessWidget {
+  final String fieldName;
+  final String label;
+  final IconData? icon;
+  final String value;
+  final List<String> options;
+  final ValueChanged<String> onChanged;
+  final bool isEnabled;
+
+  const CustomInputDropdownField({
+    super.key,
+    required this.fieldName,
     required this.label,
-    this.value,
+    required this.value,
     required this.options,
     required this.onChanged,
-    this.placeholder = 'Not Set',
-  }) : super(key: key);
-
-  @override
-  State<CustomInputDropdown> createState() => _CustomInputDropdownState();
-}
-
-class _CustomInputDropdownState extends State<CustomInputDropdown> {
-  bool _isEditing = false;
-  bool _isLoading = false;
-  bool _hasError = false;
-  String? _selectedValue;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedValue = widget.value;
-  }
-
-  @override
-  void didUpdateWidget(CustomInputDropdown oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    // Update selected value when widget value changes, but only if not editing
-    if (oldWidget.value != widget.value && !_isEditing) {
-      _selectedValue = widget.value;
-    }
-  }
-
-  void _startEditing() {
-    setState(() {
-      _isEditing = true;
-      _hasError = false;
-      _selectedValue = widget.value;
-    });
-  }
-
-  Future<void> _saveEdit() async {
-    setState(() {
-      _isLoading = true;
-      _hasError = false;
-    });
-
-    try {
-      await widget.onChanged(_selectedValue);
-
-      setState(() {
-        _isEditing = false;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _hasError = true;
-      });
-    }
-  }
-
-  void _cancelEdit() {
-    setState(() {
-      _isEditing = false;
-      _hasError = false;
-      _selectedValue = widget.value;
-    });
-  }
-
-  void _selectOption(String? value) {
-    setState(() {
-      _selectedValue = value;
-    });
-  }
+    this.icon,
+    this.isEnabled = true,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final displayValue = widget.value ?? '';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Label
-        Padding(
-          padding: const EdgeInsets.only(left: 16, bottom: 1),
-          child: Text(
-            widget.label,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
+    final colors = context.colors;
+    final fontWeight = context.weight;
+    final radius = context.radii;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        borderRadius: radius.medium,
+        border: Border.all(
+          color: colors.white.withOpacity(0.4),
+          width: 1,
         ),
-
-        // Dropdown field
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          decoration: const BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: Colors.grey, width: 0.5),
-            ),
-          ),
-          child: Row(
-            children: [
-              // Value/Dropdown
-              Expanded(
-                child: _isEditing
-                    ? Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 4),
-                        child: DropdownButton<String>(
-                          value: widget.options.contains(_selectedValue)
-                              ? _selectedValue
-                              : null,
-                          isExpanded: true,
-                          underline: const SizedBox.shrink(),
-                          style: const TextStyle(
-                            fontSize: 17,
-                            color: Colors.black,
-                          ),
-                          hint: Text(
-                            widget.placeholder,
-                            style: TextStyle(
-                              fontSize: 17,
-                              color: Colors.grey.shade500,
-                            ),
-                          ),
-                          items: widget.options.map((String option) {
-                            return DropdownMenuItem<String>(
-                              value: option,
-                              child: Text(option),
-                            );
-                          }).toList(),
-                          onChanged: _selectOption,
-                        ),
-                      )
-                    : Text(
-                        displayValue.isEmpty
-                            ? widget.placeholder
-                            : displayValue,
-                        style: TextStyle(
-                          fontSize: 17,
-                          color: displayValue.isEmpty
-                              ? Colors.grey.shade500
-                              : Colors.black,
-                        ),
-                      ),
-              ),
-
-              const SizedBox(width: 8),
-
-              // Action Icons
-              if (_isEditing) ...[
-                // Cancel button
-                GestureDetector(
-                  onTap: _cancelEdit,
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    child: Icon(
-                      Icons.close,
-                      size: 18,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // Save button
-                GestureDetector(
-                  onTap: _isLoading ? null : _saveEdit,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    child: _isLoading
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.grey),
-                            ),
-                          )
-                        : Icon(
-                            Icons.check,
-                            size: 18,
-                            color: _hasError
-                                ? Colors.red.shade600
-                                : Colors.green.shade600,
-                          ),
-                  ),
-                ),
-              ] else
-                // Edit button
-                GestureDetector(
-                  onTap: _startEditing,
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    child: Icon(
-                      Icons.edit_outlined,
-                      size: 18,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                ),
+        color: colors.white,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            if (icon != null) ...[
+              Icon(icon, color: colors.textPrimary.withOpacity(0.6), size: 20),
+              const SizedBox(width: 12),
             ],
-          ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: fontWeight.medium,
+                      color: colors.textPrimary,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  DropdownButtonFormField<String>(
+                    value: value.isEmpty ? null : value,
+                    isExpanded: true,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: fontWeight.medium,
+                      color: isEnabled
+                          ? colors.black
+                          : colors.black.withOpacity(0.5),
+                    ),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                      isDense: true,
+                      hintText: 'Select $label',
+                      hintStyle: TextStyle(
+                        color: colors.textPrimary,
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                    icon: Icon(
+                      Icons.keyboard_arrow_down,
+                      color: colors.textPrimary,
+                    ),
+                    items: options.map((option) {
+                      return DropdownMenuItem<String>(
+                        value: option,
+                        child: Text(
+                          option,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    }).toList(),
+                    selectedItemBuilder: (BuildContext context) {
+                      return options.map<Widget>((String item) {
+                        return Container(
+                          alignment: Alignment.centerLeft,
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final textPainter = TextPainter(
+                                text: TextSpan(
+                                  text: item,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: fontWeight.medium,
+                                  ),
+                                ),
+                                textDirection: TextDirection.ltr,
+                              );
+                              textPainter.layout();
+
+                              // Only apply fade if text is longer than available space
+                              final needsFade =
+                                  textPainter.width > constraints.maxWidth - 20;
+
+                              if (needsFade) {
+                                return ShaderMask(
+                                  shaderCallback: (Rect bounds) {
+                                    return const LinearGradient(
+                                      begin: Alignment.centerLeft,
+                                      end: Alignment.centerRight,
+                                      colors: [
+                                        Colors.black,
+                                        Colors.black,
+                                        Colors.transparent
+                                      ],
+                                      stops: [0.0, 0.8, 1.0],
+                                    ).createShader(bounds);
+                                  },
+                                  blendMode: BlendMode.dstIn,
+                                  child: Text(
+                                    item,
+                                    maxLines: 1,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: fontWeight.medium,
+                                      color: isEnabled
+                                          ? colors.black
+                                          : colors.black.withOpacity(0.5),
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                return Text(
+                                  item,
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: fontWeight.medium,
+                                    color: isEnabled
+                                        ? colors.black
+                                        : colors.black.withOpacity(0.5),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        );
+                      }).toList();
+                    },
+                    onChanged: isEnabled
+                        ? (newValue) => onChanged(newValue ?? '')
+                        : null,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

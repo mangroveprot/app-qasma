@@ -89,7 +89,6 @@ class ForgotPasswordPageState extends State<ForgotPasswordPage> {
       create: (context) => ButtonCubit(),
       child: Scaffold(
         appBar: const CustomAppBar(
-          leadingText: 'Back',
           title: 'Forgot Pasword',
         ),
         body: BlocListener<ButtonCubit, ButtonState>(

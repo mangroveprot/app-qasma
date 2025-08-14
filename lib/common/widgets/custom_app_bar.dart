@@ -25,7 +25,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Text(
         title,
         style: TextStyle(
-            color: colors.black, fontSize: 14, fontWeight: fontWeight.regular),
+            color: colors.black, fontSize: 14, fontWeight: fontWeight.medium),
       ),
       backgroundColor: backgroundColor,
       elevation: 0.0,
@@ -44,9 +44,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return Row(
       children: [
         GestureDetector(
-          onTap: () async {
+          onTap: () {
             if (onBackPressed != null) {
-              await onBackPressed!(context);
+              onBackPressed!(context);
             } else {
               context.pop();
             }

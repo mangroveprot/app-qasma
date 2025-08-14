@@ -36,6 +36,11 @@ const FormFieldConfig field_confirm_password = FormFieldConfig(
   name: 'Confirm Password',
   hint: 'Re-enter...',
 );
+const FormFieldConfig field_current_password = FormFieldConfig(
+  field_key: 'current-password',
+  name: 'Current Password',
+  hint: 'Enter your current password...',
+);
 const FormFieldConfig field_block = FormFieldConfig(
   field_key: 'block',
   name: 'Block',

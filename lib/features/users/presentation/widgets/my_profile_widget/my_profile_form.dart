@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../common/helpers/helpers.dart';
-import '../../../../../common/utils/constant.dart';
-import '../../../../../common/widgets/bloc/button/button_cubit.dart';
-import '../../../../../common/widgets/custom_input_field.dart';
 import '../../../../../common/widgets/custom_input_dropdown.dart';
+import '../../../../../common/widgets/custom_input_field.dart';
+import '../../../../../theme/theme_extensions.dart';
+import 'profile_section.dart';
+import '../../../../../common/helpers/helpers.dart';
+import '../../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../../common/widgets/toast/app_toast.dart';
 import '../../../../../infrastructure/injection/service_locator.dart';
 import '../../../data/models/params/dynamic_param.dart';
@@ -13,7 +14,11 @@ import '../../../data/models/user_model.dart';
 import '../../../data/models/other_info_model.dart';
 import '../../../domain/usecases/is_register_usecase.dart';
 import '../../bloc/user_cubit.dart';
+import '../../config/profile_config.dart';
 import '../../pages/my_profile_page.dart';
+import '../../utils/profile_utils.dart';
+import 'my_profile_action_buttons.dart';
+import 'my_profile_header.dart';
 
 class MyProfileForm extends StatefulWidget {
   final MyProfilePageState state;
@@ -24,68 +29,144 @@ class MyProfileForm extends StatefulWidget {
 }
 
 class _MyProfileFormState extends State<MyProfileForm> {
+  UserModel? _originalUser;
   UserModel? _currentUser;
-  bool _hasLocalChanges = false;
+  bool _hasChanges = false;
+  bool _isSaving = false;
+  final Map<String, TextEditingController> _controllers = {};
 
-  // Field configurations
-  static const Map<String, List<String>> _dropdownOptions = {
-    'gender': genderList,
-    'course': courseList,
-    'yearLevel': yearLevelList,
-    'block': blockList,
-  };
+  @override
+  void initState() {
+    super.initState();
+    _initializeControllers();
+  }
 
-  static const Map<String, String> _fieldLabels = {
-    'first_name': 'First Name',
-    'middle_name': 'Middle Name',
-    'last_name': 'Last Name',
-    'suffix': 'Suffix',
-    'gender': 'Gender',
-    'email': 'Email',
-    'contact_number': 'Contact Number',
-    'address': 'Address',
-    'facebook': 'Facebook',
-    'course': 'Course',
-    'yearLevel': 'Year Level',
-    'block': 'Block',
-  };
+  @override
+  void dispose() {
+    _controllers.forEach((key, controller) => controller.dispose());
+    super.dispose();
+  }
 
-  static const List<String> _otherInfoFields = ['course', 'yearLevel', 'block'];
-
-  Future<void> _updateField(String fieldName, String newValue) async {
-    if (_currentUser == null) return;
-
-    if (fieldName == 'email') {
-      if (newValue == _currentUser!.email) return;
-
-      final isValid = isValidEmail(newValue.trim());
-
-      if (!isValid)
-        return AppToast.show(
-            message: 'This is not a valid email.', type: ToastType.error);
-
-      final result = await sl<IsRegisterUsecase>().call(param: newValue);
-
-      result.fold((error) {
-        AppToast.show(
-            message: error.errorMessages.first, type: ToastType.error);
-        return;
-      }, (isNotRegistered) {
-        if (!isNotRegistered) {
-          AppToast.show(
-              message: 'This email is already registered.',
-              type: ToastType.error);
-          return;
-        }
-
-        _proceedWithUpdate(fieldName, newValue);
-      });
-    } else {
-      await _proceedWithUpdate(fieldName, newValue);
+  void _initializeControllers() {
+    for (String fieldName in ProfileFieldConfig.fieldLabels.keys) {
+      if (!ProfileFieldConfig.dropdownOptions.containsKey(fieldName)) {
+        _controllers[fieldName] = TextEditingController();
+      }
     }
   }
 
-  Future<void> _proceedWithUpdate(String fieldName, String newValue) async {
+  void _populateControllers() {
+    if (_currentUser == null) return;
+
+    for (String fieldName in _controllers.keys) {
+      _controllers[fieldName]?.text =
+          ProfileFormUtils.getFieldValue(_currentUser!, fieldName);
+    }
+  }
+
+  void _onFieldChanged() {
+    setState(() {
+      _hasChanges = _hasAnyChanges();
+    });
+  }
+
+  bool _hasAnyChanges() {
+    if (_originalUser == null || _currentUser == null) return false;
+
+    for (String fieldName in _controllers.keys) {
+      final String currentValue = _controllers[fieldName]?.text ?? '';
+      final String originalValue =
+          ProfileFormUtils.getFieldValue(_originalUser!, fieldName);
+      if (currentValue != originalValue) return true;
+    }
+
+    for (String fieldName in ProfileFieldConfig.dropdownOptions.keys) {
+      final String currentValue =
+          ProfileFormUtils.getFieldValue(_currentUser!, fieldName);
+      final String originalValue =
+          ProfileFormUtils.getFieldValue(_originalUser!, fieldName);
+      if (currentValue != originalValue) return true;
+    }
+
+    return false;
+  }
+
+  void _onDropdownChanged(String fieldName, String newValue) {
+    setState(() {
+      if (ProfileFieldConfig.otherInfoFields.contains(fieldName)) {
+        final currentOtherInfo =
+            OtherInfoModel.fromEntity(_currentUser!.other_info);
+        final updatedOtherInfo = ProfileFormUtils.updateOtherInfo(
+            currentOtherInfo, fieldName, newValue);
+        _currentUser = _currentUser!.copyWith(other_info: updatedOtherInfo);
+      } else {
+        _currentUser =
+            ProfileFormUtils.updateMainUser(_currentUser!, fieldName, newValue);
+      }
+      _hasChanges = _hasAnyChanges();
+    });
+  }
+
+  void _cancelChanges() {
+    setState(() {
+      _currentUser = _originalUser?.copyWith();
+      _populateControllers();
+      _hasChanges = false;
+    });
+  }
+
+  Future<void> _saveChanges() async {
+    if (_currentUser == null || _isSaving) return;
+
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      _updateCurrentUserWithTextFields();
+
+      final emailChanged = _controllers['email']?.text != _originalUser?.email;
+      if (emailChanged) {
+        final email = _controllers['email']?.text.trim() ?? '';
+        if (!isValidEmail(email)) {
+          _showError('This is not a valid email.');
+          return;
+        }
+
+        final result = await sl<IsRegisterUsecase>().call(param: email);
+        result.fold((error) {
+          _showError(error.message ?? error.errorMessages.first);
+          return;
+        }, (isNotRegistered) {
+          if (!isNotRegistered) {
+            _showError('This email is already registered.');
+            return;
+          }
+        });
+      }
+
+      await _performUpdate();
+    } catch (e) {
+      _showError('Update failed. Please try again.');
+    }
+  }
+
+  void _showError(String message) {
+    setState(() {
+      _isSaving = false;
+    });
+    AppToast.show(message: message, type: ToastType.error);
+  }
+
+  void _updateCurrentUserWithTextFields() {
+    for (String fieldName in _controllers.keys) {
+      final String newValue = _controllers[fieldName]?.text ?? '';
+      _currentUser =
+          ProfileFormUtils.updateMainUser(_currentUser!, fieldName, newValue);
+    }
+  }
+
+  Future<void> _performUpdate() async {
     final completer = Completer<void>();
     late StreamSubscription subscription;
 
@@ -93,12 +174,21 @@ class _MyProfileFormState extends State<MyProfileForm> {
       if (state is ButtonSuccessState) {
         subscription.cancel();
         if (!completer.isCompleted) {
-          _updateLocalUser(fieldName, newValue);
+          setState(() {
+            _isSaving = false;
+            _originalUser = _currentUser?.copyWith();
+            _hasChanges = false;
+          });
+          AppToast.show(
+            message: 'Profile updated successfully',
+            type: ToastType.success,
+          );
           completer.complete();
         }
       } else if (state is ButtonFailureState) {
         subscription.cancel();
         if (!completer.isCompleted) {
+          _showError(state.errorMessages.first);
           completer.completeError(Exception(state.errorMessages));
         }
       }
@@ -107,170 +197,91 @@ class _MyProfileFormState extends State<MyProfileForm> {
     Timer(const Duration(seconds: 10), () {
       if (!completer.isCompleted) {
         subscription.cancel();
+        _showError('Update timed out. Please try again.');
         completer.completeError(Exception('Update timed out'));
       }
     });
 
     try {
-      final updatedData = _getAllFieldsData();
-      updatedData[fieldName] = newValue;
-
+      final updatedData =
+          ProfileFormUtils.getAllFieldsData(_currentUser!, _controllers);
       final param = DynamicParam(fields: updatedData);
       widget.state.controller.updateUser(param);
-
       await completer.future;
     } catch (e) {
       subscription.cancel();
+      _showError('Update failed. Please try again.');
       rethrow;
     }
   }
 
-  void _updateLocalUser(String fieldName, String newValue) {
-    setState(() {
-      _hasLocalChanges = true;
+  List<Widget> _buildFieldsForSection(List<String> fields) {
+    return fields.map((fieldName) {
+      final label = ProfileFieldConfig.fieldLabels[fieldName] ?? fieldName;
+      final value = ProfileFormUtils.getFieldValue(_currentUser!, fieldName);
+      final options = ProfileFieldConfig.dropdownOptions[fieldName];
+      final icon = ProfileFieldConfig.fieldIcons[fieldName];
 
-      if (_otherInfoFields.contains(fieldName)) {
-        final currentOtherInfo =
-            OtherInfoModel.fromEntity(_currentUser!.other_info);
-        final updatedOtherInfo =
-            _updateOtherInfo(currentOtherInfo, fieldName, newValue);
-        _currentUser = _currentUser!.copyWith(other_info: updatedOtherInfo);
+      if (options != null) {
+        final List<String> updatedOptions = List.from(options);
+
+        if (value.isNotEmpty && !options.contains(value)) {
+          updatedOptions.add(value);
+        }
+
+        String finalValue;
+        if (value.isNotEmpty && updatedOptions.contains(value)) {
+          finalValue = value;
+        } else {
+          finalValue = updatedOptions.first;
+        }
+
+        return CustomInputDropdownField(
+          fieldName: fieldName,
+          label: label,
+          value: finalValue,
+          options: updatedOptions,
+          icon: icon,
+          isEnabled: !_isSaving,
+          onChanged: (newValue) => _onDropdownChanged(fieldName, newValue),
+        );
       } else {
-        _currentUser = _updateMainUser(_currentUser!, fieldName, newValue);
+        return CustomInputField(
+          fieldName: fieldName,
+          label: label,
+          controller: _controllers[fieldName]!,
+          icon: icon,
+          isEnabled: !_isSaving,
+          keyboardType: ProfileFieldConfig.getKeyboardType(fieldName),
+          onChanged: _onFieldChanged,
+        );
       }
-    });
-  }
-
-  OtherInfoModel _updateOtherInfo(
-      OtherInfoModel otherInfo, String fieldName, String newValue) {
-    switch (fieldName) {
-      case 'course':
-        return otherInfo.copyWith(course: newValue);
-      case 'yearLevel':
-        return otherInfo.copyWith(yearLevel: newValue);
-      case 'block':
-        return otherInfo.copyWith(block: newValue);
-      default:
-        return otherInfo;
-    }
-  }
-
-  UserModel _updateMainUser(UserModel user, String fieldName, String newValue) {
-    switch (fieldName) {
-      case 'first_name':
-        return user.copyWith(first_name: newValue);
-      case 'last_name':
-        return user.copyWith(last_name: newValue);
-      case 'middle_name':
-        return user.copyWith(middle_name: newValue);
-      case 'email':
-        return user.copyWith(email: newValue);
-      case 'suffix':
-        return user.copyWith(suffix: newValue);
-      case 'gender':
-        return user.copyWith(gender: newValue);
-      case 'address':
-        return user.copyWith(address: newValue);
-      case 'contact_number':
-        return user.copyWith(contact_number: newValue);
-      case 'facebook':
-        return user.copyWith(facebook: newValue);
-      default:
-        return user;
-    }
-  }
-
-  Map<String, String> _getAllFieldsData() {
-    return {
-      'first_name': _currentUser!.first_name,
-      'last_name': _currentUser!.last_name,
-      'middle_name': _currentUser!.middle_name,
-      'email': _currentUser!.email,
-      'suffix': _currentUser!.suffix,
-      'gender': _currentUser!.gender,
-      'address': _currentUser!.address,
-      'contact_number': _currentUser!.contact_number,
-      'facebook': _currentUser!.facebook,
-      'course': _currentUser!.other_info.course ?? '',
-      'yearLevel': _currentUser!.other_info.yearLevel ?? '',
-      'block': _currentUser!.other_info.block ?? '',
-    };
-  }
-
-  String _getFieldValue(String fieldName) {
-    if (_currentUser == null) return '';
-
-    if (_otherInfoFields.contains(fieldName)) {
-      switch (fieldName) {
-        case 'course':
-          return _currentUser!.other_info.course ?? '';
-        case 'yearLevel':
-          return _currentUser!.other_info.yearLevel ?? '';
-        case 'block':
-          return _currentUser!.other_info.block ?? '';
-        default:
-          return '';
-      }
-    }
-
-    switch (fieldName) {
-      case 'first_name':
-        return _currentUser!.first_name;
-      case 'last_name':
-        return _currentUser!.last_name;
-      case 'middle_name':
-        return _currentUser!.middle_name;
-      case 'email':
-        return _currentUser!.email;
-      case 'suffix':
-        return _currentUser!.suffix;
-      case 'gender':
-        return _currentUser!.gender;
-      case 'address':
-        return _currentUser!.address;
-      case 'contact_number':
-        return _currentUser!.contact_number;
-      case 'facebook':
-        return _currentUser!.facebook;
-      default:
-        return '';
-    }
-  }
-
-  Widget _buildField(String fieldName) {
-    final label = _fieldLabels[fieldName] ?? fieldName;
-    final value = _getFieldValue(fieldName);
-    final options = _dropdownOptions[fieldName];
-
-    if (options != null) {
-      return CustomInputDropdown(
-        label: label,
-        value: value,
-        options: options,
-        placeholder: 'Select $label',
-        onChanged: (newValue) => _updateField(fieldName, newValue ?? ''),
-      );
-    }
-
-    return CustomInputField(
-      label: label,
-      value: value,
-      placeholder: 'Enter $label',
-      onChanged: (newValue) => _updateField(fieldName, newValue),
-    );
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: BlocBuilder<UserCubit, UserCubitState>(
+    return Scaffold(
+      backgroundColor: Colors.grey.shade50,
+      body: BlocBuilder<UserCubit, UserCubitState>(
         builder: (context, state) {
           if (state is UserLoadedState) {
-            if (!_hasLocalChanges || _currentUser == null) {
-              _currentUser = state.user;
+            if (_originalUser == null) {
+              _originalUser = state.user.copyWith();
+              _currentUser = state.user.copyWith();
+              _populateControllers();
             }
-            return _buildForm();
+            return Column(
+              children: [
+                Expanded(child: _buildForm()),
+                MyProfileActionButtons(
+                  hasChanges: _hasChanges,
+                  isSaving: _isSaving,
+                  onCancel: _cancelChanges,
+                  onSave: _saveChanges,
+                ),
+              ],
+            );
           }
 
           if (state is UserFailureState) {
@@ -284,61 +295,100 @@ class _MyProfileFormState extends State<MyProfileForm> {
   }
 
   Widget _buildForm() {
-    const personalFields = [
-      'first_name',
-      'middle_name',
-      'last_name',
-      'suffix',
-      'gender'
-    ];
-    const contactFields = ['email', 'contact_number', 'address', 'facebook'];
-    const academicFields = ['course', 'yearLevel', 'block'];
-
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSection('Personal Information', personalFields),
-          _buildSection('Contact Information', contactFields),
-          _buildSection('Academic Information', academicFields),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSection(String title, List<String> fields) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(20),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              const ProfileHeader(),
+              const SizedBox(height: 32),
+              ProfileSection(
+                title: 'Personal Information',
+                icon: Icons.person_outline,
+                fields:
+                    _buildFieldsForSection(ProfileFieldConfig.personalFields),
+              ),
+              const SizedBox(height: 24),
+              ProfileSection(
+                title: 'Contact Information',
+                icon: Icons.contact_phone_outlined,
+                fields:
+                    _buildFieldsForSection(ProfileFieldConfig.contactFields),
+              ),
+              const SizedBox(height: 24),
+              ProfileSection(
+                title: 'Academic Information',
+                icon: Icons.school_outlined,
+                fields:
+                    _buildFieldsForSection(ProfileFieldConfig.academicFields),
+              ),
+              const SizedBox(height: 40),
+            ]),
+          ),
         ),
-        const SizedBox(height: 16),
-        ...fields.map((field) => Padding(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: _buildField(field),
-            )),
-        const SizedBox(height: 12),
       ],
     );
   }
 
   Widget _buildError(String message) {
+    final colors = context.colors;
+    final fontWeight = context.weight;
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 64, color: Colors.red),
-          const SizedBox(height: 16),
-          Text(message,
-              style: const TextStyle(fontSize: 16, color: Colors.red)),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: widget.state.controller.refreshUser,
-            child: const Text('Retry'),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: colors.error.withOpacity(0.4),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.error_outline,
+                size: 48,
+                color: colors.error,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Something went wrong',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: fontWeight.bold,
+                color: colors.black.withOpacity(0.8),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              style: TextStyle(
+                fontSize: 16,
+                color: colors.textPrimary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: widget.state.controller.refreshUser,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Try Again'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colors.secondary,
+                foregroundColor: colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

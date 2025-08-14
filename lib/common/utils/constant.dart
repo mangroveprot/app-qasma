@@ -19,6 +19,8 @@ class StatusType {
   static Status approved = Status(status: 'approved');
 }
 
+String get guidance_email => 'katipunan.guidance@jrmsu.edu.ph';
+
 const Map<String, dynamic> name = {
   'name': 'First Name',
   'hint': 'Enter your first name...',
@@ -29,30 +31,54 @@ const Map<String, dynamic> lastname = {
 };
 
 const List<String> courseList = [
-  'BS Information Technology',
-  'BS Computer Science',
-  'BS Education major in English',
-  'BS Education major in Math',
-  'BS Civil Engineering',
-  'BS Accountancy',
-  'BS Nursing',
-  'BS Criminology',
-  'BS Agriculture',
-  'BS Hospitality Management',
-  'BS Tourism Management',
+  'Bachelor of Elementary Education',
+  'Bachelor of Physical Education',
+  'Bachelor of Science in Agriculture - Majors: Animal Science and Crop Science',
+  'Bachelor of Science in Agricultural and Biosystems Engineering',
+  'Bachelor of Science in Criminology',
+  'Bachelor of Science in Forestry',
+  'Bachelor of Secondary Education - Filipino',
+  'Bachelor of Secondary Education - Mathematics',
+  'Bachelor of Secondary Education - Science',
+  'Bachelor of Secondary Education - Social Studies',
+  'Bachelor of Science in Agribusiness',
+  'Bachelor of Science in Computer Science',
+  'Bachelor of Science in Hospitality Management',
+  'Bachelor of Science in Information Systems'
 ];
 
 const List<String> blockList = [
-  'Block A',
-  'Block B',
-  'Block C',
-  'Block D',
-  'Block E',
+  'A',
+  'B',
+  'C',
+  'D',
+  'E',
+  'F',
+  'G',
+  'H',
+  'I',
+  'J',
+  'K',
+  'L',
+  'M',
+  'N',
+  'O',
+  'P',
+  'Q',
+  'R',
+  'S',
+  'T',
+  'U',
+  'V',
+  'W',
+  'X',
+  'Y',
+  'Z'
 ];
 
 const List<String> yearLevelList = ['1', '2', '3', '4'];
 
-const List<String> genderList = ['Male', 'Female', 'other'];
+const List<String> genderList = ['male', 'female', 'other'];
 
 final currentYear = DateTime.now().year;
 final yearsList = List.generate(

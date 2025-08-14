@@ -29,7 +29,7 @@ class LoginForgotPasswordBtn extends StatelessWidget {
             width: null,
             fontWeight: context.weight.medium,
             borderRadius: context.radii.medium,
-            textDecoration: TextDecoration.underline,
+            textDecoration: TextDecoration.none,
           );
         }));
   }

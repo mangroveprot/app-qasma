@@ -83,7 +83,7 @@ class MyProfilePageState extends State<MyProfilePage> {
 
       if (onSuccess != null) {
         try {
-          await onSuccess();
+          onSuccess();
         } catch (e) {
           debugPrint('Error calling success callback: $e');
         }

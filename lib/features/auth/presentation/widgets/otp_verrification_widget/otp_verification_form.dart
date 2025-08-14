@@ -48,8 +48,23 @@ class OtpVerificationForm extends StatelessWidget {
                 OtpVerifyButton(
                     onPressed: () => state.handleVerifyOTP(context)),
                 Spacing.verticalMedium,
-                OtpResendButton(
-                    onPressedResend: () => state.handleResendOTP(context)),
+                state.canResendOtp
+                    ? OtpResendButton(
+                        onPressedResend: () => state.handleResendOTP(context))
+                    : Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 12.0),
+                        child: TextButton(
+                          onPressed: null,
+                          child: Text(
+                            'Resend OTP in ${state.formatResendTime(state.resendCooldownRemaining)}',
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
                 Spacing.verticalMedium,
               ],
             ),

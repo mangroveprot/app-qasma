@@ -21,6 +21,7 @@ class MenuKeys {
   static const String termsAndCondition = 'terms_and_condition';
   static const String settings = 'settings';
   static const String logout = 'logout';
+  static const String about = 'about';
 }
 
 const List<MenuItemConfig> menu_items = [
@@ -50,9 +51,14 @@ const List<MenuItemConfig> menu_items = [
     icon: Icons.settings_outlined,
   ),
   MenuItemConfig(
+    menu_key: MenuKeys.about,
+    title: 'About',
+    icon: Icons.info_outline,
+  ),
+  MenuItemConfig(
     menu_key: MenuKeys.logout,
     title: 'Log-out',
-    icon: Icons.logout,
+    icon: Icons.logout_outlined,
     isLogout: true,
   ),
 ];

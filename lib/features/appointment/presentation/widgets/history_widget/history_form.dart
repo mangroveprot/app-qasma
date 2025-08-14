@@ -54,38 +54,35 @@ class _HistoryFormState extends State<HistoryForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: BlocBuilder<AppointmentsCubit, AppointmentCubitState>(
-        buildWhen: (previous, current) {
-          return previous.runtimeType != current.runtimeType ||
-              previous is AppointmentsLoadingState ||
-              current is AppointmentsLoadingState;
-        },
-        builder: (context, state) {
-          if (state is AppointmentsLoadingState) {
-            return const _LoadingContent();
-          }
+    return BlocBuilder<AppointmentsCubit, AppointmentCubitState>(
+      buildWhen: (previous, current) {
+        return previous.runtimeType != current.runtimeType ||
+            previous is AppointmentsLoadingState ||
+            current is AppointmentsLoadingState;
+      },
+      builder: (context, state) {
+        if (state is AppointmentsLoadingState) {
+          return const _LoadingContent();
+        }
 
-          if (state is AppointmentsLoadedState) {
-            return _LoadedContent(
-              appointments: _getFilteredAppointments(state),
-              onRefresh: _onRefresh,
-            );
-          }
+        if (state is AppointmentsLoadedState) {
+          return _LoadedContent(
+            appointments: _getFilteredAppointments(state),
+            onRefresh: _onRefresh,
+          );
+        }
 
-          if (state is AppointmentsFailureState) {
-            return _ErrorContent(
-              error: state.primaryError,
-              onRefresh: _onRefresh,
-              onRetry: widget.state.controller.appointmentRefreshData,
-              isRefreshing: _isRefreshing,
-            );
-          }
+        if (state is AppointmentsFailureState) {
+          return _ErrorContent(
+            error: state.primaryError,
+            onRefresh: _onRefresh,
+            onRetry: widget.state.controller.appointmentRefreshData,
+            isRefreshing: _isRefreshing,
+          );
+        }
 
-          return _EmptyContent(onRefresh: _onRefresh);
-        },
-      ),
+        return _EmptyContent(onRefresh: _onRefresh);
+      },
     );
   }
 }

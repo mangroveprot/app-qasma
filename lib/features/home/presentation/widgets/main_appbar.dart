@@ -22,7 +22,14 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
     final color_white = colors.white;
     return Container(
       decoration: BoxDecoration(
-        color: context.colors.primary,
+        gradient: LinearGradient(
+          colors: [
+            colors.primary,
+            colors.primary.withOpacity(0.4),
+          ],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
       ),
       child: SafeArea(
         child: Container(

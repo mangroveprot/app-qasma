@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/appointment/presentation/pages/appointment_history_page.dart';
 import '../../features/appointment/presentation/pages/book_appointment_page.dart';
+import '../../features/auth/presentation/pages/change_password.dart';
 import '../../features/auth/presentation/pages/create_account_page.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/get_started_page.dart';
@@ -10,6 +11,10 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/otp_verification_page.dart';
 import '../../features/auth/presentation/pages/reset_password_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/preferences/features/pages/about_page.dart';
+import '../../features/preferences/features/pages/privacy_policy_page.dart';
+import '../../features/preferences/features/pages/settings_page.dart';
+import '../../features/preferences/features/pages/terms_and_conditions.dart';
 import '../../features/splash/splash_screen.dart';
 import '../../features/users/presentation/pages/my_profile_page.dart';
 import 'app_routes.dart';
@@ -58,6 +63,10 @@ class AppRouter {
             path: Routes.reset_password,
             builder: (context, state) => const ResetPassswordPage(),
           ),
+          GoRoute(
+            path: Routes.change_password,
+            builder: (context, state) => const ChangePassswordPage(),
+          ),
         ],
       ),
       // home
@@ -83,6 +92,24 @@ class AppRouter {
           GoRoute(
             path: Routes.user_profile,
             builder: (context, state) => const MyProfilePage(),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: Routes.preference_path, // preference
+        builder: (context, state) => const SettingsPage(),
+        routes: [
+          GoRoute(
+            path: Routes.privacy_policy,
+            builder: (context, state) => const PrivacyPolicyPage(),
+          ),
+          GoRoute(
+            path: Routes.terms_conditons,
+            builder: (context, state) => const TermsAndConditionPage(),
+          ),
+          GoRoute(
+            path: Routes.about,
+            builder: (context, state) => const AboutPage(),
           ),
         ],
       )

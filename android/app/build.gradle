@@ -1,4 +1,9 @@
 def localProperties = new Properties()
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
     localPropertiesFile.withReader('UTF-8') { reader ->
@@ -48,6 +53,14 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
+    }
 
     flavorDimensions "environment"
     productFlavors {
@@ -55,9 +68,11 @@ android {
             dimension "environment"
             applicationIdSuffix ".dev"
             versionNameSuffix "-dev"
+            signingConfig signingConfigs.debug 
         }
         production {
             dimension "environment"
+            signingConfig signingConfigs.release
         }
     }
 
@@ -66,12 +81,11 @@ android {
             // Enable code shrinking, obfuscation, and optimization for production release builds
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.debug
-            
-            // Optional: Enable resource shrinking to remove unused resources
+            signingConfig signingConfigs.release
+
             shrinkResources true
         }
-        
+
         debug {
             // Disable minification for debug builds for faster compilation
             minifyEnabled false

@@ -30,6 +30,7 @@ import '../../features/appointment_config/domain/services/appointment_config_ser
 import '../../features/appointment_config/domain/usecases/get_config_usecase.dart';
 import '../../features/appointment_config/domain/usecases/sync_config_usecase.dart';
 import '../../features/auth/domain/services/auth_service.dart';
+import '../../features/auth/domain/usecases/change_password_usecase.dart';
 import '../../features/auth/domain/usecases/forgot_password_usecase.dart';
 import '../../features/auth/domain/usecases/logout_usecase.dart';
 import '../../features/auth/domain/usecases/resend_otp_usecase.dart';
@@ -125,8 +126,8 @@ void _registerUserRepositories() {
       fromJson: UserModel.fromJson,
       toJson: (user) => user.toJson(),
       getId: (model) => model.idNumber,
-      getItemPath: (id) => '/getProfile',
-      deletePath: (id) => '/delete/$id',
+      getItemPath: (id) => '/api/user/getProfile',
+      deletePath: (id) => '/api/user/delete/$id',
       includeId: true,
       syncField: SyncField<UserModel>(
         name: 'updateAt',
@@ -218,6 +219,8 @@ void _registerUseCases() {
     ..registerLazySingleton<SignupUsecase>(() => SignupUsecase())
     ..registerLazySingleton<ResendOTPUsecase>(() => ResendOTPUsecase())
     ..registerLazySingleton<ResetPasswordUsecase>(() => ResetPasswordUsecase())
+    ..registerLazySingleton<ChangePasswordUsecase>(
+        () => ChangePasswordUsecase())
     ..registerLazySingleton<LogoutUsecase>(() => LogoutUsecase())
     ..registerLazySingleton<ForgotPasswordUsecase>(
         () => ForgotPasswordUsecase())

@@ -143,7 +143,6 @@ class ResetPassswordPageState extends State<ResetPassswordPage> {
       create: (context) => ButtonCubit(),
       child: Scaffold(
         appBar: const CustomAppBar(
-          leadingText: 'Back',
           title: 'Reset Password',
         ),
         body: BlocListener<ButtonCubit, ButtonState>(

@@ -9,6 +9,7 @@ import '../../../../common/widgets/custom_app_bar.dart';
 import '../../../../common/widgets/toast/app_toast.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
 import '../../../../infrastructure/routes/app_routes.dart';
+import '../../../../theme/theme_extensions.dart';
 import '../../../users/domain/usecases/is_register_usecase.dart';
 import '../widgets/custom_password_field.dart';
 import '../widgets/get_started_widget/get_started_form.dart';
@@ -138,8 +139,8 @@ class GetStartedPageState extends State<GetStartedPage> {
     return BlocProvider(
       create: (context) => ButtonCubit(),
       child: Scaffold(
-        appBar: const CustomAppBar(
-          leadingText: 'Back',
+        appBar: CustomAppBar(
+          backgroundColor: context.colors.background,
         ),
         body: BlocListener<ButtonCubit, ButtonState>(
           listener: _handleButtonState,

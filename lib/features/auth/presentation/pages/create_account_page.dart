@@ -11,6 +11,7 @@ import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/toast/app_toast.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
 import '../../../../infrastructure/routes/app_routes.dart';
+import '../../../../theme/theme_extensions.dart';
 import '../../../users/domain/entities/other_info.dart';
 import '../../../users/data/models/user_model.dart';
 import '../../domain/usecases/signup_usecase.dart';
@@ -203,8 +204,8 @@ class CreateAccountPageState extends State<CreateAccountPage> {
     return BlocProvider(
       create: (context) => ButtonCubit(),
       child: Scaffold(
-        appBar: const CustomAppBar(
-          leadingText: 'Back',
+        appBar: CustomAppBar(
+          backgroundColor: context.colors.background,
         ),
         body: BlocListener<ButtonCubit, ButtonState>(
           listener: _handleButtonState,

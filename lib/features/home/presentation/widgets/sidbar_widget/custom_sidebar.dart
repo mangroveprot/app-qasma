@@ -5,12 +5,14 @@ import 'menu_items_list.dart';
 
 class CustomSidebar extends StatelessWidget {
   final String userName;
+  final String idNumber;
   final Function(String)? onMenuItemTap;
 
   const CustomSidebar({
     super.key,
-    this.userName = 'Jane Doe',
+    required this.userName,
     this.onMenuItemTap,
+    required this.idNumber,
   });
 
   void _handleMenuTap(BuildContext context, String menuKey) {
@@ -21,15 +23,21 @@ class CustomSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: Column(
-        children: [
-          MenuHeader(user_name: userName),
-          Expanded(
-            child: MenuItemsList(
-              onMenuItemTap: (menuKey) => _handleMenuTap(context, menuKey),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            MenuHeader(
+              user_name: userName,
+              idNumber: idNumber,
             ),
-          ),
-        ],
+            Expanded(
+              child: MenuItemsList(
+                onMenuItemTap: (menuKey) => _handleMenuTap(context, menuKey),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

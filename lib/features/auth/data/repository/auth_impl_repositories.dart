@@ -8,6 +8,7 @@ import '../../../appointment_config/domain/usecases/get_config_usecase.dart';
 import '../../../users/data/models/user_model.dart';
 import '../../domain/repository/auth_repositories.dart';
 import '../../domain/services/auth_service.dart';
+import '../models/change_password_params.dart';
 import '../models/logout_params.dart';
 import '../models/resend_otp_params.dart';
 import '../models/reset_password_params.dart';
@@ -92,6 +93,20 @@ class AuthRepositoryImpl extends AuthRepository {
   Future<Either<AppError, bool>> resetPassword(
       ResetPasswordParams resetReq) async {
     final Either result = await _authService.resetPassword(resetReq);
+    return result.fold(
+      (error) {
+        return Left(error);
+      },
+      (data) {
+        return Right(data);
+      },
+    );
+  }
+
+  @override
+  Future<Either<AppError, bool>> changePassword(
+      ChangePasswordParams changePasswordReq) async {
+    final Either result = await _authService.changePassword(changePasswordReq);
     return result.fold(
       (error) {
         return Left(error);

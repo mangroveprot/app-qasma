@@ -23,6 +23,7 @@ class URLProviderConfig {
   String get forgotPassword => '${authEndPoint}/forgot-password';
   String get resendOtpUrl => '${authEndPoint}/resendOTP';
   String get resetPasswordUrl => '${authEndPoint}/reset-password';
+  String get changePasswordUrl => '${authEndPoint}/change-password';
   String get logoutUrl => '${authEndPoint}/logout';
   String get userUpdateUrl => '${authEndPoint}/update';
 

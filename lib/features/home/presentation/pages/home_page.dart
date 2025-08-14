@@ -90,6 +90,9 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
             final firstName =
                 userState is UserLoadedState ? userState.user.first_name : '';
 
+            final idNumber =
+                userState is UserLoadedState ? userState.user.idNumber : '';
+
             return Scaffold(
               drawerEnableOpenDragGesture: true,
               drawerScrimColor: Colors.black54,
@@ -100,6 +103,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
               ),
               drawer: CustomSidebar(
                 userName: fullName,
+                idNumber: idNumber,
                 onMenuItemTap: (menuItem) =>
                     controller.handleMenuItemTap(menuItem, context),
               ),

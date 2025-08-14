@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -33,7 +34,16 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
   bool isResend = false;
   bool isResetPassword = false;
 
+  bool _canResendOtp = true;
+  DateTime? _lastResendTime;
+  Timer? _resendTimer;
+  int _resendCooldownRemaining = 0;
+  static const int resendCooldownDuration = 300; // 5minutes
+
   static const List<FormFieldConfig> _routeFields = [field_email];
+
+  bool get canResendOtp => _canResendOtp;
+  int get resendCooldownRemaining => _resendCooldownRemaining;
 
   @override
   void initState() {
@@ -42,6 +52,7 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
       controllers.add(TextEditingController());
       focusNodes.add(FocusNode());
     }
+    _checkResendCooldown();
   }
 
   @override
@@ -69,6 +80,54 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
     return _routeData?[field.field_key] ?? '';
   }
 
+  void _checkResendCooldown() {
+    if (_lastResendTime != null) {
+      final timeSinceLastResend = DateTime.now().difference(_lastResendTime!);
+      final remainingSeconds =
+          resendCooldownDuration - timeSinceLastResend.inSeconds;
+
+      if (remainingSeconds > 0) {
+        _canResendOtp = false;
+        _resendCooldownRemaining = remainingSeconds;
+        _startCooldownTimer();
+      } else {
+        _canResendOtp = true;
+        _resendCooldownRemaining = 0;
+      }
+    }
+  }
+
+  void _startCooldownTimer() {
+    _resendTimer?.cancel();
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_resendCooldownRemaining > 0) {
+        setState(() {
+          _resendCooldownRemaining--;
+        });
+      } else {
+        setState(() {
+          _canResendOtp = true;
+        });
+        timer.cancel();
+      }
+    });
+  }
+
+  void _startResendCooldown() {
+    setState(() {
+      _canResendOtp = false;
+      _lastResendTime = DateTime.now();
+      _resendCooldownRemaining = resendCooldownDuration;
+    });
+    _startCooldownTimer();
+  }
+
+  String formatResendTime(int seconds) {
+    final minutes = seconds ~/ 60;
+    final remainingSeconds = seconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
+  }
+
   @override
   void deactivate() {
     context.read<FormCubit>().clearAll();
@@ -77,6 +136,7 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
 
   @override
   void dispose() {
+    _resendTimer?.cancel();
     for (var controller in controllers) {
       controller.dispose();
     }
@@ -161,6 +221,16 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
   void handleResendOTP(BuildContext context) {
     if (!mounted) return;
 
+    // Check if resend is allowed
+    if (!_canResendOtp) {
+      AppToast.show(
+        message:
+            'Please wait ${formatResendTime(_resendCooldownRemaining)} before requesting another OTP',
+        type: ToastType.warning,
+      );
+      return;
+    }
+
     for (var controller in controllers) {
       controller.clear();
     }
@@ -196,7 +266,6 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
       create: (context) => ButtonCubit(),
       child: Scaffold(
         appBar: CustomAppBar(
-          leadingText: '',
           title: isResetPassword
               ? 'Reset Password Verification'
               : 'Account Verification',
@@ -229,10 +298,13 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
 
     if (state is ButtonSuccessState) {
       if (isResend) {
+        _startResendCooldown();
+
         AppToast.show(
           message: 'OTP has been resent to your email',
           type: ToastType.success,
         );
+        return;
       }
 
       if (!isResend) {

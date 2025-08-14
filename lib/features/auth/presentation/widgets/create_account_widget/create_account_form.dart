@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../common/utils/form_field_config.dart';
 import 'birthday_section.dart';
+import 'create_account_terms_footer.dart';
 import 'personal_info_section.dart';
 import 'contact_info_section.dart';
 import 'submit_btn.dart';
@@ -65,8 +66,15 @@ class CreateAccountForm extends StatelessWidget {
             ),
             Spacing.verticalMedium,
             RepaintBoundary(
-                child:
-                    SubmitButton(onPressed: () => state.handleSubmit(context))),
+                child: SubmitButton(
+              onPressed: () => state.handleSubmit(context),
+            )),
+            Spacing.verticalMedium,
+            const Center(
+              child: RepaintBoundary(
+                child: CreateAccountTermsFooter(),
+              ),
+            ),
             Spacing.verticalMedium,
           ],
         ),

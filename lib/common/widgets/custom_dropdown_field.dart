@@ -61,6 +61,7 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
             value: item,
             child: Text(
               item,
+              overflow: TextOverflow.fade,
               style: TextStyle(
                 color: textColor,
                 fontSize: 16,
@@ -197,6 +198,23 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
             elevation: 8,
             borderRadius: radiusMedium,
             items: dropdownItems,
+            selectedItemBuilder: (BuildContext context) {
+              return widget.items.map<Widget>((String item) {
+                return Container(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    item,
+                    overflow: TextOverflow.fade,
+                    maxLines: 1,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 16,
+                      fontWeight: weightRegular,
+                    ),
+                  ),
+                );
+              }).toList();
+            },
           ),
         );
       },
