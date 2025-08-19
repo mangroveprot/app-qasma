@@ -1,7 +1,9 @@
 import 'dart:convert';
+
 import '../../../../common/utils/model_utils.dart';
 import '../../domain/entities/user.dart';
 import 'other_info_model.dart';
+import 'params/other_info_rules.dart';
 
 class UserModel extends User {
   final String password;
@@ -81,14 +83,11 @@ class UserModel extends User {
     );
   }
 
-  // helpers for value safety
-  // helpers for value safety
   static String _getString(
     Map<String, dynamic> map,
     String key1, [
     String? key2,
   ]) {
-    // Check if the key exists first to avoid QueryResultSet null check error
     if (map.containsKey(key1)) {
       final value = map[key1];
       if (value != null) return value.toString();
@@ -115,7 +114,8 @@ class UserModel extends User {
     String key1, [
     String? key2,
   ]) {
-    final value = map[key1]?.toString() ?? map[key2]?.toString();
+    final value =
+        map[key1]?.toString() ?? (key2 != null ? map[key2]?.toString() : null);
     if (value != null && value.isNotEmpty) {
       return DateTime.parse(value);
     }
@@ -139,7 +139,10 @@ class UserModel extends User {
       'address': address,
       'contact_number': contact_number,
       'facebook': facebook,
-      'other_info': jsonEncode(other_info.toMap()),
+      // store role-sanitized other_info; staff gets {}
+      'other_info': jsonEncode(
+        OtherInfoRules.sanitize(role, other_info.toMap()),
+      ),
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       'createdBy': createdBy,
@@ -149,13 +152,36 @@ class UserModel extends User {
     };
   }
 
-  // from localdb (sqlife)
+  // from localdb (sqlite)
   factory UserModel.fromDb(Map<String, dynamic> map) {
+    final role = _getString(map, 'role');
+
+    // decode other_info from TEXT (JSON) or Map (defensive)
+    final rawOther = (() {
+      final v = map['other_info'];
+      if (v == null) return <String, dynamic>{};
+      if (v is String && v.isNotEmpty) {
+        try {
+          final decoded = jsonDecode(v);
+          return decoded is Map<String, dynamic>
+              ? decoded
+              : <String, dynamic>{};
+        } catch (_) {
+          return <String, dynamic>{};
+        }
+      }
+      if (v is Map<String, dynamic>) return v;
+      return <String, dynamic>{};
+    })();
+
+    final sanitized =
+        OtherInfoRules.sanitize(role, Map<String, dynamic>.from(rawOther));
+
     return UserModel(
       idNumber: _getString(map, 'idNumber'),
       email: _getString(map, 'email'),
       password: '',
-      role: _getString(map, 'role'),
+      role: role,
       verified: _getBool(map, 'verified'),
       active: _getBool(map, 'active'),
       first_name: _getString(map, 'first_name'),
@@ -167,11 +193,7 @@ class UserModel extends User {
       address: _getString(map, 'address'),
       contact_number: _getString(map, 'contact_number'),
       facebook: _getString(map, 'facebook'),
-      other_info: OtherInfoModel.fromMap(
-        map['other_info'] != null
-            ? jsonDecode(map['other_info'])
-            : <String, dynamic>{},
-      ),
+      other_info: OtherInfoModel.fromMap(sanitized),
       deletedAt: ModelUtils.getNullableDateTime(map, 'deletedAt'),
       deletedBy: ModelUtils.getString(map, 'deletedBy'),
       createdBy: ModelUtils.getString(map, 'createdBy'),
@@ -196,31 +218,54 @@ class UserModel extends User {
       'address': address,
       'contact_number': contact_number,
       'facebook': facebook,
-      'other_info': other_info.toMap(),
+      // role-sanitized payload (staff will be {})
+      'other_info': OtherInfoRules.sanitize(role, other_info.toMap()),
     };
   }
 
   // From API (JSON format) - handles both camelCase and snake_case
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    final role = _getString(json, 'role');
+
+    // Accept either object or string for other_info/otherInfo
+    final otherRaw = json['otherInfo'] ?? json['other_info'];
+    final otherMap = (() {
+      if (otherRaw == null) return <String, dynamic>{};
+      if (otherRaw is String && otherRaw.isNotEmpty) {
+        try {
+          final decoded = jsonDecode(otherRaw);
+          return decoded is Map<String, dynamic>
+              ? decoded
+              : <String, dynamic>{};
+        } catch (_) {
+          return <String, dynamic>{};
+        }
+      }
+      if (otherRaw is Map<String, dynamic>) return otherRaw;
+      return <String, dynamic>{};
+    })();
+
+    final sanitized =
+        OtherInfoRules.sanitize(role, Map<String, dynamic>.from(otherMap));
+
     return UserModel(
       idNumber: _getString(json, 'idNumber', 'id_number'),
       email: _getString(json, 'email'),
       password: _getString(json, 'password'),
-      role: _getString(json, 'role'),
+      role: role,
       verified: _getBool(json, 'verified'),
       active: _getBool(json, 'active'),
-      first_name: _getString(json, 'first_name', 'first_name'),
-      last_name: _getString(json, 'last_name', 'last_name'),
-      middle_name: _getString(json, 'middle_name', 'middle_name'),
+      // proper camelCase → snake_case fallbacks
+      first_name: _getString(json, 'firstName', 'first_name'),
+      last_name: _getString(json, 'lastName', 'last_name'),
+      middle_name: _getString(json, 'middleName', 'middle_name'),
       suffix: _getString(json, 'suffix'),
       gender: _getString(json, 'gender'),
-      date_of_birth: _getDateTime(json, 'date_of_birth', 'date_of_birth'),
+      date_of_birth: _getDateTime(json, 'dateOfBirth', 'date_of_birth'),
       address: _getString(json, 'address'),
-      contact_number: _getString(json, 'contact_number', 'contact_number'),
+      contact_number: _getString(json, 'contactNumber', 'contact_number'),
       facebook: _getString(json, 'facebook'),
-      other_info: OtherInfoModel.fromMap(
-        json['other_info'] ?? json['other_info'] ?? <String, dynamic>{},
-      ),
+      other_info: OtherInfoModel.fromMap(sanitized),
       deletedAt:
           ModelUtils.getNullableDateTime(json, 'deletedAt', 'deleted_at'),
       deletedBy: ModelUtils.getString(json, 'deletedBy', 'deleted_by'),
@@ -284,5 +329,12 @@ class UserModel extends User {
       deletedAt: entity.deletedAt,
       deletedBy: entity.deletedBy,
     );
+  }
+
+  @override
+  String get fullName {
+    final first = first_name.trim();
+    final last = last_name.trim();
+    return '$first $last'.trim();
   }
 }

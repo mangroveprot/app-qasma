@@ -9,8 +9,8 @@ class ButtonCubit extends BaseCubit<ButtonState> {
   ButtonCubit() : super(ButtonInitialState());
 
   @override
-  void emitLoading({bool isRefreshing = false}) {
-    emit(ButtonLoadingState());
+  void emitLoading({bool isRefreshing = false, String? buttonId}) {
+    emit(ButtonLoadingState(buttonId));
   }
 
   @override

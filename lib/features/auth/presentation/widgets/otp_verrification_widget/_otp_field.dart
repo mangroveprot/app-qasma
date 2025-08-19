@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../common/widgets/bloc/form/form_cubit.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 
 // Individual OTP Field Component
 class OtplFields extends StatefulWidget {

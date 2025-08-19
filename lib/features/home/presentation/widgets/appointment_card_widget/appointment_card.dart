@@ -2,29 +2,29 @@ import 'package:flutter/material.dart';
 
 import '../../../../../common/helpers/helpers.dart';
 import '../../../../../common/helpers/spacing.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../common/utils/constant.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
+import '../../../../users/data/models/user_model.dart';
+import 'card_approved_button.dart';
 import 'card_cancel_button.dart';
 import 'card_reschedule_button.dart';
 import 'status_chip.dart';
 
-class AppointmentCard extends StatefulWidget {
+class AppointmentCard extends StatelessWidget {
   final AppointmentModel appointment;
+  final UserModel userModel;
   final VoidCallback onCancel;
   final VoidCallback onReschedule;
+  final VoidCallback onApproved;
   const AppointmentCard({
     super.key,
     required this.appointment,
     required this.onCancel,
     required this.onReschedule,
+    required this.userModel,
+    required this.onApproved,
   });
-
-  @override
-  State<AppointmentCard> createState() => _AppointmentCardState();
-}
-
-class _AppointmentCardState extends State<AppointmentCard> {
-  bool _showActions = false;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +32,8 @@ class _AppointmentCardState extends State<AppointmentCard> {
     final weight = context.weight;
     final radius = context.radii;
     final textPrimay = colors.textPrimary;
+
+    final appointmentId = appointment.appointmentId;
 
     final _divider = Container(
       height: 1,
@@ -85,8 +87,8 @@ class _AppointmentCardState extends State<AppointmentCard> {
                           const SizedBox(width: 8),
                           Text(
                             formatUtcToLocal(
-                                utcTime: widget.appointment.scheduledStartAt
-                                    .toString(),
+                                utcTime:
+                                    appointment.scheduledStartAt.toString(),
                                 style: DateTimeFormatStyle.dateOnly),
                             style: _titleTextStyle,
                           ),
@@ -102,10 +104,9 @@ class _AppointmentCardState extends State<AppointmentCard> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            '${formatUtcToLocal(utcTime: widget.appointment.scheduledStartAt.toString(), style: DateTimeFormatStyle.timeOnly)} - '
+                            '${formatUtcToLocal(utcTime: appointment.scheduledStartAt.toString(), style: DateTimeFormatStyle.timeOnly)} - '
                             '${formatUtcToLocal(
-                              utcTime:
-                                  widget.appointment.scheduledEndAt.toString(),
+                              utcTime: appointment.scheduledEndAt.toString(),
                               style: DateTimeFormatStyle.timeOnly,
                             )}',
                             style: _subtitleTextStyle,
@@ -115,7 +116,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
                     ],
                   ),
                 ),
-                StatusChip(status: widget.appointment.status),
+                StatusChip(status: appointment.status),
               ],
             ),
 
@@ -137,7 +138,60 @@ class _AppointmentCardState extends State<AppointmentCard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Icon(
-                            Icons.category_outlined,
+                            Icons.badge_outlined,
+                            size: 16,
+                            color: colors.textPrimary,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                      text: 'ID: ', style: _labelTextStyle),
+                                  TextSpan(
+                                      text: userModel.idNumber,
+                                      style: _subtitleTextStyle),
+                                ],
+                              ),
+                              softWrap: true,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.person_outline,
+                            size: 16,
+                            color: colors.textPrimary,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                      text: 'Name: ', style: _labelTextStyle),
+                                  TextSpan(
+                                      text: userModel.fullName,
+                                      style: _subtitleTextStyle),
+                                ],
+                              ),
+                              softWrap: true,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                      ),
+                      Spacing.verticalSmall,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.local_offer_outlined,
                             size: 16,
                             color: colors.textPrimary,
                           ),
@@ -153,7 +207,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
                                   ),
                                   TextSpan(
                                     text: capitalizeWords(
-                                        widget.appointment.appointmentCategory),
+                                        appointment.appointmentCategory),
                                     style: _subtitleTextStyle,
                                   ),
                                 ],
@@ -184,7 +238,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
                                       text: 'Description: ',
                                       style: _labelTextStyle),
                                   TextSpan(
-                                      text: widget.appointment.description,
+                                      text: appointment.description,
                                       style: _subtitleTextStyle),
                                 ],
                               ),
@@ -214,7 +268,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
                                       text: 'Appointment Type: ',
                                       style: _labelTextStyle),
                                   TextSpan(
-                                      text: widget.appointment.appointmentType,
+                                      text: appointment.appointmentType,
                                       style: _subtitleTextStyle),
                                 ],
                               ),
@@ -230,61 +284,34 @@ class _AppointmentCardState extends State<AppointmentCard> {
 
             Spacing.verticalMedium,
             _divider,
-            Spacing.verticalSmall,
+            Spacing.verticalMedium,
 
-            // See More / Actions
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  _showActions = !_showActions;
-                });
-              },
-              child: Center(
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-                  decoration: BoxDecoration(
-                    //   color: colors.textPrimary.withOpacity(0.4),
-                    borderRadius: BorderRadius.circular(20),
+            Row(
+              children: [
+                if (appointment.status != StatusType.approved.status) ...[
+                  Expanded(
+                    child: CardApproveButton(
+                      buttonId: 'approved${appointmentId}',
+                      onPressed: onApproved,
+                    ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        _showActions ? 'See less' : 'See more',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: colors.textPrimary,
-                          fontWeight: weight.medium,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        _showActions
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down,
-                        color: colors.textPrimary,
-                        size: 14,
-                      ),
-                    ],
+                  const SizedBox(width: 8),
+                ],
+                Expanded(
+                  child: CardRescheduleButton(
+                    buttonId: 'reschedule_${appointmentId}',
+                    onPressed: onReschedule,
                   ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: CardCancelButton(
+                    buttonId: 'cancel${appointmentId}',
+                    onPressed: onCancel,
+                  ),
+                ),
+              ],
             ),
-
-            if (_showActions) ...[
-              Spacing.verticalMedium,
-              // action Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  CardRescheduleButton(onPressed: widget.onReschedule),
-                  const SizedBox(width: 8),
-                  CardCancelButton(onPressed: widget.onCancel),
-                ],
-              ),
-            ],
           ],
         ),
       ),

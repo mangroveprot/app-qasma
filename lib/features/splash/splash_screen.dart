@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../infrastructure/routes/app_routes.dart';
-import '../../theme/theme_extensions.dart';
+import '../../infrastructure/theme/theme_extensions.dart';
 import '../auth/presentation/bloc/auth/auth_cubit.dart';
 
 class SplashScreen extends StatefulWidget {

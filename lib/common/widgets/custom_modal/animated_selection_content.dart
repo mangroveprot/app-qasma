@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../theme/theme_extensions.dart';
+import '../../../infrastructure/theme/theme_extensions.dart';
 import '../modal.dart';
 import '../models/modal_option.dart';
 import 'enhance_option_card.dart';

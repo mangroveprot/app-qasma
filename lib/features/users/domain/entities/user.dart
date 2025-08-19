@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+
 import 'other_info.dart';
 
 class User extends Equatable {
@@ -55,26 +56,26 @@ class User extends Equatable {
 
   @override
   List<Object?> get props => [
-    idNumber,
-    email,
-    role,
-    verified,
-    active,
-    first_name,
-    last_name,
-    middle_name,
-    suffix,
-    gender,
-    date_of_birth,
-    address,
-    contact_number,
-    facebook,
-    other_info,
-    createdAt,
-    updatedAt,
-    createdBy,
-    updatedBy,
-    deletedAt,
-    deletedBy,
-  ];
+        idNumber,
+        email,
+        role,
+        verified,
+        active,
+        first_name,
+        last_name,
+        middle_name,
+        suffix,
+        gender,
+        date_of_birth,
+        address,
+        contact_number,
+        facebook,
+        other_info,
+        createdAt,
+        updatedAt,
+        createdBy,
+        updatedBy,
+        deletedAt,
+        deletedBy,
+      ];
 }

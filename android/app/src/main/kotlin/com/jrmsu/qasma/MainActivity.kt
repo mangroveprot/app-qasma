@@ -1,4 +1,4 @@
-package com.jrmsu.qasma
+package com.jrmsu.qasma.staff
 
 import io.flutter.embedding.android.FlutterActivity
 

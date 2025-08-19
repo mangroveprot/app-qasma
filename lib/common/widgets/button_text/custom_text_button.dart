@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../theme/theme_extensions.dart';
+import '../../../infrastructure/theme/theme_extensions.dart';
 import '../bloc/button/button_cubit.dart';
 
 enum Position { left, right }
@@ -26,7 +26,7 @@ class CustomTextButton extends StatelessWidget {
   final double? iconSize;
   final Color? iconColor;
   final double? iconSpacing;
-  final String? buttonId; // Add this line
+  final String? buttonId;
 
   const CustomTextButton({
     Key? key,
@@ -93,15 +93,12 @@ class CustomTextButton extends StatelessWidget {
                     children: [
                       if (iconData != null &&
                           iconPosition == Position.left) ...[
-                        Padding(
-                          padding: EdgeInsets.only(left: iconSpacing ?? 8),
-                          child: Icon(
-                            iconData,
-                            size: iconSize,
-                            color: iconColor ?? textColor ?? colorToUse,
-                          ),
+                        Icon(
+                          iconData,
+                          size: iconSize,
+                          color: iconColor ?? textColor ?? colorToUse,
                         ),
-                        SizedBox(width: iconSpacing ?? 4),
+                        SizedBox(width: iconSpacing ?? 8),
                       ],
                       Text(
                         text,
@@ -114,7 +111,7 @@ class CustomTextButton extends StatelessWidget {
                       ),
                       if (iconData != null &&
                           iconPosition == Position.right) ...[
-                        SizedBox(width: iconSpacing ?? 4),
+                        SizedBox(width: iconSpacing ?? 8),
                         Icon(
                           iconData,
                           size: iconSize,

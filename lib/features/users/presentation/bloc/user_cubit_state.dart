@@ -14,21 +14,12 @@ class UserLoadingState extends UserCubitState {
 }
 
 class UserLoadedState extends UserCubitState {
-  final UserModel user;
+  final List<UserModel> users;
 
-  UserLoadedState(this.user);
+  UserLoadedState(this.users);
 
   @override
-  List<Object?> get props => [user];
-
-  // Helper getters
-  String get fullName => user.fullName;
-  bool get isVerified => user.verified;
-  bool get isActive => user.active;
-  bool get canPerformActions => user.canPerformActions;
-  String get role => user.role;
-  String get email => user.email;
-  String get idNumber => user.idNumber;
+  List<Object?> get props => [users];
 }
 
 class UserFailureState extends UserCubitState {
@@ -43,14 +34,11 @@ class UserFailureState extends UserCubitState {
   @override
   List<Object?> get props => [suggestions, errorMessages];
 
-  // Helper getter to get the first error message
   String get primaryError =>
       errorMessages.isNotEmpty ? errorMessages.first : 'Unknown error occurred';
 
-  // Helper getter to check if there are multiple errors
   bool get hasMultipleErrors => errorMessages.length > 1;
 
-  // Helper getter to get formatted error message
   String get formattedMessage {
     if (errorMessages.length <= 1) {
       return primaryError;
@@ -58,6 +46,5 @@ class UserFailureState extends UserCubitState {
     return '${errorMessages.first}\n• ${errorMessages.skip(1).join('\n• ')}';
   }
 
-  // Helper getter to get combined error message
   String get combinedMessage => errorMessages.join(', ');
 }

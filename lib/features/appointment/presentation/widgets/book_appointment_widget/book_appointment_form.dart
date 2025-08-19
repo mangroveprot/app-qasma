@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../common/helpers/spacing.dart';
 import '../../../../../common/widgets/toast/app_toast.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 import '../../bloc/slots/slots_cubit.dart';
 import '../../pages/book_appointment_page.dart';
 import 'book_appointment_buttons.dart';

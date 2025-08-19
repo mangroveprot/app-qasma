@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../theme/theme_extensions.dart';
+import '../../../infrastructure/theme/theme_extensions.dart';
 import '../bloc/button/button_cubit.dart';
 import '../button_text/custom_text_button.dart';
 import '../modal.dart';
@@ -226,7 +226,7 @@ class CustomModal {
     );
   }
 
-// Helper method to create warning icon with custom color
+  // Helper method to create warning icon with custom color
   static Widget warningIcon({
     Color iconColor = Colors.red,
     Color? backgroundColor,
@@ -248,7 +248,7 @@ class CustomModal {
     );
   }
 
-// Helper method to create success icon with custom color
+  // Helper method to create success icon with custom color
   static Widget successIcon({
     Color iconColor = Colors.green,
     Color? backgroundColor,
@@ -270,7 +270,7 @@ class CustomModal {
     );
   }
 
-// Helper method to create info icon with custom color
+  // Helper method to create info icon with custom color
   static Widget infoIcon({
     Color iconColor = Colors.blue,
     Color? backgroundColor,
@@ -327,6 +327,7 @@ class CustomModal {
   static Future<T?> showRadioSelectionModal<T>(
     BuildContext context, {
     required List<ModalOption> options,
+    SelectedOptionType selectedOptionType = SelectedOptionType.subtitle,
     String title = 'Select an Option',
     String? subtitle,
     bool isBottomSheet = true,
@@ -343,13 +344,16 @@ class CustomModal {
       context: context,
       isBottomSheet: isBottomSheet,
       backgroundColor: backgroundColor ?? context.colors.white,
-      borderRadius:
-          borderRadius ?? const BorderRadius.vertical(top: Radius.circular(20)),
+      borderRadius: borderRadius ??
+          (isBottomSheet
+              ? const BorderRadius.vertical(top: Radius.circular(20))
+              : BorderRadius.circular(20)),
       padding: padding ?? EdgeInsets.zero,
       maxHeight: maxHeight ?? MediaQuery.of(context).size.height * 0.8,
       child: BlocProvider(
         create: (context) => ButtonCubit(),
         child: AnimatedRadioContent<T>(
+          selectedOptionType: selectedOptionType,
           options: options,
           title: title,
           subtitle: subtitle,

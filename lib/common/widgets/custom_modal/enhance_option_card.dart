@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../theme/theme_extensions.dart';
+import '../../../infrastructure/theme/theme_extensions.dart';
 import '../models/modal_option.dart';
 
 class EnhancedOptionCard extends StatefulWidget {

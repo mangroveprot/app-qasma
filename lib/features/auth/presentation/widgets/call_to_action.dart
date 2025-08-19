@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../theme/theme_extensions.dart';
+import '../../../../infrastructure/theme/theme_extensions.dart';
 
 class CallToAction extends StatelessWidget {
   final String actionText;
@@ -33,11 +33,10 @@ class CallToAction extends StatelessWidget {
                 fontWeight: context.weight.bold,
                 decoration: TextDecoration.underline,
               ),
-              recognizer:
-                  TapGestureRecognizer()
-                    ..onTap = () {
-                      context.go(directionPath);
-                    },
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  context.go(directionPath);
+                },
             ),
           ],
         ),

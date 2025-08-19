@@ -1,7 +1,7 @@
 // widgets/about_header.dart
 import 'package:flutter/material.dart';
 
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 
 class AboutHeader extends StatelessWidget {
   const AboutHeader({Key? key}) : super(key: key);

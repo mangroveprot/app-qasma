@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../../common/widgets/button_text/custom_text_button.dart';
 import '../../../../../infrastructure/routes/app_routes.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 
 class LoginForgotPasswordBtn extends StatelessWidget {
   const LoginForgotPasswordBtn({super.key});

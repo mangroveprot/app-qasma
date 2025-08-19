@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../common/utils/form_field_config.dart';
 import '../../../../../common/widgets/bloc/form/form_cubit.dart';
 import '../../../../../infrastructure/injection/service_locator.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 import '../../../domain/usecases/get_slots_usecase.dart';
 import '../../bloc/slots/slots_cubit.dart';
 import '../../../../appointment_config/presentation/bloc/appointment_config_cubit.dart';

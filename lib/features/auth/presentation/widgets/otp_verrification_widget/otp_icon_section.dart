@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../common/helpers/spacing.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 
 class OtpIconSection extends StatelessWidget {
   const OtpIconSection({super.key});

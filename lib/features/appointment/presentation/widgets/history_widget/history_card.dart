@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../../common/helpers/helpers.dart';
 import '../../../../../common/helpers/spacing.dart';
 import '../../../../../common/utils/constant.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 import '../../../../home/presentation/widgets/appointment_card_widget/status_chip.dart';
 import '../../../data/models/appointment_model.dart';
 import 'history_modal_section.dart';
@@ -86,7 +86,7 @@ class HistoryCard extends StatelessWidget {
                         borderRadius: radius.small,
                       ),
                       child: Icon(
-                        Icons.category_outlined,
+                        Icons.local_offer_outlined,
                         size: 20,
                         color: StatusType.cancelled == status
                             ? colors.primary

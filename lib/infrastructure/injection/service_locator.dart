@@ -15,9 +15,12 @@ import '../../features/appointment/data/repository/appointment_repositories_impl
 import '../../features/appointment/data/services/appointment_service_impl.dart';
 import '../../features/appointment/domain/repository/appointment_repositories.dart';
 import '../../features/appointment/domain/services/appointment_service.dart';
+import '../../features/appointment/domain/usecases/approved_appointment_usecase.dart';
 import '../../features/appointment/domain/usecases/cancel_appointment_usecase.dart';
+import '../../features/appointment/domain/usecases/counselors_availability_usecase.dart';
 import '../../features/appointment/domain/usecases/create_new_appointment_usecase.dart';
 import '../../features/appointment/domain/usecases/get_slots_usecase.dart';
+import '../../features/appointment/domain/usecases/getall_appointments_by_user_usecase.dart';
 import '../../features/appointment/domain/usecases/getall_appointments_usecase.dart';
 import '../../features/appointment/domain/usecases/sync_appointments_usecase.dart';
 import '../../features/appointment/domain/usecases/update_appointment_usecase.dart';
@@ -47,6 +50,7 @@ import '../../features/users/data/repository/user_repositories_impl.dart';
 import '../../features/users/data/services/user_service_impl.dart';
 import '../../features/users/domain/repository/user_repositories.dart';
 import '../../features/users/domain/services/user_service.dart';
+import '../../features/users/domain/usecases/get_all_user_usecase.dart';
 import '../../features/users/domain/usecases/get_user_usecase.dart';
 import '../../features/users/domain/usecases/is_register_usecase.dart';
 import '../../features/users/domain/usecases/sync_user_usecase.dart';
@@ -128,7 +132,7 @@ void _registerUserRepositories() {
       getId: (model) => model.idNumber,
       getItemPath: (id) => '/api/user/getProfile',
       deletePath: (id) => '/api/user/delete/$id',
-      includeId: true,
+      includeId: false,
       syncField: SyncField<UserModel>(
         name: 'updateAt',
         accessor: (user) => user.updatedAt,
@@ -157,7 +161,7 @@ void _registerAppointmentRepositories() {
       getId: (model) => model.appointmentId,
       getItemPath: (id) => '/getAppointmentById',
       deletePath: (id) => '/cancel/',
-      includeId: true,
+      includeId: false,
       syncField: SyncField<AppointmentModel>(
         name: 'updatedAt',
         accessor: (appointment) => appointment.updatedAt,
@@ -228,6 +232,7 @@ void _registerUseCases() {
 
   // User use cases
   sl
+    ..registerLazySingleton<GetAllUserUsecase>(() => GetAllUserUsecase())
     ..registerLazySingleton<SyncUserUsecase>(() => SyncUserUsecase())
     ..registerLazySingleton<UpdateUserUsecase>(() => UpdateUserUsecase())
     ..registerLazySingleton<IsRegisterUsecase>(() => IsRegisterUsecase())
@@ -235,13 +240,19 @@ void _registerUseCases() {
 
   // Appointment use cases
   sl
+    ..registerLazySingleton<ApprovedAppointmentUsecase>(
+        () => ApprovedAppointmentUsecase())
     ..registerLazySingleton<CancelAppointmentUsecase>(
         () => CancelAppointmentUsecase())
-    ..registerLazySingleton<GetAllAppointmentUsecase>(
-        () => GetAllAppointmentUsecase())
+    ..registerLazySingleton<GetAllAppointmentsUsecase>(
+        () => GetAllAppointmentsUsecase())
+    ..registerLazySingleton<GetAllAppointmentByUserUsecase>(
+        () => GetAllAppointmentByUserUsecase())
     ..registerLazySingleton<SyncAppointmentsUsecase>(
         () => SyncAppointmentsUsecase())
     ..registerLazySingleton<GetSlotsUseCase>(() => GetSlotsUseCase())
+    ..registerLazySingleton<CounselorsAvailabilityUsecase>(
+        () => CounselorsAvailabilityUsecase())
     ..registerLazySingleton<UpdateAppointmentUsecase>(
         () => UpdateAppointmentUsecase())
     ..registerLazySingleton<CreateNewAppointmentUsecase>(

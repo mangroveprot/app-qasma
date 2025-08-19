@@ -108,7 +108,6 @@ class AppointmentsCubit extends BaseCubit<AppointmentCubitState> {
     );
   }
 
-  // Refresh appointments
   Future<void> refreshAppointments({
     dynamic params,
     required Usecase usecase,
@@ -120,7 +119,6 @@ class AppointmentsCubit extends BaseCubit<AppointmentCubitState> {
     );
   }
 
-  // Filter appointments locally by status
   void filterByStatus(String status) {
     if (state is AppointmentsLoadedState) {
       final currentState = state as AppointmentsLoadedState;
@@ -136,7 +134,6 @@ class AppointmentsCubit extends BaseCubit<AppointmentCubitState> {
     }
   }
 
-  // Clear filters and show all appointments
   void clearFilters() {
     if (state is AppointmentsLoadedState) {
       final currentState = state as AppointmentsLoadedState;
@@ -146,7 +143,6 @@ class AppointmentsCubit extends BaseCubit<AppointmentCubitState> {
     }
   }
 
-  // Search appointments by description or category
   void searchAppointments(String query) {
     if (state is AppointmentsLoadedState) {
       final currentState = state as AppointmentsLoadedState;

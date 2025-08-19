@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../common/utils/button_ids.dart';
 import '../../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../../common/widgets/button/custom_app_button.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 
 class OtpVerifyButton extends StatelessWidget {
   final VoidCallback onPressed;

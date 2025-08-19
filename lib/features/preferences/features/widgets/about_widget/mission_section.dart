@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 import 'about_feature_container.dart';
 import 'about_section_container.dart';
 

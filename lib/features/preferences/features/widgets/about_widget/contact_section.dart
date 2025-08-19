@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../../common/utils/constant.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 import 'about_section_container.dart';
 
 class ContactSection extends StatelessWidget {

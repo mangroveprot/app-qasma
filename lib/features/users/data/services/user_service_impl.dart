@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:logger/logger.dart';
 
 import '../../../../common/error/app_error.dart';
 import '../../../../common/networks/api_client.dart';
@@ -16,31 +17,61 @@ class UserServiceImpl extends BaseService<UserModel> implements UserService {
   UserServiceImpl(AbstractRepository<UserModel> repository) : super(repository);
   final ApiClient _apiClient = sl<ApiClient>();
   final URLProviderConfig _urlProviderConfig = sl<URLProviderConfig>();
+  final _logger = Logger();
 
   @override
-  Future<Either<AppError, bool>> isRegister(String identifier) async {
+  Future<Either<AppError, List<UserModel>>> getAllUser() async {
     try {
-      final url = _urlProviderConfig.addPathSegments(
-        _urlProviderConfig.isRegister,
-        [identifier],
+      final int page = 1;
+      final int limit = 999;
+      final bool paginate = true;
+      final response = await _apiClient.get(
+        _urlProviderConfig.userEndPoint,
+        requiresAuth: true,
+        queryParameters: {
+          'page': page,
+          'limit': limit,
+          'paginate': paginate,
+        },
       );
 
-      final response = await _apiClient.get(url, requiresAuth: false);
-      final apiResponse = ApiResponse.fromJson(response.data, (json) => json);
+      final apiResponse = ApiResponse<UserModel>.fromJson(
+        response.data,
+        (json) => UserModel.fromJson(json),
+      );
 
-      if (apiResponse.isSuccess) {
-        return const Right(true);
+      if (apiResponse.isSuccess && apiResponse.hasData) {
+        final users = apiResponse.documents!;
+
+        try {
+          await repository.saveAllItems(users);
+        } catch (e, stackTrace) {
+          _logger.e('Failed to save users data locally', e, stackTrace);
+          return Left(AppError.create(
+            message:
+                'Something went wrong while saving your data. Please contact the administrator.',
+            type: ErrorType.database,
+            originalError: e,
+            stackTrace: stackTrace,
+          ));
+        }
+
+        return Right(users);
       } else {
-        return Left(apiResponse.error!);
+        return Left(apiResponse.error ??
+            AppError.create(
+              message: 'No users found.',
+              type: ErrorType.notFound,
+            ));
       }
-    } catch (e, stack) {
+    } catch (e, stackTrace) {
       final error = e is AppError
           ? e
           : AppError.create(
-              message: 'Unexpected error during getUser',
+              message: 'Unexpected error during getting all users',
               type: ErrorType.unknown,
               originalError: e,
-              stackTrace: stack,
+              stackTrace: stackTrace,
             );
       return Left(error);
     }
@@ -59,6 +90,35 @@ class UserServiceImpl extends BaseService<UserModel> implements UserService {
       }
 
       return Right(user);
+    } catch (e, stack) {
+      final error = e is AppError
+          ? e
+          : AppError.create(
+              message: 'Unexpected error during getUser',
+              type: ErrorType.unknown,
+              originalError: e,
+              stackTrace: stack,
+            );
+      return Left(error);
+    }
+  }
+
+  @override
+  Future<Either<AppError, bool>> isRegister(String identifier) async {
+    try {
+      final url = _urlProviderConfig.addPathSegments(
+        _urlProviderConfig.isRegister,
+        [identifier],
+      );
+
+      final response = await _apiClient.get(url, requiresAuth: false);
+      final apiResponse = ApiResponse.fromJson(response.data, (json) => json);
+
+      if (apiResponse.isSuccess) {
+        return const Right(true);
+      } else {
+        return Left(apiResponse.error!);
+      }
     } catch (e, stack) {
       final error = e is AppError
           ? e

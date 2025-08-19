@@ -1,6 +1,5 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/foundation.dart';
-import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,7 +15,7 @@ import 'core/_config/bloc_dispatcher.dart';
 import 'core/_config/flavor_config.dart';
 import 'infrastructure/injection/service_locator.dart';
 import 'infrastructure/routes/app_router.dart';
-import 'theme/light_theme.dart';
+import 'infrastructure/theme/light_theme.dart';
 import 'features/auth/presentation/bloc/auth/auth_cubit.dart';
 
 Future<void> mainCommon(Flavor flavor) async {
@@ -40,10 +39,12 @@ Future<void> mainCommon(Flavor flavor) async {
     debugPaintSizeEnabled = false;
   }
 
-  runApp(DevicePreview(
-    enabled: !kReleaseMode,
-    builder: (context) => const MyApp(),
-  ));
+  // DevicePreview(
+  //   enabled: kReleaseMode,
+  //   builder: (context) => const MyApp(),
+  // )
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {

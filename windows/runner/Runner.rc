@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.jrmsu.qasma" "\0"
-            VALUE "FileDescription", "qasma" "\0"
+            VALUE "CompanyName", "com.jrmsu.qasma_staff" "\0"
+            VALUE "FileDescription", "qasma_staff" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "qasma" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 com.jrmsu.qasma. All rights reserved." "\0"
-            VALUE "OriginalFilename", "qasma.exe" "\0"
-            VALUE "ProductName", "qasma" "\0"
+            VALUE "InternalName", "qasma_staff" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 com.jrmsu.qasma_staff. All rights reserved." "\0"
+            VALUE "OriginalFilename", "qasma_staff.exe" "\0"
+            VALUE "ProductName", "qasma_staff" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

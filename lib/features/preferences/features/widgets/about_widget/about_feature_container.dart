@@ -1,7 +1,7 @@
 // widgets/feature_card.dart
 import 'package:flutter/material.dart';
 
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 
 class FeatureCardData {
   final IconData icon;

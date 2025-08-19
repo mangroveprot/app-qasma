@@ -54,7 +54,6 @@ class AppointmentConfigServiceImpl extends BaseService<AppointmentConfigModel>
           ));
         }
 
-        // ✅ Return the actual config models instead of just bool
         return Right(configModels);
       } else {
         return Left(AppError.create(

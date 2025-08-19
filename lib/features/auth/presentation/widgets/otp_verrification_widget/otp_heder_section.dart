@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../common/helpers/maskEmail.dart';
 import '../../../../../common/helpers/spacing.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 
 class OtpHederSection extends StatelessWidget {
   final email;

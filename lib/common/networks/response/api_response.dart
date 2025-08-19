@@ -67,6 +67,13 @@ class ApiResponse<T> {
       );
     }
 
+    int? _toInt(dynamic value) {
+      if (value == null) return null;
+      if (value is int) return value;
+      if (value is String) return int.tryParse(value);
+      return null;
+    }
+
     return ApiResponse(
       success: success,
       document: json['document'] != null ? fromJsonT(json['document']) : null,
@@ -75,10 +82,10 @@ class ApiResponse<T> {
               json['documents'],
             ).map(fromJsonT).toList()
           : null,
-      total: json['total'],
-      results: json['results'] ?? json['_results'],
-      page: json['page'],
-      limit: json['limit'],
+      total: _toInt(json['total']),
+      results: _toInt(json['results'] ?? json['_results']),
+      page: _toInt(json['page']),
+      limit: _toInt(json['limit']),
       error: error,
     );
   }

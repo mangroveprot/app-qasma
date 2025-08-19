@@ -5,9 +5,6 @@ import '../../../../common/utils/constant.dart';
 class ProfileFieldConfig {
   static const Map<String, List<String>> dropdownOptions = {
     'gender': genderList,
-    'course': courseList,
-    'yearLevel': yearLevelList,
-    'block': blockList,
   };
 
   static const Map<String, String> fieldLabels = {
@@ -20,9 +17,6 @@ class ProfileFieldConfig {
     'contact_number': 'Contact Number',
     'address': 'Address',
     'facebook': 'Facebook',
-    'course': 'Course',
-    'yearLevel': 'Year Level',
-    'block': 'Block',
   };
 
   static const Map<String, IconData> fieldIcons = {
@@ -35,12 +29,7 @@ class ProfileFieldConfig {
     'contact_number': Icons.phone_outlined,
     'address': Icons.location_on_outlined,
     'facebook': Icons.facebook_outlined,
-    'course': Icons.school_outlined,
-    'yearLevel': Icons.grade_outlined,
-    'block': Icons.class_outlined,
   };
-
-  static const List<String> otherInfoFields = ['course', 'yearLevel', 'block'];
 
   static const List<String> personalFields = [
     'first_name',
@@ -56,8 +45,6 @@ class ProfileFieldConfig {
     'address',
     'facebook'
   ];
-
-  static const List<String> academicFields = ['course', 'yearLevel', 'block'];
 
   static TextInputType? getKeyboardType(String fieldName) {
     switch (fieldName) {

@@ -10,20 +10,27 @@ import '../../../../common/utils/constant.dart';
 import '../../../../common/utils/menu_items_config.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/button_text/custom_text_button.dart';
+import '../../../../common/widgets/custom_modal/_radio/animated_radio_content.dart';
 import '../../../../common/widgets/custom_modal/custom_modal.dart';
 import '../../../../common/widgets/modal.dart';
 import '../../../../common/widgets/models/modal_option.dart';
 import '../../../../core/_base/_services/storage/shared_preference.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
 import '../../../../infrastructure/routes/app_routes.dart';
-import '../../../../theme/theme_extensions.dart';
+import '../../../../infrastructure/theme/theme_extensions.dart';
 import '../../../appointment/data/models/cancellation_model.dart';
+import '../../../appointment/data/models/params/approved_params.dart';
+import '../../../appointment/data/models/params/availability_params.dart';
 import '../../../appointment/data/models/params/cancel_params.dart';
+import '../../../appointment/domain/usecases/approved_appointment_usecase.dart';
 import '../../../appointment/domain/usecases/cancel_appointment_usecase.dart';
+import '../../../appointment/domain/usecases/counselors_availability_usecase.dart';
 import '../../../appointment/presentation/bloc/appointments/appointments_cubit.dart';
 import '../../../appointment_config/presentation/bloc/appointment_config_cubit.dart';
+import '../../../users/data/models/user_model.dart';
 import '../../../users/presentation/bloc/user_cubit.dart';
 import '../../../appointment/data/models/appointment_model.dart';
+import '../../../users/presentation/bloc/user_cubit_extensions.dart';
 
 class HomePageController {
   // Cubits
@@ -42,25 +49,21 @@ class HomePageController {
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
 
-  List<BlocProvider> get blocProviders => [
-        BlocProvider<AppointmentsCubit>(
-          create: (context) => _appointmentsCubit,
-        ),
-        BlocProvider<UserCubit>(
-          create: (context) => _userCubit,
-        ),
-        BlocProvider<AppointmentConfigCubit>(
-          create: (context) => _appointmentConfigCubit,
-        ),
-        BlocProvider<ButtonCubit>(
-          create: (context) => _buttonCubit,
-        ),
-      ];
+  List<BlocProvider>? _blocProviders;
+
+  List<BlocProvider> get blocProviders {
+    if (_blocProviders == null) {
+      throw StateError(
+          'Controller must be initialized before accessing blocProviders');
+    }
+    return _blocProviders!;
+  }
 
   void initialize({Function(String route, {Object? extra})? onNavigate}) {
     _navigationCallback = onNavigate;
     _initializeManagers();
     _initializeCubits();
+    _createBlocProviders();
     _loadInitialData();
     _isInitialized = true;
   }
@@ -78,6 +81,16 @@ class HomePageController {
     _buttonCubit = ButtonCubit();
   }
 
+  void _createBlocProviders() {
+    _blocProviders = [
+      BlocProvider<AppointmentsCubit>.value(value: _appointmentsCubit),
+      BlocProvider<UserCubit>.value(value: _userCubit),
+      BlocProvider<AppointmentConfigCubit>.value(
+          value: _appointmentConfigCubit),
+      BlocProvider<ButtonCubit>.value(value: _buttonCubit),
+    ];
+  }
+
   void _loadInitialData() {
     _loadUserData();
     appoitnmentRefreshData();
@@ -85,21 +98,28 @@ class HomePageController {
   }
 
   void _loadUserData() {
-    final userId = SharedPrefs().getString('currentUserId');
-    if (userId != null) {
-      _userManager.loadUser(userId, _userCubit);
-    }
+    _userManager.loadAllUser(_userCubit);
   }
 
   void _loadAppointmentConfig() {
     _appointmentConfigManager
         .loadAllAppointmentsConfig(_appointmentConfigCubit);
   }
-
   // PUBLIC METHODS
+
+  String get currentUserId => SharedPrefs().getString('currentUserId') ?? '';
 
   Future<void> appoitnmentRefreshData() async {
     await _appointmentManager.refreshAppointments(_appointmentsCubit);
+  }
+
+  UserModel? getUserByIdNumber(String idNumber) {
+    return _userCubit.getUserByIdNumber(idNumber);
+  }
+
+  UserModel? currentUserProfile() {
+    if (currentUserId.isEmpty) return null;
+    return _userCubit.getUserByIdNumber(currentUserId);
   }
 
   Future<void> userRefreshData() async {
@@ -139,8 +159,97 @@ class HomePageController {
     }
   }
 
+  // Handler
+  Future<void> handleApprovedAppointment(
+    BuildContext context,
+    String appointmentId,
+  ) async {
+    final currentUserId = SharedPrefs().getString('currentUserId') ?? 'staff';
+    final appointments = _appointmentsCubit.state;
+    AppointmentModel? appointmentsToApprove;
+    if (appointments is AppointmentsLoadedState) {
+      try {
+        appointmentsToApprove = appointments.appointments.firstWhere(
+            (appointment) => appointment.appointmentId == appointmentId);
+
+        final List<Map<String, dynamic>> gettingListOfCounselors =
+            await _getCounselorsAvailability(
+          context: context,
+          model: appointmentsToApprove,
+        );
+
+        final List<ModalOption> counselorOptions =
+            gettingListOfCounselors.map((item) {
+          return ModalOption(
+            value: item['id'],
+            title: '',
+            subtitle: item['name'],
+            icon:
+                Icon(Icons.person, size: 14, color: context.colors.textPrimary),
+          );
+        }).toList();
+
+        await CustomModal.showRadioSelectionModal<String>(
+          context,
+          isBottomSheet: false,
+          options: counselorOptions,
+          title: 'Select a counselor to assign',
+          subtitle: 'Only available counselors are shown below',
+          selectedOptionType: SelectedOptionType.value,
+          onConfirm: (String value) async {
+            final _approvedData = ApprovedParams(
+              studentId: appointmentsToApprove!.studentId,
+              staffId: currentUserId,
+              counselorId: value,
+              appointmentId: appointmentId,
+              status: StatusType.approved.status,
+            );
+
+            await context.read<ButtonCubit>().execute(
+                  usecase: sl<ApprovedAppointmentUsecase>(),
+                  params: _approvedData,
+                );
+            return '';
+          },
+        );
+      } catch (e) {
+        debugPrint('Appointment not found for approving: $appointmentId');
+        return;
+      }
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _getCounselorsAvailability({
+    required BuildContext context,
+    required AppointmentModel model,
+  }) async {
+    final _availabilityReq = AvailabilityParams(
+      scheduledStartAt: model.scheduledStartAt,
+      scheduledEndAt: model.scheduledEndAt,
+    );
+
+    final cubit = context.read<ButtonCubit>();
+    cubit.emitLoading(buttonId: 'approved${model.appointmentId}');
+
+    final usecase = sl<CounselorsAvailabilityUsecase>();
+    final result = await usecase.call(param: _availabilityReq);
+
+    return result.fold(
+      (failure) {
+        cubit.emitError(errorMessages: [failure]);
+        return <Map<String, dynamic>>[];
+      },
+      (data) {
+        cubit.emitInitial();
+        return data as List<Map<String, dynamic>>;
+      },
+    );
+  }
+
   Future<void> handleCancelAppointment(
-      String appointmentId, BuildContext context) async {
+    String appointmentId,
+    BuildContext context,
+  ) async {
     final currentUserId = SharedPrefs().getString('currentUserId');
     final shouldCancel =
         await _showCancellationConfirmation(context, appointmentId);
@@ -148,6 +257,7 @@ class HomePageController {
 
     await CustomModal.showRadioSelectionModal<String>(
       context,
+      isBottomSheet: false,
       options: reasonOptionList,
       title: 'Select Cancellation Reason',
       onConfirm: (String reason) async {
@@ -345,10 +455,12 @@ class HomePageController {
     );
   }
 
-  void handleMyProfile() {
+  void handleMyProfile([String? idNumber, bool isCurrentUser = true]) {
     _navigationCallback?.call(
       Routes.buildPath(Routes.user_path, Routes.user_profile),
       extra: {
+        'idNumber': idNumber ?? SharedPrefs().getString('currentUserId'),
+        'isCurrentUser': isCurrentUser,
         'onSuccess': () async {
           await userRefreshData();
         },

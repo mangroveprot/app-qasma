@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../data/models/other_info_model.dart';
 import '../../data/models/user_model.dart';
-import '../config/profile_config.dart';
 
 class ProfileFormUtils {
   static UserModel updateMainUser(
@@ -31,34 +29,7 @@ class ProfileFormUtils {
     }
   }
 
-  static OtherInfoModel updateOtherInfo(
-      OtherInfoModel otherInfo, String fieldName, String newValue) {
-    switch (fieldName) {
-      case 'course':
-        return otherInfo.copyWith(course: newValue);
-      case 'yearLevel':
-        return otherInfo.copyWith(yearLevel: newValue);
-      case 'block':
-        return otherInfo.copyWith(block: newValue);
-      default:
-        return otherInfo;
-    }
-  }
-
   static String getFieldValue(UserModel user, String fieldName) {
-    if (ProfileFieldConfig.otherInfoFields.contains(fieldName)) {
-      switch (fieldName) {
-        case 'course':
-          return user.other_info.course ?? '';
-        case 'yearLevel':
-          return user.other_info.yearLevel ?? '';
-        case 'block':
-          return user.other_info.block ?? '';
-        default:
-          return '';
-      }
-    }
-
     switch (fieldName) {
       case 'first_name':
         return user.first_name;
@@ -95,9 +66,6 @@ class ProfileFormUtils {
       'address': controllers['address']?.text ?? '',
       'contact_number': controllers['contact_number']?.text ?? '',
       'facebook': controllers['facebook']?.text ?? '',
-      'course': user.other_info.course ?? '',
-      'yearLevel': user.other_info.yearLevel ?? '',
-      'block': user.other_info.block ?? '',
     };
   }
 }

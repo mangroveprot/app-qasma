@@ -42,7 +42,10 @@ class URLProviderConfig {
   String get updateAppointment => '${appointmentEndPoint}/update';
   String get getAllAppointmentByUser => '${appointmentEndPoint}/getAllByUser';
   String get getSlots => '${appointmentEndPoint}/slots';
+  String get counselorsAvailability =>
+      '${appointmentEndPoint}/counselors/availability';
   String get cancelAppointment => '${appointmentEndPoint}/cancel';
+  String get acceptAppointment => '${appointmentEndPoint}/accept';
 
   String addPathSegments(String baseUrl, List<String> segments) {
     final String cleanedBase = baseUrl.replaceFirst(RegExp(r'/+$'), '');

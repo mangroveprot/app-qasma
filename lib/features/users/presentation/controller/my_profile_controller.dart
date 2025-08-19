@@ -3,14 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 
 import '../../../../common/manager/user_manager.dart';
-import '../../../../core/_base/_services/storage/shared_preference.dart';
 import '../../data/models/params/dynamic_param.dart';
 import '../bloc/user_cubit.dart';
 
 class MyProfileController {
   late final ButtonCubit _buttonCubit;
   late final UserCubit _userCubit;
-  late final String _currentUserId;
 
   late final UserManager _userManager;
 
@@ -26,10 +24,13 @@ class MyProfileController {
         ),
       ];
 
-  void initialize({Function(String route, {Object? extra})? onNavigate}) {
+  void initialize({
+    required String idNumber,
+    Function(String route, {Object? extra})? onNavigate,
+  }) {
     _initializeManagers();
     _initializeCubits();
-    _loadInitialData();
+    _loadInitialData(idNumber);
     _isInitialized = true;
   }
 
@@ -40,19 +41,18 @@ class MyProfileController {
   void _initializeCubits() {
     _userCubit = UserCubit();
     _buttonCubit = ButtonCubit();
-    _currentUserId = SharedPrefs().getString('currentUserId') ?? '';
   }
 
-  void _loadInitialData() {
-    _loadUserData();
+  void _loadInitialData(String idNumber) {
+    _getUserProfile(idNumber);
   }
 
   ButtonCubit get buttonCubit => _buttonCubit;
 
   UserCubit get userCubit => _userCubit;
 
-  void _loadUserData() {
-    _userManager.loadUser(_currentUserId, _userCubit);
+  void _getUserProfile(String idNumber) {
+    _userManager.getUserProfile(_userCubit, idNumber);
   }
 
   Future<void> refreshUser() async {

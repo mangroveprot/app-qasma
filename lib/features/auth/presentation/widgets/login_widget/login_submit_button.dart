@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../common/widgets/button/custom_app_button.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 
 class LoginSubmitButton extends StatelessWidget {
   final VoidCallback onPressed;

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../common/helpers/helpers.dart';
 import '../../../../../common/helpers/spacing.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 
 class BookCategorySection extends StatelessWidget {
   final String category;

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/custom_app_bar.dart';
 import '../../../../common/widgets/toast/app_toast.dart';
+import '../../../../infrastructure/routes/app_route_extractor.dart';
 import '../controller/my_profile_controller.dart';
 import '../widgets/my_profile_widget/my_profile_form.dart';
 
@@ -17,24 +18,36 @@ class MyProfilePage extends StatefulWidget {
 
 class MyProfilePageState extends State<MyProfilePage> {
   late final MyProfileController controller;
+  Map<String, dynamic>? _routeData;
+  bool _hasInitialized = false;
 
   @override
   void initState() {
     super.initState();
     controller = MyProfileController();
-    controller.initialize();
   }
 
   @override
-  Widget build(BuildContext context) {
-    if (!controller.isInitialized) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_hasInitialized) {
+      _extractRouteData();
+      controller.initialize(idNumber: idNumber ?? '');
+      _hasInitialized = true;
     }
+  }
 
+  void _extractRouteData() {
+    if (_routeData != null) return;
+    _routeData = AppRouteExtractor.extractRaw<Map<String, dynamic>>(
+        GoRouterState.of(context).extra);
+  }
+
+  String? get idNumber => _routeData?['idNumber'] as String?;
+  bool get isCurrentUser => _routeData?['isCurrentUser'] as bool? ?? false;
+
+  @override
+  Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: controller.blocProviders,
       child: MultiBlocListener(
@@ -45,16 +58,18 @@ class MyProfilePageState extends State<MyProfilePage> {
         ],
         child: Scaffold(
           appBar: CustomAppBar(
-            title: 'My Profile',
+            title: isCurrentUser ? 'My Profile' : 'User Profile',
             onBackPressed: _handleBack,
           ),
-          body: LayoutBuilder(builder: (context, constraints) {
-            return SizedBox(
-              width: constraints.maxWidth,
-              height: constraints.maxHeight,
-              child: MyProfileForm(state: this),
-            );
-          }),
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              return SizedBox(
+                width: constraints.maxWidth,
+                height: constraints.maxHeight,
+                child: MyProfileForm(state: this),
+              );
+            },
+          ),
         ),
       ),
     );

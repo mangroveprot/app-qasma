@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../common/widgets/button_text/custom_text_button.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 
 class NextButton extends StatelessWidget {
   final VoidCallback onPressed;

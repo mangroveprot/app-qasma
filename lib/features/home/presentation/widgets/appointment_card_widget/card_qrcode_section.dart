@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 import '../../../../appointment/domain/entities/qrcode.dart';
 import '../../../../auth/presentation/pages/qrcode_page.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 import '../../../data/models/appointment_model.dart';
 import '../../bloc/appointments/appointments_cubit.dart';
 import '../../pages/appointment_history_page.dart';

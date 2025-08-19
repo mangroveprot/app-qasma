@@ -57,7 +57,6 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
           final idNumber = userData['idNumber'] as String?;
           if (idNumber != null) {
             await SharedPrefs().setString('currentUserId', idNumber);
-            await SharedPrefs().setBool('privacyPolicyAccepted', false);
           }
           final userModel = UserModel.fromJson(userData);
 

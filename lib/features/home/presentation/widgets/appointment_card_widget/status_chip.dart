@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 
 class StatusChip extends StatelessWidget {
   final String status;

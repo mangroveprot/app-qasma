@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../theme/theme_extensions.dart'; // assuming this contains context.colors, .weight, .radii
+import '../../infrastructure/theme/theme_extensions.dart'; // assuming this contains context.colors, .weight, .radii
 
 class CustomInputField extends StatelessWidget {
   final String fieldName;

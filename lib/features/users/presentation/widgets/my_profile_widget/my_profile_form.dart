@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../common/widgets/custom_input_dropdown.dart';
 import '../../../../../common/widgets/custom_input_field.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../core/_base/_services/storage/shared_preference.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
+import '../../bloc/user_cubit_extensions.dart';
+import '../skeleton_loader/my_profile_skeletal_loader.dart';
 import 'profile_section.dart';
 import '../../../../../common/helpers/helpers.dart';
 import '../../../../../common/widgets/bloc/button/button_cubit.dart';
@@ -11,7 +14,6 @@ import '../../../../../common/widgets/toast/app_toast.dart';
 import '../../../../../infrastructure/injection/service_locator.dart';
 import '../../../data/models/params/dynamic_param.dart';
 import '../../../data/models/user_model.dart';
-import '../../../data/models/other_info_model.dart';
 import '../../../domain/usecases/is_register_usecase.dart';
 import '../../bloc/user_cubit.dart';
 import '../../config/profile_config.dart';
@@ -33,12 +35,21 @@ class _MyProfileFormState extends State<MyProfileForm> {
   UserModel? _currentUser;
   bool _hasChanges = false;
   bool _isSaving = false;
+  bool _isMinimumLoadingTime = true;
   final Map<String, TextEditingController> _controllers = {};
 
   @override
   void initState() {
     super.initState();
     _initializeControllers();
+
+    Timer(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          _isMinimumLoadingTime = false;
+        });
+      }
+    });
   }
 
   @override
@@ -93,16 +104,8 @@ class _MyProfileFormState extends State<MyProfileForm> {
 
   void _onDropdownChanged(String fieldName, String newValue) {
     setState(() {
-      if (ProfileFieldConfig.otherInfoFields.contains(fieldName)) {
-        final currentOtherInfo =
-            OtherInfoModel.fromEntity(_currentUser!.other_info);
-        final updatedOtherInfo = ProfileFormUtils.updateOtherInfo(
-            currentOtherInfo, fieldName, newValue);
-        _currentUser = _currentUser!.copyWith(other_info: updatedOtherInfo);
-      } else {
-        _currentUser =
-            ProfileFormUtils.updateMainUser(_currentUser!, fieldName, newValue);
-      }
+      _currentUser =
+          ProfileFormUtils.updateMainUser(_currentUser!, fieldName, newValue);
       _hasChanges = _hasAnyChanges();
     });
   }
@@ -265,10 +268,22 @@ class _MyProfileFormState extends State<MyProfileForm> {
       backgroundColor: Colors.grey.shade50,
       body: BlocBuilder<UserCubit, UserCubitState>(
         builder: (context, state) {
+          if (_isMinimumLoadingTime ||
+              (state is! UserLoadedState && state is! UserFailureState)) {
+            return MyProfileSkeletonLoader.profilePage();
+          }
+
           if (state is UserLoadedState) {
+            final id = SharedPrefs().getString('currentUserId') ?? '';
+            final current = context.read<UserCubit>().getUserByIdNumber(id);
+
+            if (current == null) {
+              return _buildError('User not found');
+            }
+
             if (_originalUser == null) {
-              _originalUser = state.user.copyWith();
-              _currentUser = state.user.copyWith();
+              _originalUser = current.copyWith();
+              _currentUser = current.copyWith();
               _populateControllers();
             }
             return Column(
@@ -288,7 +303,7 @@ class _MyProfileFormState extends State<MyProfileForm> {
             return _buildError(state.errorMessages.first);
           }
 
-          return const Center(child: CircularProgressIndicator());
+          return MyProfileSkeletonLoader.profilePage();
         },
       ),
     );
@@ -315,13 +330,6 @@ class _MyProfileFormState extends State<MyProfileForm> {
                 icon: Icons.contact_phone_outlined,
                 fields:
                     _buildFieldsForSection(ProfileFieldConfig.contactFields),
-              ),
-              const SizedBox(height: 24),
-              ProfileSection(
-                title: 'Academic Information',
-                icon: Icons.school_outlined,
-                fields:
-                    _buildFieldsForSection(ProfileFieldConfig.academicFields),
               ),
               const SizedBox(height: 40),
             ]),

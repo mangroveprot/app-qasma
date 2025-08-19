@@ -132,9 +132,11 @@ class RemoteRepository<T> extends BaseRepository
         final lastSyncTime =
             lastSyncStr != null ? DateTime.parse(lastSyncStr) : DateTime(2000);
 
-        final fullPath = '${endpoint.trim().replaceAll(RegExp(r'/+$'), '')}'
-            '/sync/${lastSyncTime}/'
-            '${includeId ? '$currentUserId' : ''}';
+        final basePath =
+            '${endpoint.trim().replaceAll(RegExp(r'/+$'), '')}/sync/${lastSyncTime}/';
+        final fullPath = includeId && currentUserId != null
+            ? '$basePath?idNumber=$currentUserId'
+            : basePath;
 
         final response = await handleApiCall(() {
           return apiClient.get(
@@ -186,7 +188,6 @@ class RemoteRepository<T> extends BaseRepository
           }
         }
 
-        // Only update sync timestamp if all items were processed successfully
         if (allItemsProcessedSuccessfully) {
           if (latestUpdatedAt != null) {
             await prefs.setString(
@@ -224,7 +225,6 @@ class RemoteRepository<T> extends BaseRepository
           }
         }
 
-        // Only update sync timestamp if all items were processed successfully
         if (allItemsProcessedSuccessfully) {
           final prefs = await SharedPreferences.getInstance();
           final syncTime = latestUpdatedAt?.toIso8601String() ??

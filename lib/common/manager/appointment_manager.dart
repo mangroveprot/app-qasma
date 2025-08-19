@@ -4,11 +4,11 @@ import '../../features/appointment/presentation/bloc/appointments/appointments_c
 import '../../infrastructure/injection/service_locator.dart';
 
 class AppointmentManager {
-  late final GetAllAppointmentUsecase _getAllAppointmentsUseCase;
+  late final GetAllAppointmentsUsecase _getAllAppointmentsUseCase;
   late final SyncAppointmentsUsecase _syncAppointmentsUsecase;
 
   AppointmentManager() {
-    _getAllAppointmentsUseCase = sl<GetAllAppointmentUsecase>();
+    _getAllAppointmentsUseCase = sl<GetAllAppointmentsUsecase>();
     _syncAppointmentsUsecase = sl<SyncAppointmentsUsecase>();
   }
 

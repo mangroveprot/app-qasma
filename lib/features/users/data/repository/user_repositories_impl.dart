@@ -11,6 +11,15 @@ class UserRepositoryImpl extends UserRepository {
   final UserService _userService = sl<UserService>();
 
   @override
+  Future<Either<AppError, List<UserModel>>> getAllUser() async {
+    final Either result = await _userService.getAllUser();
+    return result.fold(
+      (error) => Left(error),
+      (data) => Right(data),
+    );
+  }
+
+  @override
   Future<Either<AppError, bool>> isRegister(String identifier) async {
     final result = await _userService.isRegister(identifier);
     return result.fold(

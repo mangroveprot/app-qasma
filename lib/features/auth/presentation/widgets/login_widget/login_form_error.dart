@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../common/widgets/bloc/form/form_cubit.dart';
 import '../../../../../common/widgets/bloc/button/button_cubit.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 
 class LoginFormError extends StatelessWidget {
   const LoginFormError({super.key});

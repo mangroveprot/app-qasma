@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../common/widgets/button/custom_app_button.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../common/widgets/bloc/button/button_cubit.dart';
 
 class CardRescheduleButton extends StatelessWidget {
   final VoidCallback onPressed;
-  const CardRescheduleButton({super.key, required this.onPressed});
+  final String buttonId;
+  const CardRescheduleButton({
+    super.key,
+    required this.onPressed,
+    required this.buttonId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,37 +21,35 @@ class CardRescheduleButton extends StatelessWidget {
     final weight = context.weight;
     final radii = context.radii;
 
-    return BlocProvider(
-      create: (context) => ButtonCubit(),
-      child: Builder(builder: (context) {
-        return Align(
-          alignment: Alignment.centerRight,
-          child: IntrinsicWidth(
-            child: CustomAppButton(
-              height: 44,
-              labelText: 'Reschedule',
-              labelFontSize: 12,
-              labelTextColor: colors.white,
-              backgroundColor: colors.secondary,
-              labelTextDecoration: TextDecoration.none,
-              labelFontWeight: weight.medium,
-              borderRadius: radii.medium,
-              disabledBackgroundColor: colors.textPrimary,
-              icon: Icons.edit_calendar,
-              iconSize: 12,
-              iconPosition: Position.left,
-              contentAlignment: MainAxisAlignment.center,
-              onPressedCallback: () async {
-                final cubit = context.read<ButtonCubit>();
-                cubit.emitLoading();
-                await Future.delayed(const Duration(milliseconds: 500));
-                onPressed();
-                cubit.emitInitial();
-              },
-            ),
-          ),
-        );
-      }),
-    );
+    return Builder(builder: (context) {
+      return CustomAppButton(
+        buttonId: buttonId,
+        height: 44,
+        width: double.infinity,
+        labelText: 'Reschedule',
+        labelFontSize: 10,
+        labelTextColor: colors.white,
+        backgroundColor: colors.secondary,
+        labelTextDecoration: TextDecoration.none,
+        labelFontWeight: weight.medium,
+        borderRadius: radii.medium,
+        disabledBackgroundColor: colors.textPrimary,
+        icon: Icons.schedule,
+        iconSize: 10,
+        iconPosition: Position.left,
+        loadingSpinnerSize: 10,
+        contentAlignment: MainAxisAlignment.center,
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        onPressedCallback: () async {
+          final cubit = context.read<ButtonCubit>();
+          cubit.emitLoading(
+            buttonId: buttonId,
+          );
+          await Future.delayed(const Duration(milliseconds: 500));
+          onPressed();
+          cubit.emitInitial();
+        },
+      );
+    });
   }
 }

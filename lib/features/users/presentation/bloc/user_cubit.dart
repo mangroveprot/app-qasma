@@ -44,7 +44,6 @@ class UserCubit extends BaseCubit<UserCubitState> {
     );
   }
 
-  // Load user by idNumber (idNumber or email)
   Future<void> loadUser({
     dynamic params,
     required Usecase usecase,
@@ -64,8 +63,20 @@ class UserCubit extends BaseCubit<UserCubitState> {
           );
         },
         (data) {
-          final UserModel user = data as UserModel;
-          emit(UserLoadedState(user));
+          final List<UserModel> users;
+
+          if (data is List<UserModel>) {
+            users = data;
+          } else if (data is UserModel) {
+            users = [data];
+          } else {
+            emitError(
+              errorMessages: ['Invalid user data received'],
+            );
+            return;
+          }
+
+          emit(UserLoadedState(users));
         },
       );
     } catch (e, stackTrace) {
@@ -77,54 +88,17 @@ class UserCubit extends BaseCubit<UserCubitState> {
     }
   }
 
-  Future<void> onRefreshUser({
-    dynamic params,
-    required Usecase usecase,
-    bool isRefreshing = false,
-  }) async {
-    emitLoading(isRefreshing: isRefreshing);
-
-    try {
-      final Either result = await usecase.call(param: params);
-
-      print({'==============', result});
-
-      result.fold(
-        (error) {
-          emitError(
-            errorMessages: error.messages ?? ['Failed to load user'],
-            suggestions: error.suggestions,
-            error: error,
-          );
-        },
-        (data) {
-          final UserModel user = data.first as UserModel;
-          print({'=========================', user});
-          emit(UserLoadedState(user));
-        },
-      );
-    } catch (e, stackTrace) {
-      emitError(
-        errorMessages: ['Failed to load user: ${e.toString()}'],
-        error: e,
-        stackTrace: stackTrace,
-      );
-    }
-  }
-
-  // Refresh user data
   Future<void> refreshUser({
     dynamic params,
     required Usecase usecase,
   }) async {
-    await onRefreshUser(
+    await loadUser(
       params: params,
       usecase: usecase,
       isRefreshing: true,
     );
   }
 
-  // Clear user data
   void clearUser() {
     emit(UserInitialState());
   }

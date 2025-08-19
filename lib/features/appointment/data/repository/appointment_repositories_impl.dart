@@ -5,10 +5,21 @@ import '../../../../infrastructure/injection/service_locator.dart';
 import '../../domain/repository/appointment_repositories.dart';
 import '../../domain/services/appointment_service.dart';
 import '../models/appointment_model.dart';
+import '../models/params/approved_params.dart';
+import '../models/params/availability_params.dart';
 import '../models/params/cancel_params.dart';
 
 class AppointmentRepositoryImpl extends AppointmentRepository {
   final AppointmentService _appointmentService = sl<AppointmentService>();
+
+  @override
+  Future<Either<AppError, AppointmentModel?>> getAllAppointments() async {
+    final Either result = await _appointmentService.getAllAppointments();
+    return result.fold(
+      (error) => Left(error),
+      (data) => Right(data.isNotEmpty ? data.first : null),
+    );
+  }
 
   @override
   Future<Either> getAllAppointmentByUser() async {
@@ -26,6 +37,21 @@ class AppointmentRepositoryImpl extends AppointmentRepository {
   @override
   Future<Either> syncAppointments() async {
     final Either result = await _appointmentService.syncAppointments();
+    return result.fold(
+      (error) {
+        return Left(error);
+      },
+      (data) {
+        return Right(data);
+      },
+    );
+  }
+
+  @override
+  Future<Either<AppError, List<Map<String, dynamic>>>> counselorsAvailability(
+      AvailabilityParams availabilityParams) async {
+    final Either result =
+        await _appointmentService.counselorsAvailability(availabilityParams);
     return result.fold(
       (error) {
         return Left(error);
@@ -66,7 +92,8 @@ class AppointmentRepositoryImpl extends AppointmentRepository {
 
   @override
   Future<Either<AppError, AppointmentModel>> updateAppointment(
-      AppointmentModel model) async {
+    AppointmentModel model,
+  ) async {
     final Either result = await _appointmentService.updateAppointment(model);
     return result.fold(
       (error) {
@@ -80,9 +107,25 @@ class AppointmentRepositoryImpl extends AppointmentRepository {
 
   @override
   Future<Either<AppError, bool>> cancelAppointment(
-      CancelParams cancelReq) async {
+    CancelParams cancelReq,
+  ) async {
     final Either result =
         await _appointmentService.cancelAppointment(cancelReq);
+    return result.fold(
+      (error) {
+        return Left(error);
+      },
+      (data) {
+        return Right(data);
+      },
+    );
+  }
+
+  @override
+  Future<Either<AppError, bool>> approved(
+    ApprovedParams approvedReq,
+  ) async {
+    final Either result = await _appointmentService.approved(approvedReq);
     return result.fold(
       (error) {
         return Left(error);

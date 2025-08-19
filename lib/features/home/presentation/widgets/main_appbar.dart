@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../theme/theme_extensions.dart';
+import '../../../../infrastructure/theme/theme_extensions.dart';
 
 class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onMenuTap;

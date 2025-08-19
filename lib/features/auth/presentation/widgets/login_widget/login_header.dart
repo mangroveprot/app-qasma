@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../common/helpers/spacing.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 
 class LoginHeader extends StatelessWidget {
   const LoginHeader({super.key});
@@ -68,7 +68,7 @@ class LoginHeader extends StatelessWidget {
         ),
         Spacing.verticalXSmall,
         Text(
-          'STUDENT',
+          'STAFF',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 16,

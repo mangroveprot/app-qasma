@@ -4,9 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/appointment/presentation/pages/appointment_history_page.dart';
 import '../../features/appointment/presentation/pages/book_appointment_page.dart';
 import '../../features/auth/presentation/pages/change_password.dart';
-import '../../features/auth/presentation/pages/create_account_page.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
-import '../../features/auth/presentation/pages/get_started_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/otp_verification_page.dart';
 import '../../features/auth/presentation/pages/reset_password_page.dart';
@@ -42,14 +40,6 @@ class AppRouter {
             path: Routes.login,
             pageBuilder: (context, state) =>
                 const NoTransitionPage(child: LoginPage()),
-          ),
-          GoRoute(
-            path: Routes.get_started,
-            builder: (context, state) => const GetStartedPage(),
-          ),
-          GoRoute(
-            path: Routes.create_account,
-            builder: (context, state) => const CreateAccountPage(),
           ),
           GoRoute(
             path: Routes.otp_verification,

@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../common/helpers/spacing.dart';
 import '../../../../../common/widgets/button_text/custom_text_button.dart';
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 
 class BookAppointmentButtons extends StatelessWidget {
   final VoidCallback onPressed;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../theme/theme_extensions.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
 
 class AboutFooter extends StatelessWidget {
   const AboutFooter({Key? key}) : super(key: key);
