@@ -46,7 +46,7 @@ class ConnectionCubit extends Cubit<ConnectionCubitState> {
     try {
       final response = await http
           .get(Uri.parse('https://clients3.google.com/generate_204'))
-          .timeout(const Duration(seconds: 5));
+          .timeout(const Duration(seconds: 10));
       return response.statusCode == 204;
     } catch (_) {
       return false;

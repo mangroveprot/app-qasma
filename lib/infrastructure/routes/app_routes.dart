@@ -23,6 +23,7 @@ class Routes {
   static const String appointment_history = 'appointment-history';
 
   // preference routes name
+  static const String settings = 'settings';
   static const String privacy_policy = 'privacy-policy';
   static const String terms_conditons = 'terms-conditions';
   static const String about = 'about';

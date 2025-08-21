@@ -30,8 +30,12 @@ class MyProfilePageState extends State<MyProfilePage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
     if (!_hasInitialized) {
+      //  final rawExtra = GoRouterState.of(context).extra;
+
       _extractRouteData();
+
       controller.initialize(idNumber: idNumber ?? '');
       _hasInitialized = true;
     }
@@ -39,8 +43,14 @@ class MyProfilePageState extends State<MyProfilePage> {
 
   void _extractRouteData() {
     if (_routeData != null) return;
-    _routeData = AppRouteExtractor.extractRaw<Map<String, dynamic>>(
-        GoRouterState.of(context).extra);
+
+    final rawExtra = GoRouterState.of(context).extra;
+
+    _routeData = rawExtra as Map<String, dynamic>?;
+
+    if (_routeData == null) {
+      _routeData = AppRouteExtractor.extractRaw<Map<String, dynamic>>(rawExtra);
+    }
   }
 
   String? get idNumber => _routeData?['idNumber'] as String?;
@@ -87,6 +97,14 @@ class MyProfilePageState extends State<MyProfilePage> {
           await Future.delayed(const Duration(milliseconds: 1500));
         }
       });
+
+      for (final suggestion in state.suggestions) {
+        AppToast.show(
+          message: suggestion,
+          type: ToastType.original,
+        );
+        await Future.delayed(const Duration(milliseconds: 2000));
+      }
     }
     if (state is ButtonSuccessState) {}
   }

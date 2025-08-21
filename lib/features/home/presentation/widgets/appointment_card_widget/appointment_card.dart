@@ -288,7 +288,7 @@ class AppointmentCard extends StatelessWidget {
 
             Row(
               children: [
-                if (appointment.status != StatusType.approved.status) ...[
+                if (appointment.status != StatusType.approved.field) ...[
                   Expanded(
                     child: CardApproveButton(
                       buttonId: 'approved${appointmentId}',

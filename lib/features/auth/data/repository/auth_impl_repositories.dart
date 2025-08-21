@@ -37,17 +37,14 @@ class AuthRepositoryImpl extends AuthRepository {
 
   void _preloadData() {
     Future.microtask(() async {
-      try {
-        final userId = SharedPrefs().getString('currentUserId');
-        if (userId != null) {
-          final appointmentUseCase = sl<GetAllAppointmentsUsecase>();
-          await appointmentUseCase.call();
-          final configUseCase = sl<GetConfigUseCase>();
-          await configUseCase.call();
-          final getAllUserUsecase = sl<GetAllUserUsecase>();
-          await getAllUserUsecase.call();
-        }
-      } catch (e) {}
+      final userId = SharedPrefs().getString('currentUserId');
+      if (userId != null) {
+        await Future.wait([
+          sl<GetAllAppointmentsUsecase>().call(),
+          sl<GetConfigUseCase>().call(),
+          sl<GetAllUserUsecase>().call(),
+        ]);
+      }
     });
   }
 

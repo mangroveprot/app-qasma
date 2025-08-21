@@ -1,67 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../common/widgets/custom_filter_bar.dart';
+import '../../../../../common/utils/constant.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
-import '../../../data/models/appointment_model.dart';
-import '../../bloc/appointments/appointments_cubit.dart';
-import '../../pages/appointment_history_page.dart';
-import '../../utils/history_utils.dart';
-import 'history_card.dart';
+import '../../../data/models/user_model.dart';
+import '../../bloc/user_cubit.dart';
+import '../../pages/users_page.dart';
+import 'user_item.dart';
+import '../../../../../common/widgets/custom_search_bar.dart';
 
-class HistoryForm extends StatefulWidget {
-  final AppointmentHistoryState state;
-  const HistoryForm({super.key, required this.state});
+class UsersForm extends StatefulWidget {
+  final UsersPageState state;
+  const UsersForm({
+    super.key,
+    required this.state,
+  });
 
   @override
-  State<HistoryForm> createState() => _HistoryFormState();
+  State<UsersForm> createState() => _UsersFormState();
 }
 
-class _HistoryFormState extends State<HistoryForm> {
+class _UsersFormState extends State<UsersForm> {
   DateTime? _lastRefreshTime;
   bool _isRefreshing = false;
   static const Duration _refreshCooldown = Duration(seconds: 30);
-  List<AppointmentModel>? _cachedFilteredAppointments;
-  AppointmentsLoadedState? _lastProcessedState;
-  AppointmentHistoryStatus _selectedFilter = AppointmentHistoryStatus.all;
+  List<UserModel>? _cachedFilteredUsers;
+  UserLoadedState? _lastProcessedState;
+  String _searchQuery = '';
 
-  List<AppointmentModel> _getFilteredAppointments(
-      AppointmentsLoadedState state) {
+  List<UserModel> _getFilteredUsers(UserLoadedState state) {
     if (_lastProcessedState != state) {
-      final baseAppointments = state.allAppointments.where((appointment) {
-        final status = appointment.status.toLowerCase();
-        return status == 'cancelled' || status == 'completed';
+      _cachedFilteredUsers = state.users.where((user) {
+        final role = user.role.toLowerCase();
+        return role == RoleType.student.field.toLowerCase();
       }).toList();
 
-      _cachedFilteredAppointments = _filterByStatus(baseAppointments);
+      _cachedFilteredUsers!.sort((a, b) =>
+          a.first_name.toLowerCase().compareTo(b.first_name.toLowerCase()));
+
       _lastProcessedState = state;
     }
-    return _cachedFilteredAppointments!;
-  }
 
-  List<AppointmentModel> _filterByStatus(List<AppointmentModel> appointments) {
-    switch (_selectedFilter) {
-      case AppointmentHistoryStatus.all:
-        return appointments;
-      case AppointmentHistoryStatus.cancelled:
-        return appointments
-            .where((appointment) =>
-                appointment.status.toLowerCase() == 'cancelled')
-            .toList();
-      case AppointmentHistoryStatus.completed:
-        return appointments
-            .where((appointment) =>
-                appointment.status.toLowerCase() == 'completed')
-            .toList();
+    if (_searchQuery.isEmpty) {
+      return _cachedFilteredUsers!;
     }
-  }
 
-  void _onFilterChanged(AppointmentHistoryStatus status) {
-    setState(() {
-      _selectedFilter = status;
-      _cachedFilteredAppointments = null;
-      _lastProcessedState = null;
-    });
+    return _cachedFilteredUsers!.where((user) {
+      final fullName = '${user.first_name} ${user.last_name}'.toLowerCase();
+      final query = _searchQuery.toLowerCase();
+      return fullName.contains(query) ||
+          user.first_name.toLowerCase().contains(query) ||
+          user.last_name.toLowerCase().contains(query);
+    }).toList();
   }
 
   Future<void> _onRefresh() async {
@@ -70,7 +60,7 @@ class _HistoryFormState extends State<HistoryForm> {
     setState(() => _isRefreshing = true);
 
     try {
-      await widget.state.controller.appointmentRefreshData();
+      await widget.state.controller.loadAllUsers();
       _lastRefreshTime = DateTime.now();
     } finally {
       if (mounted) setState(() => _isRefreshing = false);
@@ -82,52 +72,74 @@ class _HistoryFormState extends State<HistoryForm> {
         DateTime.now().difference(_lastRefreshTime!) < _refreshCooldown;
   }
 
+  void _onSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        CustomDropdownFilter<AppointmentHistoryStatus>(
-          options: [
-            const FilterOption(
-                label: 'All', value: AppointmentHistoryStatus.all),
-            const FilterOption(
-                label: 'Cancelled', value: AppointmentHistoryStatus.cancelled),
-            const FilterOption(
-                label: 'Completed', value: AppointmentHistoryStatus.completed),
+    return BlocBuilder<UserCubit, UserCubitState>(
+      buildWhen: (previous, current) {
+        return previous.runtimeType != current.runtimeType ||
+            previous is UserLoadingState ||
+            current is UserLoadingState;
+      },
+      builder: (context, state) {
+        return Column(
+          children: [
+            _SearchBar(
+              onSearchChanged: _onSearchChanged,
+            ),
+            Expanded(
+              child: _buildContent(state),
+            ),
           ],
-          onFilterChanged: _onFilterChanged,
-          initialSelection: _selectedFilter,
-        ),
-        Expanded(
-            child: BlocBuilder<AppointmentsCubit, AppointmentCubitState>(
-                buildWhen: (previous, current) {
-          return previous.runtimeType != current.runtimeType ||
-              previous is AppointmentsLoadingState ||
-              current is AppointmentsLoadingState;
-        }, builder: (context, state) {
-          if (state is AppointmentsLoadingState) {
-            return const _LoadingContent();
-          }
+        );
+      },
+    );
+  }
 
-          if (state is AppointmentsLoadedState) {
-            return _LoadedContent(
-              appointments: _getFilteredAppointments(state),
-              onRefresh: _onRefresh,
-            );
-          }
+  Widget _buildContent(UserCubitState state) {
+    if (state is UserLoadingState) {
+      return const _LoadingContent();
+    }
 
-          if (state is AppointmentsFailureState) {
-            return _ErrorContent(
-              error: state.primaryError,
-              onRefresh: _onRefresh,
-              onRetry: widget.state.controller.appointmentRefreshData,
-              isRefreshing: _isRefreshing,
-            );
-          }
+    if (state is UserLoadedState) {
+      return _LoadedContent(
+        onRefresh: _onRefresh,
+        users: _getFilteredUsers(state),
+      );
+    }
 
-          return _EmptyContent(onRefresh: _onRefresh);
-        }))
-      ],
+    if (state is UserFailureState) {
+      return _ErrorContent(
+        error: state.primaryError,
+        onRefresh: _onRefresh,
+        onRetry: widget.state.controller.loadAllUsers,
+        isRefreshing: _isRefreshing,
+      );
+    }
+
+    return _EmptyContent(onRefresh: _onRefresh);
+  }
+}
+
+class _SearchBar extends StatelessWidget {
+  final Function(String) onSearchChanged;
+
+  const _SearchBar({required this.onSearchChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+      child: CustomSearchBar(
+        onSearchChanged: onSearchChanged,
+        hintText: 'Search students...',
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 0),
+      ),
     );
   }
 }
@@ -142,31 +154,32 @@ class _LoadingContent extends StatelessWidget {
 }
 
 class _LoadedContent extends StatelessWidget {
-  final List<AppointmentModel> appointments;
+  final List<UserModel> users;
   final Future<void> Function() onRefresh;
 
   const _LoadedContent({
     Key? key,
-    required this.appointments,
+    required this.users,
     required this.onRefresh,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    if (appointments.isEmpty) {
+    if (users.isEmpty) {
       return _EmptyContent(onRefresh: onRefresh);
     }
 
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: ListView.builder(
-        itemCount: appointments.length,
+        itemCount: users.length,
         itemBuilder: (context, index) {
           return RepaintBoundary(
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: HistoryCard(
-                appointment: appointments[index],
+              padding: const EdgeInsets.only(bottom: 12, left: 16, right: 16),
+              child: UserItem(
+                model: users[index],
+                count: '${index + 1}',
               ),
             ),
           );
@@ -190,7 +203,7 @@ class _EmptyContent extends StatelessWidget {
       onRefresh: onRefresh,
       child: const _ScrollableContent(
         icon: Icons.calendar_today_outlined,
-        title: 'No history of appointments',
+        title: 'No users yet',
         subtitle: '',
       ),
     );
@@ -217,7 +230,7 @@ class _ErrorContent extends StatelessWidget {
       onRefresh: onRefresh,
       child: _ScrollableContent(
         icon: Icons.error_outline,
-        title: 'Failed to load appointments',
+        title: 'Failed to users.',
         subtitle: error,
         action: ElevatedButton(
           onPressed: isRefreshing ? null : onRetry,

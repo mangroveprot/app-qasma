@@ -6,7 +6,6 @@ import '../../../../common/networks/api_client.dart';
 import '../../../../common/networks/response/api_response.dart';
 import '../../../../core/_base/_repository/base_repository/abstract_repositories.dart';
 import '../../../../core/_base/_services/base_service/base_service.dart';
-import '../../../../core/_base/_services/storage/shared_preference.dart';
 import '../../../../core/_config/url_provider.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
 import '../../domain/services/user_service.dart';
@@ -135,15 +134,26 @@ class UserServiceImpl extends BaseService<UserModel> implements UserService {
   @override
   Future<Either<AppError, bool>> update(DynamicParam param) async {
     try {
-      final currIdNumber = SharedPrefs().getString('currentUserId');
+      final idNumber = param.fields['idNumber'];
+
+      if (idNumber == null) {
+        return Left(AppError.create(
+          message: 'ID number is required in the parameters',
+          type: ErrorType.validation,
+        ));
+      }
+
+      final data = Map<String, dynamic>.from(param.fields);
+      data.remove('idNumber');
+
       final url = _urlProviderConfig.addPathSegments(
         _urlProviderConfig.userUpdateUrl,
-        [currIdNumber ?? ''],
+        [idNumber.toString()],
       );
 
       final response = await _apiClient.patch(
         url,
-        data: param.toJson(),
+        data: data,
         requiresAuth: false,
       );
 
@@ -158,7 +168,7 @@ class UserServiceImpl extends BaseService<UserModel> implements UserService {
       final error = e is AppError
           ? e
           : AppError.create(
-              message: 'Unexpected error during getUser',
+              message: 'Unexpected error during update',
               type: ErrorType.unknown,
               originalError: e,
               stackTrace: stack,

@@ -15,8 +15,10 @@ class MenuItemConfig {
 }
 
 class MenuKeys {
+  static const String dashboard = 'dashboard';
   static const String myProfile = 'my_profile';
   static const String history = 'history';
+  static const String users = 'users';
   static const String privacyPolicy = 'privacy_policy';
   static const String termsAndCondition = 'terms_and_condition';
   static const String settings = 'settings';
@@ -26,6 +28,11 @@ class MenuKeys {
 
 const List<MenuItemConfig> menu_items = [
   MenuItemConfig(
+    menu_key: MenuKeys.dashboard,
+    title: 'Dashboard',
+    icon: Icons.dashboard_outlined,
+  ),
+  MenuItemConfig(
     menu_key: MenuKeys.myProfile,
     title: 'My profile',
     icon: Icons.person_outline,
@@ -34,6 +41,11 @@ const List<MenuItemConfig> menu_items = [
     menu_key: MenuKeys.history,
     title: 'History',
     icon: Icons.history,
+  ),
+  MenuItemConfig(
+    menu_key: MenuKeys.users,
+    title: 'Students',
+    icon: Icons.people_alt_outlined,
   ),
   MenuItemConfig(
     menu_key: MenuKeys.privacyPolicy,

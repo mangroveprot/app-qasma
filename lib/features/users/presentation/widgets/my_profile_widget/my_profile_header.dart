@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/_base/_services/storage/shared_preference.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
+import '../../../data/models/user_model.dart';
 
 class ProfileHeader extends StatelessWidget {
-  const ProfileHeader({super.key});
+  final UserModel user;
+  const ProfileHeader({
+    super.key,
+    required this.user,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final currentUserId = SharedPrefs().getString('currentUserId');
     final colors = context.colors;
     final fontWeight = context.weight;
     return Container(
@@ -46,7 +53,7 @@ class ProfileHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'My Profile',
+                  user.fullName,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: fontWeight.bold,
@@ -55,7 +62,9 @@ class ProfileHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Update your personal information',
+                  currentUserId == user.idNumber
+                      ? 'Update your personal information'
+                      : 'Updated user profile information',
                   style: TextStyle(
                     fontSize: 12,
                     color: colors.white.withOpacity(0.8),

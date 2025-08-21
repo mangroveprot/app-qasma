@@ -9,12 +9,14 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/otp_verification_page.dart';
 import '../../features/auth/presentation/pages/reset_password_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
-import '../../features/preferences/features/pages/about_page.dart';
-import '../../features/preferences/features/pages/privacy_policy_page.dart';
-import '../../features/preferences/features/pages/settings_page.dart';
-import '../../features/preferences/features/pages/terms_and_conditions.dart';
+import '../../features/preferences/presentation/pages/about_page.dart';
+import '../../features/preferences/presentation/pages/dashboard_page.dart';
+import '../../features/preferences/presentation/pages/privacy_policy_page.dart';
+import '../../features/preferences/presentation/pages/settings_page.dart';
+import '../../features/preferences/presentation/pages/terms_and_conditions.dart';
 import '../../features/splash/splash_screen.dart';
 import '../../features/users/presentation/pages/my_profile_page.dart';
+import '../../features/users/presentation/pages/users_page.dart';
 import 'app_routes.dart';
 
 class AppRouter {
@@ -77,7 +79,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Routes.user_path, // user
-        builder: (context, state) => const MyProfilePage(),
+        builder: (context, state) => const UsersPage(),
         routes: [
           GoRoute(
             path: Routes.user_profile,
@@ -87,8 +89,12 @@ class AppRouter {
       ),
       GoRoute(
         path: Routes.preference_path, // preference
-        builder: (context, state) => const SettingsPage(),
+        builder: (context, state) => const DashboardPage(),
         routes: [
+          GoRoute(
+            path: Routes.settings,
+            builder: (context, state) => const SettingsPage(),
+          ),
           GoRoute(
             path: Routes.privacy_policy,
             builder: (context, state) => const PrivacyPolicyPage(),

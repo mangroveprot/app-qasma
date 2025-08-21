@@ -5,18 +5,24 @@ import '../widgets/models/modal_option.dart';
 
 int YEARS_TO_GENERATE = 50;
 
-class Status {
-  final String status;
-  Status({
-    required this.status,
+class Property {
+  final String field;
+  Property({
+    required this.field,
   });
 }
 
 class StatusType {
-  static Status pending = Status(status: 'pending');
-  static Status completed = Status(status: 'completed');
-  static Status cancelled = Status(status: 'cancelled');
-  static Status approved = Status(status: 'approved');
+  static Property pending = Property(field: 'pending');
+  static Property completed = Property(field: 'completed');
+  static Property cancelled = Property(field: 'cancelled');
+  static Property approved = Property(field: 'approved');
+}
+
+class RoleType {
+  static Property student = Property(field: 'student');
+  static Property staff = Property(field: 'staff');
+  static Property counselor = Property(field: 'counselor');
 }
 
 String get guidance_email => 'katipunan.guidance@jrmsu.edu.ph';
@@ -79,6 +85,10 @@ const List<String> blockList = [
 const List<String> yearLevelList = ['1', '2', '3', '4'];
 
 const List<String> genderList = ['male', 'female', 'other'];
+
+const List<String> activeOption = ['active', 'inactive'];
+
+const List<String> verifyption = ['verified', 'unverified'];
 
 final currentYear = DateTime.now().year;
 final yearsList = List.generate(

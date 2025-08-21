@@ -32,8 +32,6 @@ class _HomeFormState extends State<HomeForm> {
 
   List<AppointmentModel>? _lastRawAppointments;
   List<AppointmentModel> _cachedFilteredAppointments = [];
-  int _approvedCount = 0;
-  int _pendingCount = 0;
 
   static const String _approvedStatus = 'approved';
   static const String _pendingStatus = 'pending';
@@ -52,26 +50,18 @@ class _HomeFormState extends State<HomeForm> {
     if (identical(_lastRawAppointments, state.appointments)) return;
 
     final filtered = <AppointmentModel>[];
-    int approvedCount = 0;
-    int pendingCount = 0;
 
     for (final appointment in state.appointments) {
       final status = appointment.status.toLowerCase();
 
-      if (status == _approvedStatus) {
+      if (status == _approvedStatus || status == _pendingStatus) {
         filtered.add(appointment);
-        approvedCount++;
-      } else if (status == _pendingStatus) {
-        filtered.add(appointment);
-        pendingCount++;
       }
     }
 
     filtered.sort(_compareAppointments);
 
     _cachedFilteredAppointments = filtered;
-    _approvedCount = approvedCount;
-    _pendingCount = pendingCount;
     _lastRawAppointments = state.appointments;
   }
 
@@ -126,10 +116,7 @@ class _HomeFormState extends State<HomeForm> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              HomeStatusCard(
-                pendingCount: _pendingCount,
-                approvedCount: _approvedCount,
-              ),
+              const HomeStatusCard(),
               Spacing.verticalSmall,
               Expanded(
                 child: _buildContent(state),
@@ -142,20 +129,23 @@ class _HomeFormState extends State<HomeForm> {
   }
 
   Widget _buildContent(AppointmentCubitState state) {
+    if (_isMinimumLoadingTime || state is AppointmentsLoadingState) {
+      return HomeSkeletonLoader.appointmentCardSkeleton();
+    }
+
     if (state is AppointmentsLoadedState) {
+      _processAppointments(state);
       if (_cachedFilteredAppointments.isEmpty) {
         return _buildEmptyState();
       }
 
-      return RefreshIndicator(
+      return HomeAppointmentList(
+        state: widget.state,
+        appointments: _cachedFilteredAppointments,
+        onCancel: (id) =>
+            widget.state.controller.handleCancelAppointment(id, context),
+        onReschedule: widget.state.controller.handleRescheduleAppointment,
         onRefresh: _onRefresh,
-        child: HomeAppointmentList(
-          state: widget.state,
-          appointments: _cachedFilteredAppointments,
-          onCancel: (id) =>
-              widget.state.controller.handleCancelAppointment(id, context),
-          onReschedule: widget.state.controller.handleRescheduleAppointment,
-        ),
       );
     }
 

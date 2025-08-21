@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../infrastructure/theme/theme_extensions.dart';
 import '../helpers/spacing.dart';
 
@@ -10,6 +9,7 @@ class CustomChevronButton extends StatelessWidget {
   final double? iconSize;
   final double? fontSize;
   final Color? iconColor;
+  final EdgeInsetsGeometry? padding;
 
   const CustomChevronButton({
     super.key,
@@ -19,6 +19,7 @@ class CustomChevronButton extends StatelessWidget {
     this.iconSize,
     this.fontSize,
     this.iconColor,
+    this.padding,
   });
 
   @override
@@ -42,7 +43,8 @@ class CustomChevronButton extends StatelessWidget {
           borderRadius: radius.medium,
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            padding: padding ??
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

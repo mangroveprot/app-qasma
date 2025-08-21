@@ -1,18 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../../common/utils/constant.dart';
 import '../../../../../common/widgets/custom_input_dropdown.dart';
 import '../../../../../common/widgets/custom_input_field.dart';
-import '../../../../../core/_base/_services/storage/shared_preference.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
 import '../../bloc/user_cubit_extensions.dart';
-import '../skeleton_loader/my_profile_skeletal_loader.dart';
+import '../profile_skeleton_loader/my_profile_skeletal_loader.dart';
 import 'profile_section.dart';
 import '../../../../../common/helpers/helpers.dart';
 import '../../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../../common/widgets/toast/app_toast.dart';
 import '../../../../../infrastructure/injection/service_locator.dart';
-import '../../../data/models/params/dynamic_param.dart';
 import '../../../data/models/user_model.dart';
 import '../../../domain/usecases/is_register_usecase.dart';
 import '../../bloc/user_cubit.dart';
@@ -129,6 +128,17 @@ class _MyProfileFormState extends State<MyProfileForm> {
       _updateCurrentUserWithTextFields();
 
       final emailChanged = _controllers['email']?.text != _originalUser?.email;
+      final idNumberChanged =
+          _controllers['idNumber']?.text != _originalUser?.idNumber;
+
+      if (idNumberChanged) {
+        final idNumber = _controllers['idNumber']?.text.trim() ?? '';
+
+        final bool isNotRegisteredId = await _validate(
+            field: idNumber, message: 'This ID Number is already registered');
+        if (!isNotRegisteredId) return;
+      }
+
       if (emailChanged) {
         final email = _controllers['email']?.text.trim() ?? '';
         if (!isValidEmail(email)) {
@@ -136,22 +146,33 @@ class _MyProfileFormState extends State<MyProfileForm> {
           return;
         }
 
-        final result = await sl<IsRegisterUsecase>().call(param: email);
-        result.fold((error) {
-          _showError(error.message ?? error.errorMessages.first);
-          return;
-        }, (isNotRegistered) {
-          if (!isNotRegistered) {
-            _showError('This email is already registered.');
-            return;
-          }
-        });
+        final bool isNotRegisteredEmail = await _validate(
+            field: email, message: 'This email is already registered');
+        if (!isNotRegisteredEmail) return;
       }
 
       await _performUpdate();
     } catch (e) {
-      _showError('Update failed. Please try again.');
+      // _showError(e.toString());
     }
+  }
+
+  Future<bool> _validate({
+    required String field,
+    String message = 'This is already registered.',
+  }) async {
+    final result = await sl<IsRegisterUsecase>().call(param: field);
+
+    return result.fold((error) {
+      _showError(error.message ?? error.errorMessages.first);
+      return false;
+    }, (isNotRegistered) {
+      if (!isNotRegistered) {
+        _showError(message);
+        return false;
+      }
+      return true;
+    });
   }
 
   void _showError(String message) {
@@ -208,58 +229,86 @@ class _MyProfileFormState extends State<MyProfileForm> {
     try {
       final updatedData =
           ProfileFormUtils.getAllFieldsData(_currentUser!, _controllers);
-      final param = DynamicParam(fields: updatedData);
-      widget.state.controller.updateUser(param);
+      print(['=============================', updatedData]);
+      // final param = DynamicParam(fields: updatedData);
+      // widget.state.controller.updateUser(param);
       await completer.future;
     } catch (e) {
       subscription.cancel();
-      _showError('Update failed. Please try again.');
       rethrow;
     }
   }
 
-  List<Widget> _buildFieldsForSection(List<String> fields) {
-    return fields.map((fieldName) {
-      final label = ProfileFieldConfig.fieldLabels[fieldName] ?? fieldName;
-      final value = ProfileFormUtils.getFieldValue(_currentUser!, fieldName);
-      final options = ProfileFieldConfig.dropdownOptions[fieldName];
-      final icon = ProfileFieldConfig.fieldIcons[fieldName];
+  List<Widget> _buildFieldsForSection(List<String> fields, {String? userRole}) {
+    return fields
+        .map((fieldName) {
+          final label = ProfileFieldConfig.fieldLabels[fieldName] ?? fieldName;
+          final value =
+              ProfileFormUtils.getFieldValue(_currentUser!, fieldName);
+          final options = ProfileFieldConfig.dropdownOptions[fieldName];
+          final icon = ProfileFieldConfig.fieldIcons[fieldName];
 
-      if (options != null) {
-        final List<String> updatedOptions = List.from(options);
+          if (userRole != null &&
+              userRole != RoleType.student.field.toString()) {
+            final studentOnlyFields = ['course', 'year_level', 'section'];
+            if (studentOnlyFields.contains(fieldName) &&
+                (options?.isEmpty ?? true)) {
+              return const SizedBox.shrink();
+            }
+          }
 
-        if (value.isNotEmpty && !options.contains(value)) {
-          updatedOptions.add(value);
-        }
+          if (options != null && options.isNotEmpty) {
+            final List<String> updatedOptions = List.from(options);
 
-        String finalValue;
-        if (value.isNotEmpty && updatedOptions.contains(value)) {
-          finalValue = value;
-        } else {
-          finalValue = updatedOptions.first;
-        }
+            if (value.isNotEmpty && !options.contains(value)) {
+              updatedOptions.add(value);
+            }
 
-        return CustomInputDropdownField(
-          fieldName: fieldName,
-          label: label,
-          value: finalValue,
-          options: updatedOptions,
-          icon: icon,
-          isEnabled: !_isSaving,
-          onChanged: (newValue) => _onDropdownChanged(fieldName, newValue),
-        );
-      } else {
-        return CustomInputField(
-          fieldName: fieldName,
-          label: label,
-          controller: _controllers[fieldName]!,
-          icon: icon,
-          isEnabled: !_isSaving,
-          keyboardType: ProfileFieldConfig.getKeyboardType(fieldName),
-          onChanged: _onFieldChanged,
-        );
-      }
-    }).toList();
+            String finalValue;
+            if (value.isNotEmpty && updatedOptions.contains(value)) {
+              finalValue = value;
+            } else if (updatedOptions.isNotEmpty) {
+              finalValue = updatedOptions.first;
+            } else {
+              return CustomInputField(
+                fieldName: fieldName,
+                label: label,
+                controller: _controllers[fieldName] ??
+                    TextEditingController(text: value),
+                icon: icon,
+                isEnabled: !_isSaving,
+                keyboardType: ProfileFieldConfig.getKeyboardType(fieldName),
+                onChanged: _onFieldChanged,
+              );
+            }
+
+            return CustomInputDropdownField(
+              fieldName: fieldName,
+              label: label,
+              value: finalValue,
+              options: updatedOptions,
+              icon: icon,
+              isEnabled: !_isSaving,
+              onChanged: (newValue) => _onDropdownChanged(fieldName, newValue),
+            );
+          } else {
+            if (_controllers[fieldName] == null) {
+              _controllers[fieldName] = TextEditingController(text: value);
+            }
+
+            return CustomInputField(
+              fieldName: fieldName,
+              label: label,
+              controller: _controllers[fieldName]!,
+              icon: icon,
+              isEnabled: !_isSaving,
+              keyboardType: ProfileFieldConfig.getKeyboardType(fieldName),
+              onChanged: _onFieldChanged,
+            );
+          }
+        })
+        .where((widget) => widget is! SizedBox || (widget).height != 0.0)
+        .toList();
   }
 
   @override
@@ -274,7 +323,7 @@ class _MyProfileFormState extends State<MyProfileForm> {
           }
 
           if (state is UserLoadedState) {
-            final id = SharedPrefs().getString('currentUserId') ?? '';
+            final id = widget.state.idNumber ?? '';
             final current = context.read<UserCubit>().getUserByIdNumber(id);
 
             if (current == null) {
@@ -288,7 +337,9 @@ class _MyProfileFormState extends State<MyProfileForm> {
             }
             return Column(
               children: [
-                Expanded(child: _buildForm()),
+                Expanded(
+                  child: _buildForm(_currentUser!),
+                ),
                 MyProfileActionButtons(
                   hasChanges: _hasChanges,
                   isSaving: _isSaving,
@@ -309,15 +360,26 @@ class _MyProfileFormState extends State<MyProfileForm> {
     );
   }
 
-  Widget _buildForm() {
+  Widget _buildForm(UserModel user) {
     return CustomScrollView(
       slivers: [
         SliverPadding(
           padding: const EdgeInsets.all(20),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
-              const ProfileHeader(),
+              ProfileHeader(
+                user: user,
+              ),
               const SizedBox(height: 32),
+              if (user.role == RoleType.student.field.toString()) ...[
+                ProfileSection(
+                  title: 'User Information',
+                  icon: Icons.info_outline,
+                  fields: _buildFieldsForSection(
+                      ProfileFieldConfig.informationFields),
+                ),
+                const SizedBox(height: 24),
+              ],
               ProfileSection(
                 title: 'Personal Information',
                 icon: Icons.person_outline,
@@ -331,6 +393,24 @@ class _MyProfileFormState extends State<MyProfileForm> {
                 fields:
                     _buildFieldsForSection(ProfileFieldConfig.contactFields),
               ),
+              if (user.role == RoleType.student.field.toString()) ...[
+                const SizedBox(height: 24),
+                ProfileSection(
+                  title: 'Academic Information',
+                  icon: Icons.school_outlined,
+                  fields: _buildFieldsForSection(
+                      ProfileFieldConfig.otherInfoFields),
+                ),
+              ],
+              if (user.role == RoleType.student.field.toString()) ...[
+                const SizedBox(height: 24),
+                ProfileSection(
+                  title: 'Academic Information',
+                  icon: Icons.school_outlined,
+                  fields: _buildFieldsForSection(
+                      ProfileFieldConfig.otherInfoFields),
+                ),
+              ],
               const SizedBox(height: 40),
             ]),
           ),

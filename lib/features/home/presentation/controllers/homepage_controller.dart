@@ -202,7 +202,7 @@ class HomePageController {
               staffId: currentUserId,
               counselorId: value,
               appointmentId: appointmentId,
-              status: StatusType.approved.status,
+              status: StatusType.approved.field,
             );
 
             await context.read<ButtonCubit>().execute(
@@ -330,9 +330,15 @@ class HomePageController {
 
   Map<String, VoidCallback> _getMenuHandlers(BuildContext context) {
     return {
+      MenuKeys.dashboard: () => _navigationCallback?.call(
+            Routes.preference_path,
+          ),
       MenuKeys.myProfile: () => handleMyProfile(),
       MenuKeys.history: () => _navigationCallback?.call(
             Routes.buildPath(Routes.appointment, Routes.appointment_history),
+          ),
+      MenuKeys.users: () => _navigationCallback?.call(
+            Routes.user_path,
           ),
       MenuKeys.privacyPolicy: () => _navigationCallback?.call(Routes.buildPath(
             Routes.preference_path,
@@ -343,8 +349,10 @@ class HomePageController {
             Routes.preference_path,
             Routes.terms_conditons,
           )),
-      MenuKeys.settings: () =>
-          _navigationCallback?.call(Routes.preference_path),
+      MenuKeys.settings: () => _navigationCallback?.call(Routes.buildPath(
+            Routes.preference_path,
+            Routes.settings,
+          )),
       MenuKeys.about: () => _navigationCallback?.call(Routes.buildPath(
             Routes.preference_path,
             Routes.about,

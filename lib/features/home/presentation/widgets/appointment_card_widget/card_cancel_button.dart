@@ -20,7 +20,7 @@ class CardCancelButton extends StatelessWidget {
       height: 44,
       width: double.infinity,
       text: 'Cancel',
-      fontSize: 10,
+      fontSize: 12,
       textColor: colors.white,
       backgroundColor: colors.error,
       textDecoration: TextDecoration.none,
@@ -29,7 +29,7 @@ class CardCancelButton extends StatelessWidget {
       iconData: Icons.close_outlined,
       iconPosition: Position.left,
       iconColor: colors.white,
-      iconSize: 10,
+      iconSize: 12,
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       onPressed: onPressed,
     );
