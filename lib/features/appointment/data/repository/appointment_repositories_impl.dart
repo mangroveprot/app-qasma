@@ -13,11 +13,11 @@ class AppointmentRepositoryImpl extends AppointmentRepository {
   final AppointmentService _appointmentService = sl<AppointmentService>();
 
   @override
-  Future<Either<AppError, AppointmentModel?>> getAllAppointments() async {
+  Future<Either<AppError, List<AppointmentModel>>> getAllAppointments() async {
     final Either result = await _appointmentService.getAllAppointments();
     return result.fold(
       (error) => Left(error),
-      (data) => Right(data.isNotEmpty ? data.first : null),
+      (data) => Right(data),
     );
   }
 

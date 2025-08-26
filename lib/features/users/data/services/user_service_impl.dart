@@ -21,48 +21,8 @@ class UserServiceImpl extends BaseService<UserModel> implements UserService {
   @override
   Future<Either<AppError, List<UserModel>>> getAllUser() async {
     try {
-      final int page = 1;
-      final int limit = 999;
-      final bool paginate = true;
-      final response = await _apiClient.get(
-        _urlProviderConfig.userEndPoint,
-        requiresAuth: true,
-        queryParameters: {
-          'page': page,
-          'limit': limit,
-          'paginate': paginate,
-        },
-      );
-
-      final apiResponse = ApiResponse<UserModel>.fromJson(
-        response.data,
-        (json) => UserModel.fromJson(json),
-      );
-
-      if (apiResponse.isSuccess && apiResponse.hasData) {
-        final users = apiResponse.documents!;
-
-        try {
-          await repository.saveAllItems(users);
-        } catch (e, stackTrace) {
-          _logger.e('Failed to save users data locally', e, stackTrace);
-          return Left(AppError.create(
-            message:
-                'Something went wrong while saving your data. Please contact the administrator.',
-            type: ErrorType.database,
-            originalError: e,
-            stackTrace: stackTrace,
-          ));
-        }
-
-        return Right(users);
-      } else {
-        return Left(apiResponse.error ??
-            AppError.create(
-              message: 'No users found.',
-              type: ErrorType.notFound,
-            ));
-      }
+      final allUsers = await repository.getAllItems();
+      return Right(allUsers);
     } catch (e, stackTrace) {
       final error = e is AppError
           ? e

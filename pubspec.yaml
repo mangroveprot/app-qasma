@@ -28,6 +28,8 @@ dependencies:
   http: ^0.13.6
   qr_flutter: ^3.2.0
   url_launcher: ^6.1.7
+  fl_chart: ^0.60.0
+  excel: ^2.1.0
 
 dev_dependencies:
   flutter_test:
@@ -43,3 +45,4 @@ flutter:
     - .env.development
     - .env.production
     - assets/
+    - assets/templates/masterlist_template.xlsx

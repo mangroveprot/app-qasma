@@ -105,6 +105,7 @@ class HomePageController {
     _appointmentConfigManager
         .loadAllAppointmentsConfig(_appointmentConfigCubit);
   }
+
   // PUBLIC METHODS
 
   String get currentUserId => SharedPrefs().getString('currentUserId') ?? '';

@@ -15,7 +15,8 @@ class ProfileFormUtils {
         return user.copyWith(
             active: newValue == activeOption[0] ? true : false);
       case 'verified':
-        return user.copyWith(active: newValue == verifyption[0] ? true : false);
+        return user.copyWith(
+            verified: newValue == verifyption[0] ? true : false);
       case 'first_name':
         return user.copyWith(first_name: newValue);
       case 'last_name':

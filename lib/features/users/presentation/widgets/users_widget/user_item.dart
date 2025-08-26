@@ -8,11 +8,13 @@ import '../../../data/models/user_model.dart';
 
 class UserItem extends StatelessWidget {
   final UserModel model;
+  final Future<void> Function() onRefresh;
   final String count;
   const UserItem({
     super.key,
     required this.model,
     required this.count,
+    required this.onRefresh,
   });
 
   @override
@@ -35,6 +37,9 @@ class UserItem extends StatelessWidget {
       extra: {
         'idNumber': idNumber,
         'isCurrentUser': isCurrentUser,
+        'onSuccess': () async {
+          await onRefresh();
+        },
       },
     );
   }

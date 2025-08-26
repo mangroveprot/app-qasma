@@ -27,45 +27,8 @@ class AppointmentServiceImpl extends BaseService<AppointmentModel>
   @override
   Future<Either<AppError, List<AppointmentModel>>> getAllAppointments() async {
     try {
-      int page = 1;
-      const int limit = 999;
-      bool hasMore = true;
-
-      final List<AppointmentModel> allAppointments = [];
-
-      while (hasMore) {
-        final response = await _apiClient.get(
-          _urlProviderConfig.appointmentEndPoint,
-          queryParameters: {
-            'paginate': true,
-            'page': page,
-            'limit': limit,
-          },
-          requiresAuth: true,
-        );
-
-        final apiResponse = ApiResponse<AppointmentModel>.fromJson(
-          response.data,
-          (json) => AppointmentModel.fromJson(json),
-        );
-
-        if (!apiResponse.isSuccess || apiResponse.documents == null) {
-          return Left(apiResponse.error ??
-              AppError.create(message: 'Failed to fetch appointments.'));
-        }
-
-        allAppointments.addAll(apiResponse.documents!);
-
-        final total = apiResponse.total ?? 0;
-        final resultsSoFar = allAppointments.length;
-
-        hasMore = resultsSoFar < total;
-        page++;
-      }
-
-      await repository.saveAllItems(allAppointments);
-
-      return Right(allAppointments);
+      final allAppoitnments = await repository.getAllItems();
+      return Right(allAppoitnments);
     } catch (e, stackTrace) {
       return Left(AppError.create(
         message: 'Unexpected error during fetching appointments.',

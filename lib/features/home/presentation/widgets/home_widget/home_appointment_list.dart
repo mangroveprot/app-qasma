@@ -5,7 +5,7 @@ import '../../../../appointment/data/models/appointment_model.dart';
 import '../../../../users/data/models/user_model.dart';
 import '../../pages/home_page.dart';
 import '../appointment_card_widget/appointment_card.dart';
-import '../home_skeletal_loader.dart';
+import '../home_skeletonloader.dart';
 import 'home_history_button.dart';
 
 class HomeAppointmentList extends StatefulWidget {

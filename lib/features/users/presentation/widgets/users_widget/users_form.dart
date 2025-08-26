@@ -178,6 +178,7 @@ class _LoadedContent extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(bottom: 12, left: 16, right: 16),
               child: UserItem(
+                onRefresh: onRefresh,
                 model: users[index],
                 count: '${index + 1}',
               ),

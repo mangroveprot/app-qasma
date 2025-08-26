@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 enum Flavor { development, production }
@@ -23,14 +24,13 @@ class FlavorValues {
       final value = dotenv.env[key];
       if (value == null || value.isEmpty) {
         // Log that the environment variable is missing
-        print(
-            'WARNING: Environment variable $key is missing or empty for $flavor');
+        ('WARNING: Environment variable $key is missing or empty for $flavor');
         return null;
       }
       return value;
     } catch (e) {
       // Log any errors when accessing environment variables
-      print(
+      debugPrint(
           'ERROR: Failed to access environment variable $key for $flavor: $e');
       return null;
     }

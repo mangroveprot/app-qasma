@@ -81,7 +81,7 @@ class BookDescriptionSection extends StatelessWidget {
                     padding: const EdgeInsets.all(12.0),
                     child: TextField(
                       maxLines: null,
-                      controller: textControllers[field_description.field_key]!,
+                      controller: textControllers[field_description.field_key],
                       onChanged: (value) {
                         if (value.trim().isNotEmpty) {
                           context

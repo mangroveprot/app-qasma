@@ -1,76 +1,101 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../common/utils/constant.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
+import '../../../../appointment/data/models/appointment_model.dart';
+import '../../../../users/data/models/user_model.dart';
+import '../../utils/dashboard_utils.dart';
+
 class DashboardStats extends StatelessWidget {
-  const DashboardStats({Key? key}) : super(key: key);
+  final List<AppointmentModel> appointments;
+  final List<UserModel> users;
+
+  const DashboardStats({
+    Key? key,
+    required this.appointments,
+    required this.users,
+  }) : super(key: key);
+
+  DashboardStatistics _calculateStatistics() {
+    final totalStudents =
+        users.where((user) => user.role == RoleType.student.field).length;
+
+    final activeStudents = users.where((user) => user.active == true).length;
+
+    final todaysAppointments =
+        DashboardUtils.getTodaysAppointments(appointments).length;
+
+    final completedAppointments = appointments
+        .where((appointment) => appointment.status == StatusType.completed)
+        .length;
+
+    return DashboardStatistics(
+      totalStudents: totalStudents,
+      activeStudents: activeStudents,
+      todaysAppointments: todaysAppointments,
+      completedAppointments: completedAppointments,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final statistics = _calculateStatistics();
+
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 2,
       crossAxisSpacing: 12,
       mainAxisSpacing: 12,
-      childAspectRatio: 1.7, // Increased from 1.6 to give more height
+      childAspectRatio: 1.7,
       children: [
-        buildStatCard(
+        _buildStatCard(
+          context: context,
           icon: Icons.people,
-          iconColor: const Color(0xFF3B82F6), // Blue
-          title: 'Total Patients',
-          value: '245',
-          backgroundColor: Colors.white,
-          onTap: () => _handleStatCardTap('Total Patients'),
+          iconColor: colors.secondary,
+          title: 'Total Students',
+          value: statistics.totalStudents.toString(),
+          backgroundColor: colors.white,
+          onTap: () => _handleStatCardTap('Total Students'),
         ),
-        buildStatCard(
-          icon: Icons.person_add,
-          iconColor: const Color(0xFF10B981), // Green
-          title: 'New Patients',
-          value: '42',
-          backgroundColor: Colors.white,
-          onTap: () => _handleStatCardTap('New Patients'),
+        _buildStatCard(
+          context: context,
+          icon: Icons.verified_outlined,
+          iconColor: colors.primary.withOpacity(0.8),
+          title: 'Active Students',
+          value: statistics.activeStudents.toString(),
+          backgroundColor: colors.white,
+          onTap: () => _handleStatCardTap('Active Students'),
         ),
-        buildStatCard(
+        _buildStatCard(
+          context: context,
           icon: Icons.calendar_today,
-          iconColor: const Color(0xFF8B5CF6), // Purple
+          iconColor: colors.textPrimary,
           title: "Today's Appointments",
-          value: '8',
-          backgroundColor: Colors.white,
+          value: statistics.todaysAppointments.toString(),
+          backgroundColor: colors.white,
           onTap: () => _handleStatCardTap('Today\'s Appointments'),
         ),
-        buildStatCard(
-          icon: Icons.notifications,
-          iconColor: const Color(0xFFF59E0B), // Orange
-          title: 'Notifications',
-          value: '5',
-          backgroundColor: Colors.white,
-          onTap: () => _handleStatCardTap('Notifications'),
+        _buildStatCard(
+          context: context,
+          icon: Icons.check_circle_outline,
+          iconColor: colors.primary,
+          title: 'Completed Appointments',
+          value: statistics.completedAppointments.toString(),
+          backgroundColor: colors.white,
+          onTap: () => _handleStatCardTap('Completed Appointments'),
         ),
       ],
     );
   }
 
   void _handleStatCardTap(String cardType) {
-    // Handle different card taps here
-    print('Tapped on: $cardType');
-    // You can navigate to different screens or show dialogs based on cardType
-    // Example:
-    // switch (cardType) {
-    //   case 'Total Patients':
-    //     Navigator.pushNamed(context, '/patients');
-    //     break;
-    //   case 'New Patients':
-    //     Navigator.pushNamed(context, '/new-patients');
-    //     break;
-    //   case 'Today\'s Appointments':
-    //     Navigator.pushNamed(context, '/appointments');
-    //     break;
-    //   case 'Notifications':
-    //     Navigator.pushNamed(context, '/notifications');
-    //     break;
-    // }
+    // implements in the future
   }
 
-  Widget buildStatCard({
+  Widget _buildStatCard({
+    required BuildContext context,
     required IconData icon,
     required Color iconColor,
     required String title,
@@ -78,6 +103,9 @@ class DashboardStats extends StatelessWidget {
     required Color backgroundColor,
     required VoidCallback onTap,
   }) {
+    final colors = context.colors;
+    final boxShadow = context.shadows;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -85,20 +113,14 @@ class DashboardStats extends StatelessWidget {
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: [boxShadow.light],
         ),
-        padding: const EdgeInsets.all(10), // Reduced from 12 to 10
+        padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.all(6), // Reduced from 8 to 6
+              padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 color: iconColor.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(8),
@@ -106,10 +128,10 @@ class DashboardStats extends StatelessWidget {
               child: Icon(
                 icon,
                 color: iconColor,
-                size: 16, // Reduced from 18 to 16
+                size: 16,
               ),
             ),
-            const SizedBox(height: 6), // Reduced from 8 to 6
+            const SizedBox(height: 6),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,23 +140,23 @@ class DashboardStats extends StatelessWidget {
                   Flexible(
                     child: Text(
                       title,
-                      style: const TextStyle(
-                        fontSize: 10, // Reduced from 11 to 10
+                      style: TextStyle(
+                        fontSize: 10,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF6B7280),
+                        color: colors.black,
                         height: 1.1,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(height: 2), // Reduced from 4 to 2
+                  const SizedBox(height: 2),
                   Text(
                     value,
-                    style: const TextStyle(
-                      fontSize: 20, // Reduced from 22 to 20
+                    style: TextStyle(
+                      fontSize: 20,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF111827),
+                      color: colors.textPrimary,
                       height: 1.0,
                     ),
                   ),
@@ -146,4 +168,18 @@ class DashboardStats extends StatelessWidget {
       ),
     );
   }
+}
+
+class DashboardStatistics {
+  final int totalStudents;
+  final int activeStudents;
+  final int todaysAppointments;
+  final int completedAppointments;
+
+  const DashboardStatistics({
+    required this.totalStudents,
+    required this.activeStudents,
+    required this.todaysAppointments,
+    required this.completedAppointments,
+  });
 }

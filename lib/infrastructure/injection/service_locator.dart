@@ -1,7 +1,12 @@
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
 
+import '../../common/data/repository/common_repositories_impl.dart';
+import '../../common/domain/repository/common_repositories.dart';
+import '../../common/domain/services/master_list_report_service.dart';
+import '../../common/domain/usecases/GenerateMasterListReportUsecase.dart';
 import '../../common/networks/api_client.dart';
+import '../../common/data/services/master_list_report_service_impl.dart';
 import '../../core/_base/_models/sync_model.dart';
 import '../../core/_base/_repository/base_repository/abstract_repositories.dart';
 import '../../core/_base/_repository/remote_repository/remote_reposiories.dart';
@@ -98,6 +103,9 @@ void _registerRepositories() {
 
   // User repository
   sl.registerLazySingleton<UserRepository>(() => UserRepositoryImpl());
+
+  // Common repository
+  sl.registerLazySingleton<CommonRepository>(() => CommonRepositoryImpl());
 
   // Appointment repository
   sl.registerLazySingleton<AppointmentRepository>(
@@ -201,6 +209,9 @@ void _registerAppointmentConfigRepositories() {
 
 void _registerServices() {
   sl
+    ..registerLazySingleton<MasterlistReportService>(
+      () => MasterlistReportServiceImpl(),
+    )
     ..registerLazySingleton<AuthService>(
       () => AuthServiceImpl(sl<AbstractRepository<UserModel>>()),
     )
@@ -262,4 +273,9 @@ void _registerUseCases() {
   sl
     ..registerLazySingleton<GetConfigUseCase>(() => GetConfigUseCase())
     ..registerLazySingleton<SyncConfigUsecase>(() => SyncConfigUsecase());
+
+  // Common use cases
+  sl
+    ..registerLazySingleton<GenerateMasterListReportUsecase>(
+        () => GenerateMasterListReportUsecase());
 }

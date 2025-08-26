@@ -5,6 +5,7 @@ import '../../../../../common/utils/constant.dart';
 import '../../../../../common/widgets/custom_input_dropdown.dart';
 import '../../../../../common/widgets/custom_input_field.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
+import '../../../data/models/params/dynamic_param.dart';
 import '../../bloc/user_cubit_extensions.dart';
 import '../profile_skeleton_loader/my_profile_skeletal_loader.dart';
 import 'profile_section.dart';
@@ -229,9 +230,8 @@ class _MyProfileFormState extends State<MyProfileForm> {
     try {
       final updatedData =
           ProfileFormUtils.getAllFieldsData(_currentUser!, _controllers);
-      print(['=============================', updatedData]);
-      // final param = DynamicParam(fields: updatedData);
-      // widget.state.controller.updateUser(param);
+      final param = DynamicParam(fields: updatedData);
+      widget.state.controller.updateUser(param);
       await completer.future;
     } catch (e) {
       subscription.cancel();

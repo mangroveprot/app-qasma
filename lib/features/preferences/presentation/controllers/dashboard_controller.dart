@@ -1,8 +1,13 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../common/data/model/master_list_model.dart';
+import '../../../../common/domain/usecases/GenerateMasterListReportUsecase.dart';
 import '../../../../common/manager/appointment_manager.dart';
 import '../../../../common/manager/user_manager.dart';
+import '../../../../common/utils/button_ids.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
+import '../../../../infrastructure/injection/service_locator.dart';
 import '../../../appointment/presentation/bloc/appointments/appointments_cubit.dart';
 import '../../../users/presentation/bloc/user_cubit.dart';
 
@@ -14,8 +19,8 @@ class DashboardController {
   late final AppointmentManager _appointmentManager;
   late final UserManager _userManager;
 
-  bool _isInitialized = false;
-  bool get isInitialized => _isInitialized;
+  // bool _isInitialized = false;
+  // bool get isInitialized => _isInitialized;
 
   List<BlocProvider> get blocProviders => [
         BlocProvider<AppointmentsCubit>(
@@ -33,7 +38,7 @@ class DashboardController {
     _initializeCubits();
     _initializeManagers();
     _loadInitialData();
-    _isInitialized = true;
+    // _isInitialized = true;
   }
 
   void _initializeManagers() {
@@ -48,8 +53,16 @@ class DashboardController {
   }
 
   void _loadInitialData() {
-    refreshUsersData();
-    appointmentRefreshData();
+    _loadUsersData();
+    _loadAppointmentsData();
+  }
+
+  void _loadUsersData() {
+    _userManager.loadAllUser(_userCubit);
+  }
+
+  void _loadAppointmentsData() {
+    _appointmentManager.loadAllAppointments(_appointmentsCubit);
   }
 
   Future<void> refreshUsersData() async {
@@ -58,5 +71,16 @@ class DashboardController {
 
   Future<void> appointmentRefreshData() async {
     await _appointmentManager.refreshAppointments(_appointmentsCubit);
+  }
+
+  void handleGenerateReport({
+    required BuildContext context,
+    required List<MasterlistModel> entries,
+  }) {
+    context.read<ButtonCubit>().execute(
+          buttonId: ButtonsUniqeKeys.downloadReports.id,
+          usecase: sl<GenerateMasterListReportUsecase>(),
+          params: entries,
+        );
   }
 }

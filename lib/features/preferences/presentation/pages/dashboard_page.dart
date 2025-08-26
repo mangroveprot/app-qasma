@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../common/utils/button_ids.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/custom_app_bar.dart';
 import '../../../../common/widgets/toast/app_toast.dart';
+import '../../../../infrastructure/theme/theme_extensions.dart';
 import '../../../appointment/presentation/bloc/appointments/appointments_cubit.dart';
 import '../../../users/presentation/bloc/user_cubit.dart';
 import '../controllers/dashboard_controller.dart';
 import '../widgets/dashboard_widget/dashboard_form.dart';
+import '../widgets/skeletal/dashboard_skeleton_loader.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -18,23 +21,29 @@ class DashboardPage extends StatefulWidget {
 
 class DashboardPageState extends State<DashboardPage> {
   late final DashboardController controller;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     controller = DashboardController();
+    _initializeWithDelay();
+  }
+
+  Future<void> _initializeWithDelay() async {
     controller.initialize();
+
+    await Future.delayed(const Duration(seconds: 1));
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!controller.isInitialized) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
     return MultiBlocProvider(
       providers: controller.blocProviders,
       child: MultiBlocListener(
@@ -50,18 +59,21 @@ class DashboardPageState extends State<DashboardPage> {
           ),
         ],
         child: Scaffold(
-          appBar: const CustomAppBar(
+          appBar: CustomAppBar(
             title: 'Dashboard',
+            backgroundColor: context.colors.background,
           ),
-          body: LayoutBuilder(builder: (context, constraints) {
-            return SizedBox(
-              width: constraints.maxWidth,
-              height: constraints.maxHeight,
-              child: DashboardForm(
-                state: this,
-              ),
-            );
-          }),
+          body: _isLoading
+              ? DashboardSkeletonLoader.dashboard()
+              : LayoutBuilder(builder: (context, constraints) {
+                  return SizedBox(
+                    width: constraints.maxWidth,
+                    height: constraints.maxHeight,
+                    child: DashboardForm(
+                      state: this,
+                    ),
+                  );
+                }),
         ),
       ),
     );
@@ -118,10 +130,14 @@ class DashboardPageState extends State<DashboardPage> {
     }
 
     if (state is ButtonSuccessState) {
-      AppToast.show(
-        message: 'Appointment has been canceled successfully.',
-        type: ToastType.success,
-      );
+      final buttonId = state.buttonId;
+      if (buttonId == ButtonsUniqeKeys.downloadReports.id)
+        return AppToast.show(
+          message: 'File saved to Downloads folder as ${state.data}',
+          type: ToastType.success,
+          duration: const Duration(seconds: 5),
+        );
+
       // await controller.appoitnmentRefreshData();
     }
   }

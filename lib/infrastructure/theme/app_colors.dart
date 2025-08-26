@@ -71,14 +71,15 @@ class AppColors extends ThemeExtension<AppColors> {
   }
 
   static const lightColors = AppColors(
-      primary: Color(0xFF32A616),
-      secondary: Color(0xFF0F65B3),
-      accent: Color(0xFF484848),
-      error: Color(0xFFE8322B),
-      warning: Color(0xFFF57C00),
-      background: Color(0xFFE6E6E6),
-      surface: Color(0xFFD9D9D9),
-      textPrimary: Color(0xFF616161),
-      white: Color(0xFFFEFEFE),
-      black: Colors.black87);
+    primary: Color(0xFF32A616),
+    secondary: Color(0xFF0F65B3),
+    accent: Color(0xFF484848),
+    error: Color(0xFFE8322B),
+    warning: Color(0xFFF57C00),
+    background: Color(0xFFE6E6E6),
+    surface: Color(0xFFD9D9D9),
+    textPrimary: Color(0xFF616161),
+    white: Color(0xFFFEFEFE),
+    black: Colors.black87,
+  );
 }
