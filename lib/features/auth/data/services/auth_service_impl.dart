@@ -55,9 +55,13 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
         if (document['user'] != null) {
           final userData = document['user'] as Map<String, dynamic>;
           final idNumber = userData['idNumber'] as String?;
+          final firstName = userData['first_name'] as String?;
           if (idNumber != null) {
             await SharedPrefs().setString('currentUserId', idNumber);
           }
+          await SharedPrefs()
+              .setString('currentUserFirstName', firstName ?? '');
+
           final userModel = UserModel.fromJson(userData);
 
           try {

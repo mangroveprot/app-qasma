@@ -84,7 +84,7 @@ const List<String> blockList = [
 
 const List<String> yearLevelList = ['1', '2', '3', '4'];
 
-const List<String> genderList = ['male', 'female', 'other'];
+const List<String> genderList = ['Male', 'Female', 'Other'];
 
 const List<String> activeOption = ['active', 'inactive'];
 

@@ -100,7 +100,7 @@ const FormFieldConfig field_year = FormFieldConfig(
 const FormFieldConfig field_address = FormFieldConfig(
   field_key: 'address',
   name: 'Address',
-  hint: 'Enter your address... (optional)',
+  hint: 'Enter your address...',
 );
 
 const FormFieldConfig field_contact_number = FormFieldConfig(
@@ -118,7 +118,7 @@ const FormFieldConfig field_email = FormFieldConfig(
 const FormFieldConfig field_facebook = FormFieldConfig(
   field_key: 'facebook',
   name: 'Facebook',
-  hint: 'Enter your Facebook profile link... (optional)',
+  hint: 'Enter your Facebook profile link...',
 );
 
 const FormFieldConfig field_otp_verification = FormFieldConfig(

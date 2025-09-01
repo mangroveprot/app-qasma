@@ -161,7 +161,6 @@ class _CustomFormFieldState extends State<CustomFormField> {
           borderSide: BorderSide(color: colorDanger, width: 1.0),
         ),
       ),
-      // CRITICAL: Disable autovalidation to prevent rebuilds on every keystroke
       autovalidateMode: AutovalidateMode.disabled,
     );
   }

@@ -7,7 +7,6 @@ import '../../../../../common/helpers/spacing.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
 import '../../../../appointment/presentation/bloc/appointments/appointments_cubit.dart';
-import '../../../../users/presentation/pages/profile_setup_page.dart';
 import '../../pages/home_page.dart';
 import '../home_skeletonloader.dart';
 import 'home_appointment_list.dart';
@@ -117,17 +116,6 @@ class _HomeFormState extends State<HomeForm> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              ElevatedButton(
-                onPressed: () {
-                  // Push SecondPage onto the navigation stack
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const ProfileSetupPage()),
-                  );
-                },
-                child: const Text('Go to Second Page'),
-              ),
               const HomeStatusCard(),
               Spacing.verticalSmall,
               Expanded(

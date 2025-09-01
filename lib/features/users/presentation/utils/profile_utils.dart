@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../common/helpers/helpers.dart';
 import '../../../../common/utils/constant.dart';
 import '../../data/models/other_info_model.dart';
 import '../../data/models/user_model.dart';
@@ -90,7 +91,7 @@ class ProfileFormUtils {
       case 'suffix':
         return user.suffix;
       case 'gender':
-        return user.gender;
+        return capitalizeWords(user.gender);
       case 'address':
         return user.address;
       case 'contact_number':

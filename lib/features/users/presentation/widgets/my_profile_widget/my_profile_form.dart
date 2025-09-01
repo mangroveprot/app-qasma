@@ -7,7 +7,7 @@ import '../../../../../common/widgets/custom_input_field.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
 import '../../../data/models/params/dynamic_param.dart';
 import '../../bloc/user_cubit_extensions.dart';
-import '../profile_skeleton_loader/my_profile_skeletal_loader.dart';
+import '../users_skeleton_loader/my_profile_skeletal_loader.dart';
 import 'profile_section.dart';
 import '../../../../../common/helpers/helpers.dart';
 import '../../../../../common/widgets/bloc/button/button_cubit.dart';
@@ -399,16 +399,8 @@ class _MyProfileFormState extends State<MyProfileForm> {
                   title: 'Academic Information',
                   icon: Icons.school_outlined,
                   fields: _buildFieldsForSection(
-                      ProfileFieldConfig.otherInfoFields),
-                ),
-              ],
-              if (user.role == RoleType.student.field.toString()) ...[
-                const SizedBox(height: 24),
-                ProfileSection(
-                  title: 'Academic Information',
-                  icon: Icons.school_outlined,
-                  fields: _buildFieldsForSection(
-                      ProfileFieldConfig.otherInfoFields),
+                    ProfileFieldConfig.otherInfoFields,
+                  ),
                 ),
               ],
               const SizedBox(height: 40),

@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../common/presentation/pages/not_found_page.dart';
 import '../../features/appointment/presentation/pages/appointment_history_page.dart';
 import '../../features/appointment/presentation/pages/book_appointment_page.dart';
 import '../../features/auth/presentation/pages/change_password.dart';
@@ -16,6 +17,7 @@ import '../../features/preferences/presentation/pages/settings_page.dart';
 import '../../features/preferences/presentation/pages/terms_and_conditions.dart';
 import '../../features/splash/splash_screen.dart';
 import '../../features/users/presentation/pages/my_profile_page.dart';
+import '../../features/users/presentation/pages/profile_setup_page.dart';
 import '../../features/users/presentation/pages/users_page.dart';
 import 'app_routes.dart';
 
@@ -27,12 +29,18 @@ class AppRouter {
     navigatorKey: parentNavigatorKey,
     debugLogDiagnostics: true,
     initialLocation: Routes.root,
+    errorBuilder: (context, state) => const NotFoundPage(),
     routes: [
       GoRoute(
         path: Routes.root,
         pageBuilder: (context, state) => const NoTransitionPage(
           child: SplashScreen(),
         ),
+      ),
+      GoRoute(
+        path: Routes.common, // '/common'
+        builder: (context, state) => const ProfileSetupPage(),
+        routes: [],
       ),
       GoRoute(
         path: Routes.aut_path, // '/auth'

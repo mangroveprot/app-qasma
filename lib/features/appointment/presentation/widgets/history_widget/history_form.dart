@@ -36,24 +36,36 @@ class _HistoryFormState extends State<HistoryForm> {
       _cachedFilteredAppointments = _filterByStatus(baseAppointments);
       _lastProcessedState = state;
     }
+
     return _cachedFilteredAppointments!;
   }
 
   List<AppointmentModel> _filterByStatus(List<AppointmentModel> appointments) {
+    List<AppointmentModel> filteredAppointments;
+
     switch (_selectedFilter) {
       case AppointmentHistoryStatus.all:
-        return appointments;
+        filteredAppointments = appointments;
+        break;
       case AppointmentHistoryStatus.cancelled:
-        return appointments
+        filteredAppointments = appointments
             .where((appointment) =>
                 appointment.status.toLowerCase() == 'cancelled')
             .toList();
+        break;
       case AppointmentHistoryStatus.completed:
-        return appointments
+        filteredAppointments = appointments
             .where((appointment) =>
                 appointment.status.toLowerCase() == 'completed')
             .toList();
+        break;
     }
+
+    filteredAppointments.sort((a, b) {
+      return b.scheduledStartAt.compareTo(a.scheduledStartAt);
+    });
+
+    return filteredAppointments;
   }
 
   void _onFilterChanged(AppointmentHistoryStatus status) {

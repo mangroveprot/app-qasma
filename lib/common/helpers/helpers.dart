@@ -1,3 +1,5 @@
+import 'package:url_launcher/url_launcher.dart';
+
 import '../utils/constant.dart';
 
 class Field {
@@ -156,5 +158,11 @@ String formatUtcToLocal({
     }
   } catch (e) {
     return 'Invalid time format';
+  }
+}
+
+Future<void> launchExternalUrl({required Uri uri}) async {
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 }

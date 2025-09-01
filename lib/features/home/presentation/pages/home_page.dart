@@ -161,10 +161,20 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
     }
 
     if (state is ButtonSuccessState) {
-      AppToast.show(
-        message: 'Appointment has been canceled successfully.',
-        type: ToastType.success,
-      );
+      if (state.buttonId != null &&
+          state.buttonId!.startsWith('counselor_selection_approved_')) {
+        AppToast.show(
+          message: 'Appointment has been approved successfully.',
+          type: ToastType.success,
+        );
+      }
+      if (state.buttonId != null &&
+          state.buttonId!.startsWith('counselor_selection_canceled_')) {
+        AppToast.show(
+          message: 'Appointment has been canceled successfully.',
+          type: ToastType.success,
+        );
+      }
       await controller.appoitnmentRefreshData();
     }
   }

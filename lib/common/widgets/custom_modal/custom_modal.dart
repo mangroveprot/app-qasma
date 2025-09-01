@@ -327,6 +327,7 @@ class CustomModal {
   static Future<T?> showRadioSelectionModal<T>(
     BuildContext context, {
     required List<ModalOption> options,
+    String? buttonId,
     SelectedOptionType selectedOptionType = SelectedOptionType.subtitle,
     String title = 'Select an Option',
     String? subtitle,
@@ -353,6 +354,7 @@ class CustomModal {
       child: BlocProvider(
         create: (context) => ButtonCubit(),
         child: AnimatedRadioContent<T>(
+          buttonId: buttonId,
           selectedOptionType: selectedOptionType,
           options: options,
           title: title,

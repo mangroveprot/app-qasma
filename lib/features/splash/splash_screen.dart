@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/_base/_services/storage/shared_preference.dart';
 import '../../infrastructure/routes/app_routes.dart';
 import '../../infrastructure/theme/theme_extensions.dart';
 import '../auth/presentation/bloc/auth/auth_cubit.dart';
@@ -19,6 +20,9 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     _initializeApp();
   }
+
+  final currentUserFirstName =
+      SharedPrefs().getString('currentUserFirstName') ?? '';
 
   Future<void> _initializeApp() async {
     try {
@@ -45,7 +49,11 @@ class _SplashScreenState extends State<SplashScreen> {
     final currentState = AuthCubit.instance.state;
 
     if (currentState is AuthSuccessState) {
-      context.go(Routes.home_path);
+      if (currentUserFirstName.isEmpty) {
+        context.go(Routes.common);
+      } else {
+        context.go(Routes.home_path);
+      }
     } else if (currentState is AuthFailureState) {
       context.go(Routes.buildPath(Routes.aut_path, Routes.login));
     } else {

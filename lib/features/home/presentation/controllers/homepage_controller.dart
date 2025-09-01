@@ -14,6 +14,7 @@ import '../../../../common/widgets/custom_modal/_radio/animated_radio_content.da
 import '../../../../common/widgets/custom_modal/custom_modal.dart';
 import '../../../../common/widgets/modal.dart';
 import '../../../../common/widgets/models/modal_option.dart';
+import '../../../../common/widgets/toast/app_toast.dart';
 import '../../../../core/_base/_services/storage/shared_preference.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
 import '../../../../infrastructure/routes/app_routes.dart';
@@ -192,6 +193,7 @@ class HomePageController {
 
         await CustomModal.showRadioSelectionModal<String>(
           context,
+          buttonId: 'counselor_selection_approved_${appointmentId}',
           isBottomSheet: false,
           options: counselorOptions,
           title: 'Select a counselor to assign',
@@ -207,9 +209,14 @@ class HomePageController {
             );
 
             await context.read<ButtonCubit>().execute(
+                  buttonId: 'counselor_selection_approved_${appointmentId}',
                   usecase: sl<ApprovedAppointmentUsecase>(),
                   params: _approvedData,
                 );
+            AppToast.show(
+              message: 'Appointment has been approved successfully.',
+              type: ToastType.success,
+            );
             return '';
           },
         );
@@ -258,6 +265,7 @@ class HomePageController {
 
     await CustomModal.showRadioSelectionModal<String>(
       context,
+      buttonId: 'counselor_selection_canceled_${appointmentId}',
       isBottomSheet: false,
       options: reasonOptionList,
       title: 'Select Cancellation Reason',
@@ -271,6 +279,7 @@ class HomePageController {
             ));
 
         await context.read<ButtonCubit>().execute(
+              buttonId: 'counselor_selection_canceled_${appointmentId}',
               usecase: sl<CancelAppointmentUsecase>(),
               params: _cancellationData,
             );

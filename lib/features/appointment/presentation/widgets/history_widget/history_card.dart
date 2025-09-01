@@ -211,10 +211,8 @@ class HistoryCard extends StatelessWidget {
   }
 
   void _showAppointmentDetails(BuildContext context) {
-    // Helper to handle null/empty values
     String safe(String? value) => value?.isNotEmpty == true ? value! : 'N/A';
 
-    // Helper for dates
     String safeDate(String? dateString, DateTimeFormatStyle style) {
       if (dateString?.isNotEmpty != true) return 'N/A';
       try {

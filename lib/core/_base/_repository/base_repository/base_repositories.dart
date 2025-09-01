@@ -116,7 +116,6 @@ abstract class BaseRepository {
       if (onComplete != null) await onComplete();
     } catch (error, stackTrace) {
       if (error is ConflictException && onConflict != null) {
-        // Fixed: Use positional parameters instead of named parameters
         _logger.w(
           'Sync conflict detected in ${runtimeType.toString()}, attempting resolution. Error: $error\nStackTrace: $stackTrace',
         );

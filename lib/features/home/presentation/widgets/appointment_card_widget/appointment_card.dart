@@ -32,6 +32,9 @@ class AppointmentCard extends StatelessWidget {
     final weight = context.weight;
     final radius = context.radii;
     final textPrimay = colors.textPrimary;
+    final appointmentDate = formatUtcToLocal(
+        utcTime: appointment.scheduledStartAt.toString(),
+        style: DateTimeFormatStyle.dateOnly);
 
     final appointmentId = appointment.appointmentId;
 
@@ -90,7 +93,11 @@ class AppointmentCard extends StatelessWidget {
                                 utcTime:
                                     appointment.scheduledStartAt.toString(),
                                 style: DateTimeFormatStyle.dateOnly),
-                            style: _titleTextStyle,
+                            style: TextStyle(
+                              fontSize: appointmentDate.length <= 15 ? 16 : 14,
+                              fontWeight: weight.bold,
+                              color: colors.black,
+                            ),
                           ),
                         ],
                       ),

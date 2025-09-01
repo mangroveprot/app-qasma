@@ -17,6 +17,10 @@ class OtherInfoModel extends OtherInfo {
   OtherInfoModel copyWith(Map<String, dynamic> patch) =>
       OtherInfoModel({...data, ...patch});
 
+  OtherInfoModel updateField(String fieldName, String? value) {
+    return copyWith({fieldName: value});
+  }
+
   @override
   String toString() => 'OtherInfoModel($data)';
 }

@@ -1,6 +1,7 @@
 class Routes {
   // paths
   static const String root = '/';
+  static const String common = '/common';
   static const String aut_path = '/auth';
   static const String user_path = '/user';
   static const String home_path = '/home';

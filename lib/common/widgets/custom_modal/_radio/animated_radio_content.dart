@@ -23,6 +23,7 @@ class AnimatedRadioContent<T> extends StatefulWidget {
   final String othersPlaceholder;
   final Future<T> Function(String selectedReason)? onConfirm;
   final SelectedOptionType selectedOptionType;
+  final String? buttonId;
 
   const AnimatedRadioContent({
     super.key,
@@ -34,6 +35,7 @@ class AnimatedRadioContent<T> extends StatefulWidget {
     this.othersPlaceholder = 'Please specify...',
     this.onConfirm,
     required this.selectedOptionType,
+    this.buttonId,
   });
 
   @override
@@ -173,8 +175,10 @@ class _AnimatedRadioContentState<T> extends State<AnimatedRadioContent<T>> {
                     _buildOthersTextField(context),
                   const SizedBox(height: 30),
                   ConfirmationButton(
-                      onPressedAsync: _handleConfirm,
-                      labelText: widget.confirmButtonText),
+                    buttonId: widget.buttonId,
+                    onPressedAsync: _handleConfirm,
+                    labelText: widget.confirmButtonText,
+                  ),
                   const SizedBox(height: 20),
                 ],
               ),

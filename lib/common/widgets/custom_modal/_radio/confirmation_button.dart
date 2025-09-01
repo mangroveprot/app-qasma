@@ -11,6 +11,7 @@ class ConfirmationButton extends StatelessWidget {
   final Future<void> Function()? onPressedAsync;
   final bool enabled;
   final Color? backgroundColor;
+  final String? buttonId;
 
   const ConfirmationButton({
     super.key,
@@ -19,6 +20,7 @@ class ConfirmationButton extends StatelessWidget {
     this.onPressedAsync,
     this.enabled = true,
     this.backgroundColor,
+    this.buttonId,
   });
 
   @override
@@ -31,6 +33,7 @@ class ConfirmationButton extends StatelessWidget {
         Container(
           width: double.infinity,
           child: CustomAppButton(
+            buttonId: buttonId,
             onPressedCallback: !enabled
                 ? null
                 : () async {
