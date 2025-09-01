@@ -5,6 +5,7 @@ import '../../../../../common/utils/constant.dart';
 import '../../../../../common/widgets/custom_input_dropdown.dart';
 import '../../../../../common/widgets/custom_input_field.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
+import '../../../data/models/other_info_model.dart';
 import '../../../data/models/params/dynamic_param.dart';
 import '../../bloc/user_cubit_extensions.dart';
 import '../users_skeleton_loader/my_profile_skeletal_loader.dart';
@@ -104,8 +105,16 @@ class _MyProfileFormState extends State<MyProfileForm> {
 
   void _onDropdownChanged(String fieldName, String newValue) {
     setState(() {
-      _currentUser =
-          ProfileFormUtils.updateMainUser(_currentUser!, fieldName, newValue);
+      if (ProfileFieldConfig.otherInfoFields.contains(fieldName)) {
+        final currentOtherInfo =
+            OtherInfoModel.fromEntity(_currentUser!.other_info);
+        final updatedOtherInfo = ProfileFormUtils.updateOtherInfo(
+            currentOtherInfo, fieldName, newValue);
+        _currentUser = _currentUser!.copyWith(other_info: updatedOtherInfo);
+      } else {
+        _currentUser =
+            ProfileFormUtils.updateMainUser(_currentUser!, fieldName, newValue);
+      }
       _hasChanges = _hasAnyChanges();
     });
   }
