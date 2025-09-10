@@ -29,7 +29,7 @@ apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    namespace 'com.jrmsu.qasma.staff'
+    namespace 'com.jrmsu.qasma.counselor'
     compileSdkVersion 33
     ndkVersion "25.1.8937393"
 
@@ -47,7 +47,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.jrmsu.qasma.staff"
+        applicationId "com.jrmsu.qasma.counselor"
         minSdkVersion 19
         targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()

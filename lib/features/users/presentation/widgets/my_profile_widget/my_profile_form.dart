@@ -380,15 +380,13 @@ class _MyProfileFormState extends State<MyProfileForm> {
                 user: user,
               ),
               const SizedBox(height: 32),
-              if (user.role == RoleType.student.field.toString()) ...[
-                ProfileSection(
-                  title: 'User Information',
-                  icon: Icons.info_outline,
-                  fields: _buildFieldsForSection(
-                      ProfileFieldConfig.informationFields),
-                ),
-                const SizedBox(height: 24),
-              ],
+              ProfileSection(
+                title: 'User Information',
+                icon: Icons.info_outline,
+                fields: _buildFieldsForSection(
+                    ProfileFieldConfig.informationFields),
+              ),
+              const SizedBox(height: 24),
               ProfileSection(
                 title: 'Personal Information',
                 icon: Icons.person_outline,

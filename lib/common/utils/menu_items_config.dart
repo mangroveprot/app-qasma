@@ -17,6 +17,8 @@ class MenuItemConfig {
 class MenuKeys {
   static const String dashboard = 'dashboard';
   static const String myProfile = 'my_profile';
+  static const String schedule = 'schedule';
+  static const String appointmentPreference = 'appointment_preference';
   static const String history = 'history';
   static const String users = 'users';
   static const String privacyPolicy = 'privacy_policy';
@@ -34,8 +36,18 @@ const List<MenuItemConfig> menu_items = [
   ),
   MenuItemConfig(
     menu_key: MenuKeys.myProfile,
-    title: 'My profile',
+    title: 'My Profile',
     icon: Icons.person_outline,
+  ),
+  MenuItemConfig(
+    menu_key: MenuKeys.schedule,
+    title: 'Schedule',
+    icon: Icons.calendar_month_outlined,
+  ),
+  MenuItemConfig(
+    menu_key: MenuKeys.appointmentPreference,
+    title: 'Appointment Preferences',
+    icon: Icons.tune_outlined,
   ),
   MenuItemConfig(
     menu_key: MenuKeys.history,
@@ -44,17 +56,17 @@ const List<MenuItemConfig> menu_items = [
   ),
   MenuItemConfig(
     menu_key: MenuKeys.users,
-    title: 'Students',
+    title: 'Users',
     icon: Icons.people_alt_outlined,
   ),
   MenuItemConfig(
     menu_key: MenuKeys.privacyPolicy,
-    title: 'Privacy Policy',
+    title: 'Privacy Policys',
     icon: Icons.shield_outlined,
   ),
   MenuItemConfig(
     menu_key: MenuKeys.termsAndCondition,
-    title: 'Terms And Condition',
+    title: 'Terms And Conditions',
     icon: Icons.description_outlined,
   ),
   MenuItemConfig(

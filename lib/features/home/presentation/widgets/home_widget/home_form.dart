@@ -7,6 +7,7 @@ import '../../../../../common/helpers/spacing.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
 import '../../../../appointment/presentation/bloc/appointments/appointments_cubit.dart';
+import '../../../../appointment/presentation/pages/qrcode_page.dart';
 import '../../pages/home_page.dart';
 import '../home_skeletonloader.dart';
 import 'home_appointment_list.dart';
@@ -116,6 +117,30 @@ class _HomeFormState extends State<HomeForm> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const QrScannerPage()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue, // button color
+                    foregroundColor: Colors.white, // text color
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Click Me',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
               const HomeStatusCard(),
               Spacing.verticalSmall,
               Expanded(

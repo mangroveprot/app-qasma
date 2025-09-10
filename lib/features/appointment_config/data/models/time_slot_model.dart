@@ -66,6 +66,46 @@ class TimeSlotModel extends TimeSlot {
     );
   }
 
+  factory TimeSlotModel.fromScheduleKey(String key, String day) {
+    final List<String> parts = key.split('-');
+    final String startTime = parts[0]; // e.g., "10:30AM"
+    final String endTime = parts[1]; // e.g., "11:00AM"
+
+    // Convert to 24-hour format
+    final String start24 = _convertTo24Hour(startTime);
+    final String end24 = _convertTo24Hour(endTime);
+
+    return TimeSlotModel(
+      start: start24,
+      end: end24,
+    );
+  }
+
+  static String _convertTo24Hour(String time12) {
+    if (!time12.contains('AM') && !time12.contains('PM')) {
+      final parts = time12.split(':');
+      if (parts.length >= 2) {
+        return '${parts[0].padLeft(2, '0')}:${parts[1].padLeft(2, '0')}';
+      }
+      return time12;
+    }
+
+    final String cleanTime =
+        time12.replaceAll('AM', '').replaceAll('PM', '').trim();
+    final List<String> parts = cleanTime.split(':');
+    int hour = int.parse(parts[0]);
+    final String minute = parts.length > 1 ? parts[1] : '00';
+    final bool isPM = time12.contains('PM');
+
+    if (hour == 12) {
+      hour = isPM ? 12 : 0;
+    } else if (isPM) {
+      hour += 12;
+    }
+
+    return '${hour.toString().padLeft(2, '0')}:${minute.padLeft(2, '0')}';
+  }
+
   @override
   String toString() {
     return 'TimeSlotModel(start: $start, end: $end)';

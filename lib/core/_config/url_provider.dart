@@ -36,6 +36,7 @@ class URLProviderConfig {
 
   // Config URLS
   String get getConfig => '${configEndPoint}/';
+  String get updateConfig => '${configEndPoint}/';
 
   // Appointment URLS
   String get newAppointment => '${appointmentEndPoint}/';

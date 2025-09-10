@@ -4,6 +4,11 @@ import 'package:go_router/go_router.dart';
 import '../../common/presentation/pages/not_found_page.dart';
 import '../../features/appointment/presentation/pages/appointment_history_page.dart';
 import '../../features/appointment/presentation/pages/book_appointment_page.dart';
+import '../../features/appointment/presentation/pages/qrcode_page.dart';
+import '../../features/appointment_config/presentation/pages/appointment_config_page.dart';
+import '../../features/appointment_config/presentation/pages/basic_config_page.dart';
+import '../../features/appointment_config/presentation/pages/category_and_type_page.dart';
+import '../../features/appointment_config/presentation/pages/reminders_page.dart';
 import '../../features/auth/presentation/pages/change_password.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
@@ -13,11 +18,13 @@ import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/preferences/presentation/pages/about_page.dart';
 import '../../features/preferences/presentation/pages/dashboard_page.dart';
 import '../../features/preferences/presentation/pages/privacy_policy_page.dart';
+import '../../features/preferences/presentation/pages/schedule_page.dart';
 import '../../features/preferences/presentation/pages/settings_page.dart';
 import '../../features/preferences/presentation/pages/terms_and_conditions.dart';
 import '../../features/splash/splash_screen.dart';
 import '../../features/users/presentation/pages/my_profile_page.dart';
 import '../../features/users/presentation/pages/profile_setup_page.dart';
+import '../../features/users/presentation/pages/user_types_page.dart';
 import '../../features/users/presentation/pages/users_page.dart';
 import 'app_routes.dart';
 
@@ -76,22 +83,52 @@ class AppRouter {
         routes: [],
       ),
       GoRoute(
-        path: Routes.appointment, // book-appointment
+        path: Routes.appointment, // appointment
         builder: (context, state) => const BookAppointmentPage(),
         routes: [
           GoRoute(
             path: Routes.appointment_history,
             builder: (context, state) => const AppointmentHistory(),
           ),
+          GoRoute(
+            path: Routes.qr_scan,
+            builder: (context, state) => const QrScannerPage(),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: Routes.appointment_config, // appointment config
+        builder: (context, state) => const AppointmentConfigPage(),
+        routes: [
+          GoRoute(
+            path: Routes.basic_config,
+            builder: (context, state) => const BasicConfigPage(),
+          ),
+          GoRoute(
+            path: Routes.reminders_config,
+            builder: (context, state) => const RemindersPage(),
+          ),
+          GoRoute(
+            path: Routes.categories_and_types,
+            builder: (context, state) => const CategoryTypePage(),
+          ),
         ],
       ),
       GoRoute(
         path: Routes.user_path, // user
-        builder: (context, state) => const UsersPage(),
+        builder: (context, state) => const UserTypesPage(),
         routes: [
+          GoRoute(
+            path: Routes.user_page,
+            builder: (context, state) => const UsersPage(),
+          ),
           GoRoute(
             path: Routes.user_profile,
             builder: (context, state) => const MyProfilePage(),
+          ),
+          GoRoute(
+            path: Routes.schedule,
+            builder: (context, state) => const SchedulePage(),
           ),
         ],
       ),

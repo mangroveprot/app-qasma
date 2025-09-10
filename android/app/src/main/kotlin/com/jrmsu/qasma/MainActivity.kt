@@ -1,4 +1,4 @@
-package com.jrmsu.qasma.staff
+package com.jrmsu.qasma.counselor
 
 import android.content.ContentValues
 import android.os.Build

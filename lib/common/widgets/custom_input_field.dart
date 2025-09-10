@@ -3,28 +3,40 @@ import '../../infrastructure/theme/theme_extensions.dart'; // assuming this cont
 
 class CustomInputField extends StatelessWidget {
   final String fieldName;
-  final String label;
+  final String? label;
+  final double? fontSize;
+  final FontWeight? fontWeight;
   final IconData? icon;
+  final Color? iconColor;
   final TextEditingController controller;
   final VoidCallback onChanged;
   final bool isEnabled;
   final TextInputType? keyboardType;
+  final int? maxLines;
+  final int? minLines;
+  final bool expands;
 
   const CustomInputField({
     super.key,
     required this.fieldName,
-    required this.label,
+    this.label,
+    this.fontSize,
+    this.fontWeight,
     required this.controller,
     required this.onChanged,
+    this.iconColor,
     this.icon,
     this.isEnabled = true,
     this.keyboardType,
+    this.maxLines = 1,
+    this.minLines,
+    this.expands = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final fontWeight = context.weight;
+    final customFontWeight = context.weight;
     final radius = context.radii;
 
     return Container(
@@ -40,31 +52,45 @@ class CustomInputField extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment
+              .start, // Changed to start for multi-line alignment
           children: [
             if (icon != null) ...[
-              Icon(icon, color: colors.textPrimary.withOpacity(0.6), size: 20),
+              Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: (iconColor?.withOpacity(0.1)) ?? Colors.transparent,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon,
+                      color: iconColor ?? colors.textPrimary, size: 20)),
               const SizedBox(width: 12),
             ],
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: fontWeight.medium,
-                      color: colors.textPrimary,
-                      letterSpacing: 0.3,
+                  if (label != null) ...[
+                    Text(
+                      label!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: customFontWeight.medium,
+                        color: colors.textPrimary,
+                        letterSpacing: 0.3,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
+                    const SizedBox(height: 4),
+                  ],
                   TextFormField(
                     controller: controller,
                     enabled: isEnabled,
+                    maxLines: maxLines,
+                    minLines: minLines,
+                    expands: expands,
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: fontWeight.medium,
+                      fontSize: fontSize ?? 16,
+                      fontWeight: fontWeight ?? customFontWeight.medium,
                       color: isEnabled
                           ? colors.black
                           : colors.black.withOpacity(0.5),

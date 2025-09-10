@@ -161,6 +161,18 @@ String formatUtcToLocal({
   }
 }
 
+bool isNowAppointment(DateTime currentDateTime, DateTime appointmentDateTime) {
+  return currentDateTime.year == appointmentDateTime.year &&
+      currentDateTime.month == appointmentDateTime.month &&
+      currentDateTime.day == appointmentDateTime.day &&
+      currentDateTime.hour == appointmentDateTime.hour &&
+      currentDateTime.minute == appointmentDateTime.minute;
+}
+
+bool isOverdue(DateTime currentDateTime, DateTime appointmentDateTime) {
+  return appointmentDateTime.isBefore(currentDateTime);
+}
+
 Future<void> launchExternalUrl({required Uri uri}) async {
   if (await canLaunchUrl(uri)) {
     await launchUrl(uri, mode: LaunchMode.externalApplication);

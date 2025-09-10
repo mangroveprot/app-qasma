@@ -4,6 +4,7 @@ import '../../../../common/error/app_error.dart';
 import '../../../../common/helpers/helpers.dart';
 import '../../../../common/networks/api_client.dart';
 import '../../../../common/networks/response/api_response.dart';
+import '../../../../common/utils/constant.dart';
 import '../../../../core/_base/_repository/base_repository/abstract_repositories.dart';
 import '../../../../core/_base/_repository/local_repository/local_repositories.dart';
 import '../../../../core/_base/_services/base_service/base_service.dart';
@@ -55,7 +56,24 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
         if (document['user'] != null) {
           final userData = document['user'] as Map<String, dynamic>;
           final idNumber = userData['idNumber'] as String?;
+          final role = userData['role'] as String?;
           final firstName = userData['first_name'] as String?;
+
+          if (role != null) {
+            if (role.toLowerCase() != RoleType.counselor.field) {
+              return Left(AppError.create(
+                message:
+                    'Access denied. Only counselors are allowed to sign in.',
+                type: ErrorType.validation,
+              ));
+            }
+          } else {
+            return Left(AppError.create(
+              message: 'User role information is missing.',
+              type: ErrorType.validation,
+            ));
+          }
+
           if (idNumber != null) {
             await SharedPrefs().setString('currentUserId', idNumber);
           }

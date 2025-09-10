@@ -6,6 +6,7 @@ class Routes {
   static const String user_path = '/user';
   static const String home_path = '/home';
   static const String appointment = '/appointment';
+  static const String appointment_config = '/appointment-config';
   static const String preference_path = '/preference';
 
   // auth route names
@@ -16,12 +17,22 @@ class Routes {
   static const String forgot_password = 'forgot-password';
   static const String reset_password = 'reset-password';
   static const String change_password = 'change-password';
+
+  // user route names
   static const String user_profile = 'user-profile';
+  static const String user_page = 'user-page';
+  static const String schedule = 'schedule';
 
   // home route names
 
   // appointment routes names
   static const String appointment_history = 'appointment-history';
+  static const String qr_scan = 'qr-scan';
+
+  // appointment config routes names
+  static const String basic_config = 'basic-config';
+  static const String reminders_config = 'reminders-config';
+  static const String categories_and_types = 'categories_and_types';
 
   // preference routes name
   static const String settings = 'settings';

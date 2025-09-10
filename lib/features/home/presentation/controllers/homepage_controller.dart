@@ -344,6 +344,9 @@ class HomePageController {
             Routes.preference_path,
           ),
       MenuKeys.myProfile: () => handleMyProfile(),
+      MenuKeys.schedule: () => handleCounselorSchedule(),
+      MenuKeys.appointmentPreference: () =>
+          _navigationCallback?.call(Routes.appointment_config),
       MenuKeys.history: () => _navigationCallback?.call(
             Routes.buildPath(Routes.appointment, Routes.appointment_history),
           ),
@@ -479,6 +482,17 @@ class HomePageController {
       extra: {
         'idNumber': idNumber ?? SharedPrefs().getString('currentUserId'),
         'isCurrentUser': isCurrentUser,
+        'onSuccess': () async {
+          await userRefreshData();
+        },
+      },
+    );
+  }
+
+  void handleCounselorSchedule() {
+    _navigationCallback?.call(
+      Routes.buildPath(Routes.user_path, Routes.schedule),
+      extra: {
         'onSuccess': () async {
           await userRefreshData();
         },

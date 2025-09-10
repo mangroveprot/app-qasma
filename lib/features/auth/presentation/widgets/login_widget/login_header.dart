@@ -68,7 +68,7 @@ class LoginHeader extends StatelessWidget {
         ),
         Spacing.verticalXSmall,
         Text(
-          'STAFF',
+          'COUNSELOR',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 16,

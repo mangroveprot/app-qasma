@@ -37,6 +37,7 @@ import '../../features/appointment_config/domain/repository/appointment_config_r
 import '../../features/appointment_config/domain/services/appointment_config_services.dart';
 import '../../features/appointment_config/domain/usecases/get_config_usecase.dart';
 import '../../features/appointment_config/domain/usecases/sync_config_usecase.dart';
+import '../../features/appointment_config/domain/usecases/update_config_uscase.dart';
 import '../../features/auth/domain/services/auth_service.dart';
 import '../../features/auth/domain/usecases/change_password_usecase.dart';
 import '../../features/auth/domain/usecases/forgot_password_usecase.dart';
@@ -271,6 +272,7 @@ void _registerUseCases() {
 
   // Appointment config use cases
   sl
+    ..registerLazySingleton<UpdateConfigUsecase>(() => UpdateConfigUsecase())
     ..registerLazySingleton<GetConfigUseCase>(() => GetConfigUseCase())
     ..registerLazySingleton<SyncConfigUsecase>(() => SyncConfigUsecase());
 

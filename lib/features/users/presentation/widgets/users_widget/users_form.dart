@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../common/utils/constant.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
 import '../../../data/models/user_model.dart';
 import '../../bloc/user_cubit.dart';
@@ -32,7 +31,7 @@ class _UsersFormState extends State<UsersForm> {
     if (_lastProcessedState != state) {
       _cachedFilteredUsers = state.users.where((user) {
         final role = user.role.toLowerCase();
-        return role == RoleType.student.field.toLowerCase();
+        return role == widget.state.role;
       }).toList();
 
       _cachedFilteredUsers!.sort((a, b) =>

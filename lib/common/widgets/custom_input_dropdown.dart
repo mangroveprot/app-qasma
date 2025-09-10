@@ -6,6 +6,7 @@ class CustomInputDropdownField extends StatelessWidget {
   final String fieldName;
   final String label;
   final IconData? icon;
+  final Color? iconColor;
   final String value;
   final List<String> options;
   final ValueChanged<String> onChanged;
@@ -19,6 +20,7 @@ class CustomInputDropdownField extends StatelessWidget {
     required this.options,
     required this.onChanged,
     this.icon,
+    this.iconColor,
     this.isEnabled = true,
   });
 
@@ -42,7 +44,14 @@ class CustomInputDropdownField extends StatelessWidget {
         child: Row(
           children: [
             if (icon != null) ...[
-              Icon(icon, color: colors.textPrimary.withOpacity(0.6), size: 20),
+              Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: (iconColor?.withOpacity(0.1)) ?? Colors.transparent,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon,
+                      color: iconColor ?? colors.textPrimary, size: 20)),
               const SizedBox(width: 12),
             ],
             Expanded(

@@ -88,6 +88,23 @@ class UserCubit extends BaseCubit<UserCubitState> {
     }
   }
 
+  List<UserModel> filterUsers({
+    required bool Function(UserModel) predicate,
+  }) {
+    final currentState = state;
+    if (currentState is UserLoadedState) {
+      return currentState.users.where(predicate).toList();
+    }
+    return [];
+  }
+
+  List<UserModel> getUsersByRole(String role) {
+    final targetRole = role.toLowerCase().trim();
+    return filterUsers(
+      predicate: (user) => user.role.toLowerCase().trim() == targetRole,
+    );
+  }
+
   Future<void> refreshUser({
     dynamic params,
     required Usecase usecase,

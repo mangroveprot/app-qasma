@@ -10,6 +10,7 @@ import 'card_approved_button.dart';
 import 'card_cancel_button.dart';
 import 'card_reschedule_button.dart';
 import 'status_chip.dart';
+import 'verify_chip.dart';
 
 class AppointmentCard extends StatelessWidget {
   final AppointmentModel appointment;
@@ -17,14 +18,15 @@ class AppointmentCard extends StatelessWidget {
   final VoidCallback onCancel;
   final VoidCallback onReschedule;
   final VoidCallback onApproved;
-  const AppointmentCard({
-    super.key,
-    required this.appointment,
-    required this.onCancel,
-    required this.onReschedule,
-    required this.userModel,
-    required this.onApproved,
-  });
+  final bool isCurrentSessions;
+  const AppointmentCard(
+      {super.key,
+      required this.appointment,
+      required this.onCancel,
+      required this.onReschedule,
+      required this.userModel,
+      required this.onApproved,
+      this.isCurrentSessions = false});
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +37,7 @@ class AppointmentCard extends StatelessWidget {
     final appointmentDate = formatUtcToLocal(
         utcTime: appointment.scheduledStartAt.toString(),
         style: DateTimeFormatStyle.dateOnly);
+    final now = DateTime.now();
 
     final appointmentId = appointment.appointmentId;
 
@@ -56,6 +59,8 @@ class AppointmentCard extends StatelessWidget {
       fontWeight: weight.bold,
       color: colors.black,
     );
+
+    final isPassTime = isOverdue(now, appointment.scheduledEndAt);
 
     return Card(
       elevation: 4,
@@ -88,42 +93,93 @@ class AppointmentCard extends StatelessWidget {
                             color: colors.black,
                           ),
                           const SizedBox(width: 8),
-                          Text(
-                            formatUtcToLocal(
-                                utcTime:
-                                    appointment.scheduledStartAt.toString(),
-                                style: DateTimeFormatStyle.dateOnly),
-                            style: TextStyle(
-                              fontSize: appointmentDate.length <= 15 ? 16 : 14,
-                              fontWeight: weight.bold,
-                              color: colors.black,
+                          Expanded(
+                            child: Text(
+                              formatUtcToLocal(
+                                  utcTime:
+                                      appointment.scheduledStartAt.toString(),
+                                  style: DateTimeFormatStyle.dateOnly),
+                              style: TextStyle(
+                                fontSize:
+                                    appointmentDate.length <= 15 ? 16 : 14,
+                                fontWeight: weight.bold,
+                                color: colors.black,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 8),
                       Row(
                         children: [
                           Icon(
                             Icons.access_time,
                             size: 16,
-                            color: colors.textPrimary,
+                            color:
+                                isPassTime ? colors.error : colors.textPrimary,
                           ),
                           const SizedBox(width: 8),
-                          Text(
-                            '${formatUtcToLocal(utcTime: appointment.scheduledStartAt.toString(), style: DateTimeFormatStyle.timeOnly)} - '
-                            '${formatUtcToLocal(
-                              utcTime: appointment.scheduledEndAt.toString(),
-                              style: DateTimeFormatStyle.timeOnly,
-                            )}',
-                            style: _subtitleTextStyle,
+                          Expanded(
+                            child: Text(
+                              '${formatUtcToLocal(utcTime: appointment.scheduledStartAt.toString(), style: DateTimeFormatStyle.timeOnly)} - '
+                              '${formatUtcToLocal(
+                                utcTime: appointment.scheduledEndAt.toString(),
+                                style: DateTimeFormatStyle.timeOnly,
+                              )}',
+                              style: _subtitleTextStyle.copyWith(
+                                color: isPassTime ? colors.error : textPrimay,
+                              ),
+                            ),
                           ),
                         ],
                       ),
+                      if (isPassTime) ...[
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colors.error.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: colors.error.withOpacity(0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                size: 12,
+                                color: colors.error,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Overdue',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: colors.error,
+                                  fontWeight: weight.medium,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
-                StatusChip(status: appointment.status),
+                const SizedBox(width: 8),
+                if (isCurrentSessions) ...[
+                  VerifyChip(
+                    onPressed: () {},
+                  )
+                ] else ...[
+                  StatusChip(status: appointment.status)
+                ],
               ],
             ),
 
@@ -255,7 +311,6 @@ class AppointmentCard extends StatelessWidget {
                       ),
                       Spacing.verticalXSmall,
 
-                      // Appointment Type with icon
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -268,8 +323,7 @@ class AppointmentCard extends StatelessWidget {
                           Expanded(
                             child: RichText(
                               text: TextSpan(
-                                style: DefaultTextStyle.of(context)
-                                    .style, // base style
+                                style: DefaultTextStyle.of(context).style,
                                 children: [
                                   TextSpan(
                                       text: 'Appointment Type: ',

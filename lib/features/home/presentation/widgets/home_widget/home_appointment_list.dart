@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../common/helpers/helpers.dart';
 import '../../../../../common/utils/constant.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
@@ -31,8 +32,8 @@ class HomeAppointmentList extends StatefulWidget {
 class _HomeAppointmentListState extends State<HomeAppointmentList>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  late List<AppointmentModel> _pendingAppointments;
-  late List<AppointmentModel> _approvedAppointments;
+  List<AppointmentModel> _currentSessionAppointments = [];
+  List<AppointmentModel> _upcomingAppointments = [];
 
   @override
   void initState() {
@@ -61,14 +62,33 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
   }
 
   void _filterAppointments() {
-    _pendingAppointments = widget.appointments
-        .where((appointment) =>
-            appointment.status.toLowerCase() == StatusType.pending.field)
-        .toList();
-    _approvedAppointments = widget.appointments
+    final approvedAppointments = widget.appointments
         .where((appointment) =>
             appointment.status.toLowerCase() == StatusType.approved.field)
         .toList();
+
+    final now = DateTime.now();
+    _currentSessionAppointments = [];
+    _upcomingAppointments = [];
+
+    for (final appointment in approvedAppointments) {
+      // check if the appoitnment is now or already pass on time
+      if (isNowAppointment(now, appointment.scheduledStartAt) ||
+          appointment.scheduledStartAt.isBefore(now)) {
+        _currentSessionAppointments.add(appointment);
+      } else {
+        _upcomingAppointments.add(appointment);
+      }
+    }
+
+    // sort newest to oldest
+    _currentSessionAppointments.sort((a, b) {
+      return b.scheduledStartAt.compareTo(a.scheduledStartAt);
+    });
+
+    _upcomingAppointments.sort((a, b) {
+      return a.scheduledStartAt.compareTo(b.scheduledStartAt);
+    });
   }
 
   @override
@@ -78,7 +98,6 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
 
     return Column(
       children: [
-        // Header with flexible padding
         Container(
           width: double.infinity,
           padding: const EdgeInsets.fromLTRB(8, 12, 8, 8),
@@ -91,8 +110,6 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
             ),
           ),
         ),
-
-        // TabBar with improved responsive design
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 8),
           padding: const EdgeInsets.all(3),
@@ -123,26 +140,27 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
             splashFactory: NoSplash.splashFactory,
             overlayColor: MaterialStateProperty.all(Colors.transparent),
             tabs: [
-              _buildTab('Pending', _pendingAppointments.length, 0),
-              _buildTab('Approved', _approvedAppointments.length, 1),
+              _buildTab(
+                  'Current Session', _currentSessionAppointments.length, 0),
+              _buildTab('Upcoming', _upcomingAppointments.length, 1),
             ],
           ),
         ),
-
         const SizedBox(height: 8),
-
-        // Flexible expanded content
         Flexible(
           child: TabBarView(
             controller: _tabController,
             children: [
               RefreshIndicator(
                 onRefresh: widget.onRefresh,
-                child: _buildAppointmentList(_pendingAppointments),
+                child: _buildAppointmentList(
+                  _currentSessionAppointments,
+                  isCurrentSession: true,
+                ),
               ),
               RefreshIndicator(
                 onRefresh: widget.onRefresh,
-                child: _buildAppointmentList(_approvedAppointments),
+                child: _buildAppointmentList(_upcomingAppointments),
               ),
             ],
           ),
@@ -157,9 +175,9 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
     final isSelected = _tabController.index == tabIndex;
 
     return Container(
-      height: 32, // Reduced height for small screens
+      height: 32,
       child: Row(
-        mainAxisSize: MainAxisSize.min, // Use minimum space needed
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Flexible(
@@ -169,10 +187,9 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
               maxLines: 1,
             ),
           ),
-          const SizedBox(width: 4), // Reduced spacing
+          const SizedBox(width: 4),
           Container(
-            constraints:
-                const BoxConstraints(minWidth: 20), // Minimum width for count
+            constraints: const BoxConstraints(minWidth: 20),
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
               color: isSelected
@@ -199,15 +216,15 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
     );
   }
 
-  Widget _buildAppointmentList(List<AppointmentModel> appointments) {
+  Widget _buildAppointmentList(List<AppointmentModel> appointments,
+      {bool isCurrentSession = false}) {
     if (appointments.isEmpty) {
       return _buildEmptyState();
     }
 
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding:
-          const EdgeInsets.symmetric(horizontal: 8), // Add horizontal padding
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       itemCount: appointments.length + 1,
       itemBuilder: (context, index) {
         if (index == appointments.length) {
@@ -233,11 +250,12 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
 
         return RepaintBoundary(
           child: Padding(
-            padding: const EdgeInsets.only(bottom: 8), // Reduced bottom padding
+            padding: const EdgeInsets.only(bottom: 8),
             child: AppointmentCard(
               key: ValueKey(appointmentId),
               userModel: userData,
               appointment: appointments[index],
+              isCurrentSessions: isCurrentSession,
               onApproved: () => widget.state.controller
                   .handleApprovedAppointment(context, appointmentId),
               onCancel: () => widget.state.controller
@@ -274,7 +292,7 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
             ),
             const SizedBox(height: 16),
             Text(
-              'No ${_tabController.index == 0 ? 'pending' : 'approved'} appointments',
+              'No ${_tabController.index == 0 ? 'current session' : 'upcoming'} appointments',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: weight.regular,

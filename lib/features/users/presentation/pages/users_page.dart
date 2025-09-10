@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../common/helpers/helpers.dart';
 import '../../../../common/widgets/custom_app_bar.dart';
 import '../../../../common/widgets/toast/app_toast.dart';
+import '../../../../infrastructure/routes/app_route_extractor.dart';
 import '../bloc/user_cubit.dart';
 import '../controller/users_controller.dart';
 import '../widgets/users_widget/users_form.dart';
@@ -16,6 +19,7 @@ class UsersPage extends StatefulWidget {
 
 class UsersPageState extends State<UsersPage> {
   late final UsersController controller;
+  Map<String, dynamic>? _routeData;
 
   @override
   void initState() {
@@ -23,6 +27,32 @@ class UsersPageState extends State<UsersPage> {
     controller = UsersController();
     controller.initialize();
   }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (!controller.isInitialized) {
+      //  final rawExtra = GoRouterState.of(context).extra;
+
+      controller.initialize();
+    }
+    _extractRouteData();
+  }
+
+  void _extractRouteData() {
+    if (_routeData != null) return;
+
+    final rawExtra = GoRouterState.of(context).extra;
+
+    _routeData = rawExtra as Map<String, dynamic>?;
+
+    if (_routeData == null) {
+      _routeData = AppRouteExtractor.extractRaw<Map<String, dynamic>>(rawExtra);
+    }
+  }
+
+  String? get role => _routeData?['role'] as String?;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +72,9 @@ class UsersPageState extends State<UsersPage> {
           ),
         ],
         child: Scaffold(
-          appBar: const CustomAppBar(title: 'Students'),
+          appBar: CustomAppBar(
+            title: role == null ? '' : capitalizeWords('${role}s'),
+          ),
           body: LayoutBuilder(builder: (context, constraints) {
             return SizedBox(
               width: constraints.maxWidth,
