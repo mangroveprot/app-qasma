@@ -30,7 +30,7 @@ class AppConfig {
   // config getters
   static String get baseUrl => FlavorConfig.instance.values.baseUrl;
   static String get appTitle => FlavorConfig.instance.values.appTitle;
-  static bool get shouldShowLogs => FlavorConfig.instance.values.enableLogging;
+  static bool get shouldShowLogs => true;
 
   // flavor type check
   static bool get isProduction => FlavorConfig.isProduction();

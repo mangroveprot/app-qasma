@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'qrcode.dart';
 
 import 'cancellation.dart';
+import 'reschedule.dart';
 
 class Appointment extends Equatable {
   final String studentId;
@@ -15,8 +16,10 @@ class Appointment extends Equatable {
   final DateTime? checkInTime;
   final String? staffId;
   final String? counselorId;
+  final bool? feedbackSubmitted;
   final QRCode qrCode;
   final Cancellation cancellation;
+  final Reschedule reschedule;
   final DateTime? deletedAt;
   final String? deletedBy;
   final String createdBy;
@@ -37,8 +40,10 @@ class Appointment extends Equatable {
     this.checkInStatus,
     this.staffId,
     this.counselorId,
+    this.feedbackSubmitted,
     required this.qrCode,
     required this.cancellation,
+    required this.reschedule,
     this.deletedAt,
     this.deletedBy,
     required this.createdBy,
@@ -76,8 +81,10 @@ class Appointment extends Equatable {
         checkInTime,
         staffId,
         counselorId,
+        feedbackSubmitted,
         qrCode,
         cancellation,
+        reschedule,
         deletedAt,
         deletedBy,
         createdBy,

@@ -1,4 +1,5 @@
 import '../../features/users/data/models/params/dynamic_param.dart';
+import '../../features/users/domain/usecases/get_all_user_usecase.dart';
 import '../../features/users/domain/usecases/get_user_usecase.dart';
 import '../../features/users/domain/usecases/sync_user_usecase.dart';
 import '../../features/users/domain/usecases/update_user_usecase.dart';
@@ -7,11 +8,13 @@ import '../../infrastructure/injection/service_locator.dart';
 import '../widgets/bloc/button/button_cubit.dart';
 
 class UserManager {
+  late final GetAllUserUsecase _getAllUserUsecase;
   late final GetUserUsecase _getUserUseCase;
   late final UpdateUserUsecase _updateUserUsecase;
   late final SyncUserUsecase _syncUserUsecase;
 
   UserManager() {
+    _getAllUserUsecase = sl<GetAllUserUsecase>();
     _getUserUseCase = sl<GetUserUsecase>();
     _updateUserUsecase = sl<UpdateUserUsecase>();
     _syncUserUsecase = sl<SyncUserUsecase>();
@@ -34,6 +37,12 @@ class UserManager {
   Future<void> refreshUser(UserCubit cubit) async {
     await cubit.refreshUser(
       usecase: _syncUserUsecase,
+    );
+  }
+
+  Future<void> loadAllUser(UserCubit cubit) async {
+    await cubit.loadUser(
+      usecase: _getAllUserUsecase,
     );
   }
 }

@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../../theme/theme_extensions.dart';
 import '../../../../appointment/domain/entities/qrcode.dart';
-import '../../../../auth/presentation/pages/qrcode_page.dart';
+import '../../../../appointment/presentation/pages/qrcode_page.dart';
 
 class CardQRCodeSection extends StatelessWidget {
   final QRCode qrData;
   final VoidCallback? onTap;
+  final VoidCallback? onBackPressed;
 
   const CardQRCodeSection({
     super.key,
     required this.qrData,
     this.onTap,
+    this.onBackPressed,
   });
 
   @override
@@ -42,7 +44,23 @@ class CardQRCodeSection extends StatelessWidget {
             version: QrVersions.auto,
             backgroundColor: Colors.white,
             foregroundColor: Colors.black,
-            errorCorrectionLevel: QrErrorCorrectLevel.M,
+            errorStateBuilder: (cxt, err) {
+              return const Center(
+                child: Text(
+                  'QR Error',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 8),
+                ),
+              );
+            },
+            eyeStyle: const QrEyeStyle(
+              eyeShape: QrEyeShape.square,
+              color: Colors.black,
+            ),
+            dataModuleStyle: const QrDataModuleStyle(
+              dataModuleShape: QrDataModuleShape.square,
+              color: Colors.black,
+            ),
             padding: const EdgeInsets.all(4),
           ),
         ),
@@ -55,6 +73,7 @@ class CardQRCodeSection extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => QrCodePage(
           qrData: qrData,
+          onBackPressed: onBackPressed,
         ),
       ),
     );

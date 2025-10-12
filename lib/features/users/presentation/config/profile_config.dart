@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../common/utils/constant.dart';
 
 class ProfileFieldConfig {
-  static const Map<String, List<String>> dropdownOptions = {
+  static final Map<String, List<String>> dropdownOptions = {
     'gender': genderList,
     'course': courseList,
     'yearLevel': yearLevelList,
@@ -56,9 +56,6 @@ class ProfileFieldConfig {
     'address',
     'facebook'
   ];
-
-  static const List<String> academicFields = ['course', 'yearLevel', 'block'];
-
   static TextInputType? getKeyboardType(String fieldName) {
     switch (fieldName) {
       case 'email':

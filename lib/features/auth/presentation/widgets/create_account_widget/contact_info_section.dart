@@ -29,6 +29,7 @@ class ContactInfoSection extends StatelessWidget {
               name: field_address.name,
               hint: field_address.hint,
               controller: addressController,
+              required: true,
             ),
           ],
         ),
@@ -44,7 +45,11 @@ class ContactInfoSection extends StatelessWidget {
               controller: contactController,
               required: true,
             ),
-            Spacing.horizontalXSmall,
+          ],
+        ),
+        Spacing.verticalMedium,
+        Row(
+          children: [
             CustomFormField(
               field_key: field_email.field_key,
               name: field_email.name,
@@ -55,7 +60,6 @@ class ContactInfoSection extends StatelessWidget {
           ],
         ),
         Spacing.verticalMedium,
-
         // Facebook
         Row(
           children: [

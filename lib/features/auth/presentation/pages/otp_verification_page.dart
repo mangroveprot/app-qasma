@@ -187,6 +187,7 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
   }
 
   void onSubmitted(BuildContext context, int index) {
+    FocusScope.of(context).unfocus();
     if (index < 5) {
       focusNodes[index + 1].requestFocus();
     } else if (isOtpComplete) {

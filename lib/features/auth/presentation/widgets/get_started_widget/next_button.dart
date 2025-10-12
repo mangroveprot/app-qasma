@@ -20,7 +20,7 @@ class NextButton extends StatelessWidget {
           textColor: colorToUse,
           fontSize: 16,
           borderRadius: context.radii.medium,
-          textDecoration: TextDecoration.underline,
+          textDecoration: TextDecoration.none,
           fontWeight: context.weight.medium,
           iconData: Icons.arrow_forward,
           iconColor: colorToUse,

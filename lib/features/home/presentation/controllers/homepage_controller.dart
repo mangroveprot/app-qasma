@@ -22,8 +22,10 @@ import '../../../appointment/data/models/params/cancel_params.dart';
 import '../../../appointment/domain/usecases/cancel_appointment_usecase.dart';
 import '../../../appointment/presentation/bloc/appointments/appointments_cubit.dart';
 import '../../../appointment_config/presentation/bloc/appointment_config_cubit.dart';
+import '../../../users/data/models/user_model.dart';
 import '../../../users/presentation/bloc/user_cubit.dart';
 import '../../../appointment/data/models/appointment_model.dart';
+import '../../../users/presentation/bloc/user_cubit_extension.dart';
 
 class HomePageController {
   // Cubits
@@ -97,6 +99,21 @@ class HomePageController {
   }
 
   // PUBLIC METHODS
+
+  ButtonCubit get buttonCubit => _buttonCubit;
+
+  AppointmentManager get appointmentManager => _appointmentManager;
+
+  String get currentUserId => SharedPrefs().getString('currentUserId') ?? '';
+
+  UserModel? getUserByIdNumber(String idNumber) {
+    return _userCubit.getUserByIdNumber(idNumber);
+  }
+
+  UserModel? currentUserProfile() {
+    if (currentUserId.isEmpty) return null;
+    return _userCubit.getUserByIdNumber(currentUserId);
+  }
 
   Future<void> appoitnmentRefreshData() async {
     await _appointmentManager.refreshAppointments(_appointmentsCubit);

@@ -10,6 +10,7 @@ import '../../../../core/_base/_services/base_service/base_service.dart';
 import '../../../../core/_base/_services/storage/shared_preference.dart';
 import '../../../../core/_config/url_provider.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
+import '../../../users/data/models/params/dynamic_param.dart';
 import '../../domain/services/appointment_service.dart';
 import '../models/appointment_model.dart';
 import '../models/params/cancel_params.dart';
@@ -205,11 +206,12 @@ class AppointmentServiceImpl extends BaseService<AppointmentModel>
 
   @override
   Future<Either<AppError, AppointmentModel>> updateAppointment(
-      AppointmentModel model) async {
+    DynamicParam model,
+  ) async {
     try {
       final response = await _apiClient.patch(
         _urlProviderConfig.updateAppointment,
-        data: model.updateAppointmentToJson(),
+        data: model.toJson(),
         requiresAuth: true,
       );
 

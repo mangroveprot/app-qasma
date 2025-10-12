@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../common/widgets/custom_input_dropdown.dart';
 import '../../../../../common/widgets/custom_input_field.dart';
+import '../../../../../core/_base/_services/storage/shared_preference.dart';
 import '../../../../../theme/theme_extensions.dart';
+import '../../bloc/user_cubit_extension.dart';
 import 'profile_section.dart';
 import '../../../../../common/helpers/helpers.dart';
 import '../../../../../common/widgets/bloc/button/button_cubit.dart';
@@ -266,9 +268,15 @@ class _MyProfileFormState extends State<MyProfileForm> {
       body: BlocBuilder<UserCubit, UserCubitState>(
         builder: (context, state) {
           if (state is UserLoadedState) {
+            final id = SharedPrefs().getString('currentUserId') ?? '';
+            final current = context.read<UserCubit>().getUserByIdNumber(id);
+
+            if (current == null) {
+              return _buildError('User not found');
+            }
             if (_originalUser == null) {
-              _originalUser = state.user.copyWith();
-              _currentUser = state.user.copyWith();
+              _originalUser = current.copyWith();
+              _currentUser = current.copyWith();
               _populateControllers();
             }
             return Column(
@@ -301,7 +309,7 @@ class _MyProfileFormState extends State<MyProfileForm> {
           padding: const EdgeInsets.all(20),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
-              const ProfileHeader(),
+              ProfileHeader(idNumber: _currentUser?.idNumber ?? '...'),
               const SizedBox(height: 32),
               ProfileSection(
                 title: 'Personal Information',
@@ -321,7 +329,7 @@ class _MyProfileFormState extends State<MyProfileForm> {
                 title: 'Academic Information',
                 icon: Icons.school_outlined,
                 fields:
-                    _buildFieldsForSection(ProfileFieldConfig.academicFields),
+                    _buildFieldsForSection(ProfileFieldConfig.otherInfoFields),
               ),
               const SizedBox(height: 40),
             ]),

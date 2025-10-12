@@ -112,6 +112,11 @@ class ForgotPasswordPageState extends State<ForgotPasswordPage> {
     ButtonState state,
   ) async {
     if (state is ButtonFailureState) {
+      final errorMessage = state.errorMessages.first;
+      if (errorMessage.trim().toLowerCase().contains('unverified account')) {
+        AppToast.show(message: 'DNSJFND', type: ToastType.error);
+        return;
+      }
       Future.microtask(() async {
         for (final message in state.errorMessages) {
           AppToast.show(
@@ -136,6 +141,7 @@ class ForgotPasswordPageState extends State<ForgotPasswordPage> {
           },
         );
       }
+      return;
     }
   }
 }

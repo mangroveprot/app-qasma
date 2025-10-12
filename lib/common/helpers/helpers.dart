@@ -1,3 +1,5 @@
+import 'package:url_launcher/url_launcher.dart';
+
 import '../utils/constant.dart';
 
 class Field {
@@ -84,6 +86,17 @@ DateTime combineToLocalDateTime(String date, String time12h) {
   return DateTime(year, month, day, hour, minute); // ← LOCAL time
 }
 
+DateTime stripMicroseconds(DateTime utcTime) {
+  return DateTime(
+    utcTime.year,
+    utcTime.month,
+    utcTime.day,
+    utcTime.hour,
+    utcTime.minute,
+    utcTime.second,
+  );
+}
+
 Map<String, DateTime> parseDateTimeRange(String input) {
   final parts = input.split('|');
   if (parts.length != 2) throw const FormatException('Invalid format');
@@ -156,5 +169,11 @@ String formatUtcToLocal({
     }
   } catch (e) {
     return 'Invalid time format';
+  }
+}
+
+Future<void> launchExternalUrl({required Uri uri}) async {
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 }

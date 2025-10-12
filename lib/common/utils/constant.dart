@@ -4,22 +4,24 @@ import 'package:flutter/material.dart';
 import '../widgets/models/modal_option.dart';
 
 int YEARS_TO_GENERATE = 50;
+int totalYearLevel = 10;
 
-class Status {
-  final String status;
-  Status({
-    required this.status,
+class Property {
+  final String field;
+  Property({
+    required this.field,
   });
 }
 
 class StatusType {
-  static Status pending = Status(status: 'pending');
-  static Status completed = Status(status: 'completed');
-  static Status cancelled = Status(status: 'cancelled');
-  static Status approved = Status(status: 'approved');
+  static Property pending = Property(field: 'pending');
+  static Property completed = Property(field: 'completed');
+  static Property cancelled = Property(field: 'cancelled');
+  static Property approved = Property(field: 'approved');
 }
 
 String get guidance_email => 'katipunan.guidance@jrmsu.edu.ph';
+String get feedback_url => 'https://jrmsu.online/feedback/';
 
 const Map<String, dynamic> name = {
   'name': 'First Name',
@@ -76,9 +78,10 @@ const List<String> blockList = [
   'Z'
 ];
 
-const List<String> yearLevelList = ['1', '2', '3', '4'];
+final List<String> yearLevelList =
+    List.generate(totalYearLevel, (index) => '${index + 1}');
 
-const List<String> genderList = ['male', 'female', 'other'];
+const List<String> genderList = ['Male', 'Female', 'Other'];
 
 final currentYear = DateTime.now().year;
 final yearsList = List.generate(

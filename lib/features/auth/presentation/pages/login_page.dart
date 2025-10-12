@@ -66,6 +66,7 @@ class LoginPageState extends State<LoginPage> {
   }
 
   void _performLogin(BuildContext context) {
+    FocusScope.of(context).unfocus();
     final password = _getTextValue(field_password);
     final isValid = isPasswordValid(password);
 
@@ -124,7 +125,7 @@ class LoginPageState extends State<LoginPage> {
   Future<void> _handleButtonState(
       BuildContext context, ButtonState state) async {
     if (state is ButtonSuccessState) {
-      context.go(Routes.root);
+      return context.go(Routes.root);
     }
   }
 }

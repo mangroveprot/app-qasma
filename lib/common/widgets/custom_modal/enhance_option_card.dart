@@ -74,7 +74,7 @@ class _EnhancedOptionCardState extends State<EnhancedOptionCard> {
                     borderRadius: radius.medium,
                   ),
                   child: Icon(
-                    Icons.category_outlined,
+                    Icons.local_offer_outlined,
                     color: widget.isSelected ? colors.primary : colors.black,
                     size: 24,
                   ),

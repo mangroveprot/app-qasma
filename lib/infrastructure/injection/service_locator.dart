@@ -47,6 +47,7 @@ import '../../features/users/data/repository/user_repositories_impl.dart';
 import '../../features/users/data/services/user_service_impl.dart';
 import '../../features/users/domain/repository/user_repositories.dart';
 import '../../features/users/domain/services/user_service.dart';
+import '../../features/users/domain/usecases/get_all_user_usecase.dart';
 import '../../features/users/domain/usecases/get_user_usecase.dart';
 import '../../features/users/domain/usecases/is_register_usecase.dart';
 import '../../features/users/domain/usecases/sync_user_usecase.dart';
@@ -229,6 +230,7 @@ void _registerUseCases() {
   // User use cases
   sl
     ..registerLazySingleton<SyncUserUsecase>(() => SyncUserUsecase())
+    ..registerLazySingleton<GetAllUserUsecase>(() => GetAllUserUsecase())
     ..registerLazySingleton<UpdateUserUsecase>(() => UpdateUserUsecase())
     ..registerLazySingleton<IsRegisterUsecase>(() => IsRegisterUsecase())
     ..registerLazySingleton<GetUserUsecase>(() => GetUserUsecase());

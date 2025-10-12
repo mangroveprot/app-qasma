@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../../theme/theme_extensions.dart';
 
 class ProfileHeader extends StatelessWidget {
-  const ProfileHeader({super.key});
+  final String idNumber;
+  const ProfileHeader({super.key, required this.idNumber});
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +47,7 @@ class ProfileHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'My Profile',
+                  idNumber,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: fontWeight.bold,

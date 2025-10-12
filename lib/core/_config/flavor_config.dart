@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 enum Flavor { development, production }
@@ -15,22 +16,20 @@ class FlavorValues {
             (flavor == Flavor.production ? 'App' : 'App Dev'),
         enableLogging = flavor == Flavor.production
             ? (_getEnvVar('ENABLE_LOGGING', flavor)?.toLowerCase() == 'true')
-            : true, // Always true for dev
+            : true,
         databaseName = _getEnvVar('DATABASE_NAME', flavor) ?? 'app_database';
 
   static String? _getEnvVar(String key, Flavor flavor) {
     try {
       final value = dotenv.env[key];
       if (value == null || value.isEmpty) {
-        // Log that the environment variable is missing
-        print(
+        debugPrint(
             'WARNING: Environment variable $key is missing or empty for $flavor');
         return null;
       }
       return value;
     } catch (e) {
-      // Log any errors when accessing environment variables
-      print(
+      debugPrint(
           'ERROR: Failed to access environment variable $key for $flavor: $e');
       return null;
     }

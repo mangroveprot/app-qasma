@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/custom_app_bar.dart';
 import '../../../../common/widgets/toast/app_toast.dart';
-import '../../../appointment/domain/entities/qrcode.dart';
+import '../../domain/entities/qrcode.dart';
 
 class QrCodePage extends StatefulWidget {
   final QRCode qrData;
-  const QrCodePage({super.key, required this.qrData});
+  final VoidCallback? onBackPressed;
+
+  const QrCodePage({
+    super.key,
+    required this.qrData,
+    this.onBackPressed,
+  });
 
   @override
   State<QrCodePage> createState() => QrCodePageState();
@@ -26,8 +33,9 @@ class QrCodePageState extends State<QrCodePage> {
     return BlocProvider(
       create: (context) => ButtonCubit(),
       child: Scaffold(
-        appBar: const CustomAppBar(
+        appBar: CustomAppBar(
           title: 'Share QR Code',
+          onBackPressed: _handleBack,
         ),
         body: BlocListener<ButtonCubit, ButtonState>(
           listener: _handleButtonState,
@@ -90,6 +98,19 @@ class QrCodePageState extends State<QrCodePage> {
           type: ToastType.error,
         );
       }
+    }
+  }
+
+  Future<void> _handleBack(BuildContext context) async {
+    if (context.mounted) {
+      if (widget.onBackPressed != null) {
+        try {
+          widget.onBackPressed!();
+        } catch (e) {
+          debugPrint('Error calling back callback: $e');
+        }
+      }
+      context.pop();
     }
   }
 }

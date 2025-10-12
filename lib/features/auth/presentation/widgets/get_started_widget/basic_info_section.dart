@@ -30,7 +30,7 @@ class BasicInfoSection extends StatelessWidget {
               field_key: field_idNumber.field_key,
               name: field_idNumber.name,
               required: true,
-              hint: field_idNumber.name,
+              hint: field_idNumber.hint,
               controller: idNumberController,
             ),
           ],

@@ -132,9 +132,11 @@ class RemoteRepository<T> extends BaseRepository
         final lastSyncTime =
             lastSyncStr != null ? DateTime.parse(lastSyncStr) : DateTime(2000);
 
-        final fullPath = '${endpoint.trim().replaceAll(RegExp(r'/+$'), '')}'
-            '/sync/${lastSyncTime}/'
-            '${includeId ? '$currentUserId' : ''}';
+        final basePath =
+            '${endpoint.trim().replaceAll(RegExp(r'/+$'), '')}/sync/${lastSyncTime}/';
+        final fullPath = includeId && currentUserId != null
+            ? '$basePath?idNumber=$currentUserId'
+            : basePath;
 
         final response = await handleApiCall(() {
           return apiClient.get(

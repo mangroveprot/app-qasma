@@ -38,7 +38,7 @@ class BookAppointmentButtons extends StatelessWidget {
             child: const Text(
               'Cancel',
               style: TextStyle(
-                decoration: TextDecoration.underline,
+                decoration: TextDecoration.none,
               ),
             ),
           ),

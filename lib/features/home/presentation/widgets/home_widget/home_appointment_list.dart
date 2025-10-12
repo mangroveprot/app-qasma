@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../../../../theme/theme_extensions.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
+import '../../pages/home_page.dart';
 import '../appointment_card_widget/appointment_card.dart';
 import 'home_history_button.dart';
 
 class HomeAppointmentList extends StatelessWidget {
   final List<AppointmentModel> appointments;
+  final HomePageState state;
   final Function(String) onCancel;
   final Function(String) onReschedule;
 
@@ -14,6 +16,7 @@ class HomeAppointmentList extends StatelessWidget {
     required this.appointments,
     required this.onCancel,
     required this.onReschedule,
+    required this.state,
   });
 
   @override
@@ -47,14 +50,20 @@ class HomeAppointmentList extends StatelessWidget {
                 return const HomeHistoryButton();
               }
 
+              final appointment = appointments[index];
+              final user = state.controller.getUserByIdNumber(
+                appointment.reschedule.rescheduledBy ?? '',
+              );
+
               return RepaintBoundary(
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: AppointmentCard(
-                    appointment: appointments[index],
-                    onCancel: () => onCancel(appointments[index].appointmentId),
-                    onReschedule: () =>
-                        onReschedule(appointments[index].appointmentId),
+                    appointment: appointment,
+                    onCancel: () => onCancel(appointment.appointmentId),
+                    onReschedule: () => onReschedule(appointment.appointmentId),
+                    user: user,
+                    onBackPressed: state.controller.appoitnmentRefreshData,
                   ),
                 ),
               );

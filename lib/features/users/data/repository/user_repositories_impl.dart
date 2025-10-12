@@ -20,6 +20,15 @@ class UserRepositoryImpl extends UserRepository {
   }
 
   @override
+  Future<Either<AppError, List<UserModel>>> getAllUser() async {
+    final Either result = await _userService.getAllUser();
+    return result.fold(
+      (error) => Left(error),
+      (data) => Right(data),
+    );
+  }
+
+  @override
   Future<Either<AppError, UserModel>> getUser(String idNumber) async {
     final result = await _userService.getUser(idNumber);
     return result.fold(

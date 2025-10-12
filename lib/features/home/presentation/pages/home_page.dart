@@ -82,16 +82,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
         ],
         child: BlocBuilder<UserCubit, UserCubitState>(
           builder: (context, userState) {
-            final fullName = userState is UserLoadedState
-                ? '${userState.user.first_name} ${userState.user.last_name}'
-                    .trim()
-                : '';
-
-            final firstName =
-                userState is UserLoadedState ? userState.user.first_name : '';
-
-            final idNumber =
-                userState is UserLoadedState ? userState.user.idNumber : '';
+            final userProfile = controller.currentUserProfile();
 
             return Scaffold(
               drawerEnableOpenDragGesture: true,
@@ -102,15 +93,15 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
                 onNotificationTap: controller.handleNotificationTap,
               ),
               drawer: CustomSidebar(
-                userName: fullName,
-                idNumber: idNumber,
+                userName: userProfile?.fullName ?? '',
+                idNumber: userProfile?.idNumber ?? '',
                 onMenuItemTap: (menuItem) =>
                     controller.handleMenuItemTap(menuItem, context),
               ),
               body: SafeArea(
                 child: HomeForm(
                   state: this,
-                  firstName: firstName,
+                  firstName: userProfile?.first_name ?? '',
                 ),
               ),
               floatingActionButton: RepaintBoundary(

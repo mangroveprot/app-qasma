@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../common/widgets/custom_filter_bar.dart';
 import '../../../../../theme/theme_extensions.dart';
 import '../../../data/models/appointment_model.dart';
 import '../../bloc/appointments/appointments_cubit.dart';
 import '../../pages/appointment_history_page.dart';
+import '../../utils/history_utils.dart';
 import 'history_card.dart';
 
 class HistoryForm extends StatefulWidget {
@@ -21,17 +23,57 @@ class _HistoryFormState extends State<HistoryForm> {
   static const Duration _refreshCooldown = Duration(seconds: 30);
   List<AppointmentModel>? _cachedFilteredAppointments;
   AppointmentsLoadedState? _lastProcessedState;
+  AppointmentHistoryStatus _selectedFilter = AppointmentHistoryStatus.all;
 
   List<AppointmentModel> _getFilteredAppointments(
       AppointmentsLoadedState state) {
     if (_lastProcessedState != state) {
-      _cachedFilteredAppointments = state.allAppointments.where((appointment) {
+      final baseAppointments = state.allAppointments.where((appointment) {
         final status = appointment.status.toLowerCase();
         return status == 'cancelled' || status == 'completed';
       }).toList();
+      _cachedFilteredAppointments = _filterByStatus(baseAppointments);
       _lastProcessedState = state;
     }
+
     return _cachedFilteredAppointments!;
+  }
+
+  List<AppointmentModel> _filterByStatus(List<AppointmentModel> appointments) {
+    List<AppointmentModel> filteredAppointments;
+
+    switch (_selectedFilter) {
+      case AppointmentHistoryStatus.all:
+        filteredAppointments = appointments;
+        break;
+      case AppointmentHistoryStatus.cancelled:
+        filteredAppointments = appointments
+            .where((appointment) =>
+                appointment.status.toLowerCase() == 'cancelled')
+            .toList();
+        break;
+      case AppointmentHistoryStatus.completed:
+        filteredAppointments = appointments
+            .where((appointment) =>
+                appointment.status.toLowerCase() == 'completed')
+            .toList();
+        break;
+    }
+
+    filteredAppointments.sort((a, b) {
+      return widget.state.controller.appointmentManager
+          .compareAppointments(a, b);
+    });
+
+    return filteredAppointments;
+  }
+
+  void _onFilterChanged(AppointmentHistoryStatus status) {
+    setState(() {
+      _selectedFilter = status;
+      _cachedFilteredAppointments = null;
+      _lastProcessedState = null;
+    });
   }
 
   Future<void> _onRefresh() async {
@@ -54,35 +96,54 @@ class _HistoryFormState extends State<HistoryForm> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AppointmentsCubit, AppointmentCubitState>(
-      buildWhen: (previous, current) {
-        return previous.runtimeType != current.runtimeType ||
-            previous is AppointmentsLoadingState ||
-            current is AppointmentsLoadingState;
-      },
-      builder: (context, state) {
-        if (state is AppointmentsLoadingState) {
-          return const _LoadingContent();
-        }
+    return Column(
+      children: [
+        CustomDropdownFilter<AppointmentHistoryStatus>(
+          options: [
+            const FilterOption(
+                label: 'All', value: AppointmentHistoryStatus.all),
+            const FilterOption(
+                label: 'Cancelled', value: AppointmentHistoryStatus.cancelled),
+            const FilterOption(
+                label: 'Completed', value: AppointmentHistoryStatus.completed),
+          ],
+          onFilterChanged: _onFilterChanged,
+          initialSelection: _selectedFilter,
+        ),
+        Expanded(
+          child: BlocBuilder<AppointmentsCubit, AppointmentCubitState>(
+            buildWhen: (previous, current) {
+              return previous.runtimeType != current.runtimeType ||
+                  previous is AppointmentsLoadingState ||
+                  current is AppointmentsLoadingState;
+            },
+            builder: (context, state) {
+              if (state is AppointmentsLoadingState) {
+                return const _LoadingContent();
+              }
 
-        if (state is AppointmentsLoadedState) {
-          return _LoadedContent(
-            appointments: _getFilteredAppointments(state),
-            onRefresh: _onRefresh,
-          );
-        }
+              if (state is AppointmentsLoadedState) {
+                return _LoadedContent(
+                  appointments: _getFilteredAppointments(state),
+                  onRefresh: _onRefresh,
+                  state: widget.state,
+                );
+              }
 
-        if (state is AppointmentsFailureState) {
-          return _ErrorContent(
-            error: state.primaryError,
-            onRefresh: _onRefresh,
-            onRetry: widget.state.controller.appointmentRefreshData,
-            isRefreshing: _isRefreshing,
-          );
-        }
+              if (state is AppointmentsFailureState) {
+                return _ErrorContent(
+                  error: state.primaryError,
+                  onRefresh: _onRefresh,
+                  onRetry: widget.state.controller.appointmentRefreshData,
+                  isRefreshing: _isRefreshing,
+                );
+              }
 
-        return _EmptyContent(onRefresh: _onRefresh);
-      },
+              return _EmptyContent(onRefresh: _onRefresh);
+            },
+          ),
+        ),
+      ],
     );
   }
 }
@@ -99,11 +160,13 @@ class _LoadingContent extends StatelessWidget {
 class _LoadedContent extends StatelessWidget {
   final List<AppointmentModel> appointments;
   final Future<void> Function() onRefresh;
+  final AppointmentHistoryState state;
 
   const _LoadedContent({
     Key? key,
     required this.appointments,
     required this.onRefresh,
+    required this.state,
   }) : super(key: key);
 
   @override
@@ -117,11 +180,16 @@ class _LoadedContent extends StatelessWidget {
       child: ListView.builder(
         itemCount: appointments.length,
         itemBuilder: (context, index) {
+          final appointment = appointments[index];
+          // final user = state.controller.getUserByIdNumber(
+          //   appointment.counselorId ?? '',
+          // );
           return RepaintBoundary(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: HistoryCard(
-                appointment: appointments[index],
+                appointment: appointment,
+                users: state.controller.getUsers(),
               ),
             ),
           );

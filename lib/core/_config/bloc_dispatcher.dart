@@ -10,7 +10,7 @@ class BlocDispatcher extends BlocObserver {
   final bool _enableLogging;
 
   BlocDispatcher({bool? enableLogging})
-    : _enableLogging = enableLogging ?? FlavorConfig.isDevelopment();
+      : _enableLogging = enableLogging ?? FlavorConfig.isDevelopment();
 
   @override
   void onCreate(BlocBase bloc) {

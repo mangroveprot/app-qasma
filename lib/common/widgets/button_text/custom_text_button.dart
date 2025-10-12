@@ -7,7 +7,7 @@ import '../bloc/button/button_cubit.dart';
 enum Position { left, right }
 
 class CustomTextButton extends StatelessWidget {
-  final VoidCallback? onPressed;
+  final VoidCallback onPressed;
   final String text;
   final Color? textColor;
   final double? fontSize;
@@ -49,7 +49,7 @@ class CustomTextButton extends StatelessWidget {
     this.iconSize,
     this.iconColor,
     this.iconSpacing,
-    this.buttonId, // Add this line
+    this.buttonId,
   }) : super(key: key);
 
   @override
@@ -68,7 +68,12 @@ class CustomTextButton extends StatelessWidget {
             borderRadius: borderRadius,
           ),
           child: TextButton(
-            onPressed: isLoading ? null : onPressed,
+            onPressed: isLoading
+                ? null
+                : () {
+                    FocusScope.of(context).unfocus();
+                    onPressed();
+                  },
             style: TextButton.styleFrom(
               backgroundColor: Colors.transparent,
               padding: padding,

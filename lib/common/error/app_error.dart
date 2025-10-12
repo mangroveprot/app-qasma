@@ -81,7 +81,7 @@ class AppError {
 
   String get userMessage {
     if (shouldIgnoreError()) {
-      return '';
+      return 'Something went wrong. Please try again!';
     }
 
     if (message != null && _isUserFriendly(message!)) {
