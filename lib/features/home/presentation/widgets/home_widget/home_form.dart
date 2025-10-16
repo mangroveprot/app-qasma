@@ -5,7 +5,6 @@ import '../../../../../common/utils/constant.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
 import '../../../../appointment/presentation/bloc/appointments/appointments_cubit.dart';
 import '../../pages/home_page.dart';
-import '_feedback/feedback_section.dart';
 import 'home_content.dart';
 
 class HomeForm extends StatefulWidget {
@@ -32,20 +31,6 @@ class _HomeFormState extends State<HomeForm> {
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkPendingFeedback();
-    });
-  }
-
-  void _checkPendingFeedback() {
-    if (!mounted) return;
-
-    final feedBackSection = FeedBackSection(
-      context: context,
-      buttonCubit: widget.state.controller.buttonCubit,
-    );
-    feedBackSection.checkPendingFeedback();
   }
 
   List<AppointmentModel> _getFilteredAppointments(
@@ -77,10 +62,6 @@ class _HomeFormState extends State<HomeForm> {
         widget.state.controller.appointConfigRefreshData(),
       ]);
       _lastRefreshTime = DateTime.now();
-
-      if (mounted) {
-        _checkPendingFeedback();
-      }
     } finally {
       if (mounted) setState(() => _isRefreshing = false);
     }

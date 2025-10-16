@@ -57,13 +57,10 @@ class BookTypeDataTimeSection extends StatelessWidget {
 
   Future<void> _onAppointmentTypeSelected(
       BuildContext context, String type) async {
-    // Clear date/time selection when type changes
     dropdownControllers[field_appointmentDateTime.field_key]!.value = null;
 
-    // Clear form errors
     context.read<FormCubit>().clearFieldError(field_appointmentType.field_key);
 
-    // Load slots for the selected appointment type
     final configCubit = context.read<AppointmentConfigCubit>();
     final duration = category != null
         ? configCubit.getDurationByTypeInCategory(category!, type) ?? 10

@@ -26,7 +26,7 @@ class CreateAccountForm extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const RepaintBoundary(
-                child: SignupHeader(headingTitle: 'Create Account!')),
+                child: SignupHeader(headingTitle: 'Personal Information!')),
             Spacing.verticalLarge,
             RepaintBoundary(
               child: PersonalInfoSection(

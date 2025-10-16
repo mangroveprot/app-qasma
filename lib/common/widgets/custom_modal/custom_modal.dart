@@ -337,6 +337,7 @@ class CustomModal {
     String confirmButtonText = 'Confirm',
     String cancelButtonText = 'Cancel',
     String othersPlaceholder = 'Please specify...',
+    String? buttonId,
     Future<T> Function(String selectedReason)? onConfirm,
   }) {
     return Modal.show<T>(
@@ -357,6 +358,7 @@ class CustomModal {
           cancelButtonText: cancelButtonText,
           othersPlaceholder: othersPlaceholder,
           onConfirm: onConfirm,
+          buttonId: buttonId,
         ),
       ),
     );

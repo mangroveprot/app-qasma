@@ -25,6 +25,7 @@ class LoginForgotPasswordBtn extends StatelessWidget {
                   Routes.buildPath(Routes.aut_path, Routes.forgot_password));
             },
             text: 'Forgot Password?',
+            textColor: context.colors.secondary,
             fontSize: 12,
             width: null,
             fontWeight: context.weight.medium,

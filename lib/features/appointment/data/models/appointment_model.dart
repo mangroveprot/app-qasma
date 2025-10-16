@@ -18,7 +18,7 @@ class AppointmentModel extends Appointment {
     super.checkInTime,
     super.staffId,
     super.counselorId,
-    super.feedbackSubmitted,
+    required super.feedbackSubmitted,
     required super.qrCode,
     required super.cancellation,
     required super.reschedule,
@@ -45,8 +45,7 @@ class AppointmentModel extends Appointment {
       'checkInTime': checkInTime?.toIso8601String(),
       'staffId': staffId,
       'counselorId': counselorId,
-      'feedbackSubmitted':
-          feedbackSubmitted == null ? null : (feedbackSubmitted! ? 1 : 0),
+      'feedbackSubmitted': feedbackSubmitted ? 1 : 0,
       'qrCode': jsonEncode(qrCode.toMap()),
       'cancellation': jsonEncode(cancellation.toMap()),
       'reschedule': jsonEncode(reschedule.toMap()),
@@ -74,7 +73,7 @@ class AppointmentModel extends Appointment {
       checkInTime: ModelUtils.getNullableDateTime(map, 'checkInTime'),
       staffId: ModelUtils.getString(map, 'staffId'),
       counselorId: ModelUtils.getString(map, 'counselorId'),
-      feedbackSubmitted: ModelUtils.getNullableBool(map, 'feedbackSubmitted'),
+      feedbackSubmitted: ModelUtils.getBool(map, 'feedbackSubmitted'),
       qrCode: QRCodeModel.fromMap(
         map['qrCode'] != null ? jsonDecode(map['qrCode']) : <String, dynamic>{},
       ),
@@ -163,8 +162,7 @@ class AppointmentModel extends Appointment {
           ModelUtils.getNullableDateTime(json, 'checkInTime', 'check_in_time'),
       staffId: ModelUtils.getString(json, 'staffId', 'staff_id'),
       counselorId: ModelUtils.getString(json, 'counselorId', 'counselor_id'),
-      feedbackSubmitted: ModelUtils.getNullableBool(
-          json, 'feedbackSubmitted', 'feedback_submitted'),
+      feedbackSubmitted: ModelUtils.getBool(json, 'feedbackSubmitted'),
       qrCode: QRCodeModel.fromMap(
         json['qrCode'] ?? json['qr_code'] ?? <String, dynamic>{},
       ),

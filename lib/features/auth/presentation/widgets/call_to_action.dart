@@ -18,6 +18,7 @@ class CallToAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Center(
       child: RichText(
         text: TextSpan(
@@ -29,15 +30,14 @@ class CallToAction extends StatelessWidget {
             TextSpan(
               text: actionLabel,
               style: TextStyle(
-                color: Colors.blue,
+                color: colors.secondary,
                 fontWeight: context.weight.bold,
-                decoration: TextDecoration.underline,
+                decoration: TextDecoration.none,
               ),
-              recognizer:
-                  TapGestureRecognizer()
-                    ..onTap = () {
-                      context.go(directionPath);
-                    },
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  context.go(directionPath);
+                },
             ),
           ],
         ),

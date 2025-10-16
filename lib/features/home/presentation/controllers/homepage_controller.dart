@@ -26,6 +26,7 @@ import '../../../users/data/models/user_model.dart';
 import '../../../users/presentation/bloc/user_cubit.dart';
 import '../../../appointment/data/models/appointment_model.dart';
 import '../../../users/presentation/bloc/user_cubit_extension.dart';
+import '../widgets/home_widget/_feedback/feedback_section.dart';
 
 class HomePageController {
   // Cubits
@@ -106,6 +107,14 @@ class HomePageController {
 
   String get currentUserId => SharedPrefs().getString('currentUserId') ?? '';
 
+  void checkPendingFeedback(BuildContext context) {
+    final feedBackSection = FeedBackSection(
+      context: context,
+      buttonCubit: buttonCubit,
+    );
+    feedBackSection.checkPendingFeedback();
+  }
+
   UserModel? getUserByIdNumber(String idNumber) {
     return _userCubit.getUserByIdNumber(idNumber);
   }
@@ -165,6 +174,7 @@ class HomePageController {
 
     await CustomModal.showRadioSelectionModal<String>(
       context,
+      buttonId: 'selection_canceled_${appointmentId}',
       options: reasonOptionList,
       title: 'Select Cancellation Reason',
       onConfirm: (String reason) async {
@@ -179,6 +189,7 @@ class HomePageController {
         await context.read<ButtonCubit>().execute(
               usecase: sl<CancelAppointmentUsecase>(),
               params: _cancellationData,
+              buttonId: 'selection_canceled_${appointmentId}',
             );
         return '';
       },

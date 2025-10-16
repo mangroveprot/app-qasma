@@ -13,8 +13,8 @@ import '../../../../core/_base/_services/storage/shared_preference.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
 import '../../../appointment_config/domain/usecases/sync_config_usecase.dart';
 import '../../../appointment_config/presentation/bloc/appointment_config_cubit.dart';
+import '../../../users/data/models/params/dynamic_param.dart';
 import '../../data/models/appointment_model.dart';
-import '../../data/models/reschedule_model.dart';
 import '../../domain/entities/cancellation.dart';
 import '../../domain/entities/qrcode.dart';
 import '../../domain/entities/reschedule.dart';
@@ -211,54 +211,49 @@ class BookAppointmentPageState extends State<BookAppointmentPage> {
     final parsed = parseDateTimeRange(dateTimeSelected);
 
     final isSameTimeSlot =
-        _existingAppointment!.scheduledStartAt == '${parsed['start']}Z' &&
-            _existingAppointment!.scheduledEndAt == '${parsed['end']}Z';
+        _existingAppointment!.scheduledStartAt == parsed['start'] &&
+            _existingAppointment!.scheduledEndAt == parsed['end'];
 
-    final rescheduleModel = isSameTimeSlot
-        ? (remarks.isNotEmpty
-            ? RescheduleModel(
-                rescheduledBy: _existingAppointment!.reschedule.rescheduledBy ??
-                    SharedPrefs().getString('currentUserId') ??
-                    '',
-                remarks: remarks,
-                rescheduledAt: _existingAppointment!.reschedule.rescheduledAt ??
-                    DateTime.now(),
-                previousStart: _existingAppointment!.reschedule.previousStart ??
-                    _existingAppointment!.scheduledStartAt,
-                previousEnd: _existingAppointment!.reschedule.previousEnd ??
-                    _existingAppointment!.scheduledEndAt,
-              )
-            : _existingAppointment!.reschedule)
-        : RescheduleModel(
-            rescheduledBy: SharedPrefs().getString('currentUserId') ?? '',
-            remarks: remarks,
-            rescheduledAt: DateTime.now(),
-            previousStart: _existingAppointment!.scheduledStartAt,
-            previousEnd: _existingAppointment!.scheduledEndAt,
-          );
+    final Map<String, dynamic> updateFields = {
+      'appointmentId': _existingAppointment!.appointmentId,
+      'appointmentType': appointmentType,
+      'description': description,
+    };
 
-    final updatedAppointment = AppointmentModel(
-      studentId: _existingAppointment!.studentId,
-      scheduledStartAt: parsed['start']!,
-      scheduledEndAt: parsed['end']!,
-      appointmentCategory: _existingAppointment!.appointmentCategory,
-      appointmentType: appointmentType,
-      description: description,
-      status: 'pending',
-      checkInStatus: _existingAppointment!.checkInStatus,
-      feedbackSubmitted: false,
-      qrCode: _existingAppointment!.qrCode,
-      cancellation: _existingAppointment!.cancellation,
-      reschedule: rescheduleModel,
-      createdBy: _existingAppointment!.createdBy,
-      appointmentId: _existingAppointment!.appointmentId,
-      updatedAt: DateTime.now(),
-      createdAt: _existingAppointment!.createdAt,
-    );
+    if (!isSameTimeSlot) {
+      updateFields['scheduledStartAt'] = parsed['start']!.toIso8601String();
+      updateFields['scheduledEndAt'] = parsed['end']!.toIso8601String();
+      updateFields['reschedule'] = {
+        'rescheduledBy': SharedPrefs().getString('currentUserId') ?? '',
+        'remarks': remarks,
+        'rescheduledAt': DateTime.now().toIso8601String(),
+        'previousStart':
+            _existingAppointment!.scheduledStartAt.toIso8601String(),
+        'previousEnd': _existingAppointment!.scheduledEndAt.toIso8601String(),
+      };
+    } else if (remarks.isNotEmpty) {
+      updateFields['reschedule'] = {
+        'rescheduledBy': _existingAppointment!.reschedule.rescheduledBy ??
+            SharedPrefs().getString('currentUserId') ??
+            '',
+        'remarks': remarks,
+        'rescheduledAt':
+            (_existingAppointment!.reschedule.rescheduledAt ?? DateTime.now())
+                .toIso8601String(),
+        'previousStart': (_existingAppointment!.reschedule.previousStart ??
+                _existingAppointment!.scheduledStartAt)
+            .toIso8601String(),
+        'previousEnd': (_existingAppointment!.reschedule.previousEnd ??
+                _existingAppointment!.scheduledEndAt)
+            .toIso8601String(),
+      };
+    }
+
+    final dynamicParam = DynamicParam(fields: updateFields);
 
     context.read<ButtonCubit>().execute(
           usecase: sl<UpdateAppointmentUsecase>(),
-          params: updatedAppointment,
+          params: dynamicParam,
         );
   }
 

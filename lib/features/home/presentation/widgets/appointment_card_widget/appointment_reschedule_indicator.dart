@@ -89,8 +89,8 @@ class AppointmentRescheduleIndicator extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               _buildDataRow(
-                'Rescheduled By',
-                user?.fullName ?? 'N/A',
+                'Rescheduled',
+                ' By ${user?.fullName ?? 'N/A'}',
                 Icons.person_outline,
                 colors,
               ),

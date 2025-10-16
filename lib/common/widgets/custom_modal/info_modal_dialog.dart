@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../button_text/custom_text_button.dart';
 
 import '../../../../../theme/theme_extensions.dart';
+import '../bloc/button/button_cubit.dart';
 
 class InfoModalDialog {
-  static Future<void> show<T extends StateStreamable>({
+  static Future<void> show({
     required BuildContext context,
     required IconData icon,
     required String title,
@@ -14,7 +16,8 @@ class InfoModalDialog {
     VoidCallback? onPrimaryPressed,
     String? secondaryButtonText,
     VoidCallback? onSecondaryPressed,
-    T? buttonCubit,
+    ButtonCubit? buttonCubit,
+    String? buttonId,
     double? maxWidth,
     double? maxHeight,
   }) {
@@ -80,6 +83,7 @@ class InfoModalDialog {
                         secondaryButtonText: secondaryButtonText,
                         onSecondaryButtonPressed: onSecondaryPressed,
                         cubit: buttonCubit,
+                        buttonId: buttonId,
                       ),
                     ],
                   ),
@@ -92,59 +96,36 @@ class InfoModalDialog {
     );
   }
 
-  static Widget _buildButtons<T extends StateStreamable>(
+  static Widget _buildButtons(
     BuildContext context, {
     required String buttonText,
     VoidCallback? onButtonPressed,
     String? secondaryButtonText,
     VoidCallback? onSecondaryButtonPressed,
-    T? cubit,
+    ButtonCubit? cubit,
+    String? buttonId,
   }) {
     final hasSecondary = secondaryButtonText != null;
 
     final primaryButton = cubit != null
-        ? BlocBuilder<T, dynamic>(
-            bloc: cubit,
-            builder: (ctx, state) {
-              final isLoading = state.toString().contains('Loading');
-
-              return SizedBox(
+        ? BlocProvider<ButtonCubit>.value(
+            value: cubit,
+            child: Builder(builder: (context) {
+              return CustomTextButton(
+                onPressed: onButtonPressed ?? () => Navigator.of(context).pop(),
+                text: buttonText,
+                textColor: context.colors.white,
+                fontSize: 15,
+                fontWeight: context.weight.medium,
+                backgroundColor: context.colors.primary,
+                borderRadius: BorderRadius.circular(12),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                loadingIndicatorColor: context.colors.white,
                 width: double.infinity,
                 height: 48,
-                child: ElevatedButton(
-                  onPressed: isLoading
-                      ? null
-                      : onButtonPressed ?? () => Navigator.of(context).pop(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ctx.colors.primary,
-                    foregroundColor: ctx.colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    disabledBackgroundColor:
-                        ctx.colors.primary.withOpacity(0.6),
-                  ),
-                  child: isLoading
-                      ? SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            color: ctx.colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : Text(
-                          buttonText,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: ctx.weight.medium,
-                            color: ctx.colors.white,
-                          ),
-                        ),
-                ),
+                buttonId: buttonId,
               );
-            },
+            }),
           )
         : _buildPrimaryButton(context, buttonText, onButtonPressed);
 

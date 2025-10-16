@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../../common/utils/button_ids.dart';
 import '../../../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../../../common/widgets/custom_modal/info_modal_dialog.dart';
 import '../../../../../../theme/theme_extensions.dart';
@@ -16,7 +17,7 @@ class FeedbackRequiredDialog {
   }) {
     final colors = context.colors;
 
-    return InfoModalDialog.show<ButtonCubit>(
+    return InfoModalDialog.show(
       context: context,
       icon: Icons.star_rounded,
       title: 'How Did It Go?',
@@ -101,6 +102,7 @@ class FeedbackRequiredDialog {
       primaryButtonText: 'Share My Feedback',
       onPrimaryPressed: onSubmitNow,
       buttonCubit: buttonCubit,
+      buttonId: ButtonsUniqeKeys.feedback.id,
     );
   }
 }

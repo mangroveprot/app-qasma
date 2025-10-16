@@ -10,9 +10,9 @@ class LoginSubmitButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         child: CustomAppButton(
-          labelText: 'Login',
+          labelText: 'Sign In',
           labelTextColor: context.colors.white,
           backgroundColor: context.colors.primary,
           labelTextDecoration: TextDecoration.none,

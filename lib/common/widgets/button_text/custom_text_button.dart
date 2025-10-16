@@ -7,7 +7,7 @@ import '../bloc/button/button_cubit.dart';
 enum Position { left, right }
 
 class CustomTextButton extends StatelessWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final String text;
   final Color? textColor;
   final double? fontSize;
@@ -26,7 +26,7 @@ class CustomTextButton extends StatelessWidget {
   final double? iconSize;
   final Color? iconColor;
   final double? iconSpacing;
-  final String? buttonId; // Add this line
+  final String? buttonId;
 
   const CustomTextButton({
     Key? key,
@@ -49,7 +49,7 @@ class CustomTextButton extends StatelessWidget {
     this.iconSize,
     this.iconColor,
     this.iconSpacing,
-    this.buttonId,
+    this.buttonId, // Add this line
   }) : super(key: key);
 
   @override
@@ -68,12 +68,7 @@ class CustomTextButton extends StatelessWidget {
             borderRadius: borderRadius,
           ),
           child: TextButton(
-            onPressed: isLoading
-                ? null
-                : () {
-                    FocusScope.of(context).unfocus();
-                    onPressed();
-                  },
+            onPressed: isLoading ? null : onPressed,
             style: TextButton.styleFrom(
               backgroundColor: Colors.transparent,
               padding: padding,
@@ -98,15 +93,12 @@ class CustomTextButton extends StatelessWidget {
                     children: [
                       if (iconData != null &&
                           iconPosition == Position.left) ...[
-                        Padding(
-                          padding: EdgeInsets.only(left: iconSpacing ?? 8),
-                          child: Icon(
-                            iconData,
-                            size: iconSize,
-                            color: iconColor ?? textColor ?? colorToUse,
-                          ),
+                        Icon(
+                          iconData,
+                          size: iconSize,
+                          color: iconColor ?? textColor ?? colorToUse,
                         ),
-                        SizedBox(width: iconSpacing ?? 4),
+                        SizedBox(width: iconSpacing ?? 8),
                       ],
                       Text(
                         text,
@@ -119,7 +111,7 @@ class CustomTextButton extends StatelessWidget {
                       ),
                       if (iconData != null &&
                           iconPosition == Position.right) ...[
-                        SizedBox(width: iconSpacing ?? 4),
+                        SizedBox(width: iconSpacing ?? 8),
                         Icon(
                           iconData,
                           size: iconSize,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../common/utils/button_ids.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/models/modal_option.dart';
 import '../../../../common/widgets/toast/app_toast.dart';
@@ -10,6 +11,7 @@ import '../../../appointment/presentation/bloc/appointments/appointments_cubit.d
 import '../../../appointment_config/presentation/bloc/appointment_config_cubit.dart';
 import '../../../users/presentation/bloc/user_cubit.dart';
 import '../controllers/homepage_controller.dart';
+import '../widgets/home_widget/_feedback/feedback_section.dart';
 import '../widgets/home_widget/home_fab.dart';
 import '../widgets/home_widget/home_form.dart';
 import '../widgets/main_appbar.dart';
@@ -153,14 +155,24 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
             type: ToastType.original,
           );
         }
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            controller.checkPendingFeedback(context);
+          }
+        });
         break;
     }
   }
 
   void _handleUserState(BuildContext context, UserCubitState state) {
     if (state is UserFailureState) {
-      AppToast.show(message: 'Failed to load user data', type: ToastType.error);
-      debugPrint('Failed to load user: ${state.errorMessages}');
+      Future.delayed(const Duration(seconds: 4), () {
+        AppToast.show(
+          message: 'Failed to load user data',
+          type: ToastType.error,
+        );
+      });
     }
   }
 
@@ -185,10 +197,17 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
     }
 
     if (state is ButtonSuccessState) {
-      AppToast.show(
-        message: 'Appointment has been canceled successfully.',
-        type: ToastType.success,
-      );
+      if (state.buttonId != null &&
+          state.buttonId == ButtonsUniqeKeys.feedback.id) {
+        FeedBackSection.closeModalIfOpen(context);
+      }
+      if (state.buttonId != null &&
+          state.buttonId!.startsWith('selection_canceled_')) {
+        AppToast.show(
+          message: 'Appointment has been canceled successfully.',
+          type: ToastType.success,
+        );
+      }
       await controller.appoitnmentRefreshData();
     }
   }
@@ -196,10 +215,12 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
   void _handleAppointmentConfigState(
       BuildContext context, AppointmentConfigCubitState state) {
     if (state is AppointmentConfigFailureState) {
-      AppToast.show(
-        message: 'Failed to load appointment config',
-        type: ToastType.error,
-      );
+      Future.delayed(const Duration(seconds: 4), () {
+        AppToast.show(
+          message: 'Failed to load appointment config',
+          type: ToastType.error,
+        );
+      });
     }
   }
 }

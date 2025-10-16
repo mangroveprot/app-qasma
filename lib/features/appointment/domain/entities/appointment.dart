@@ -16,7 +16,7 @@ class Appointment extends Equatable {
   final DateTime? checkInTime;
   final String? staffId;
   final String? counselorId;
-  final bool? feedbackSubmitted;
+  final bool feedbackSubmitted;
   final QRCode qrCode;
   final Cancellation cancellation;
   final Reschedule reschedule;
@@ -40,7 +40,7 @@ class Appointment extends Equatable {
     this.checkInStatus,
     this.staffId,
     this.counselorId,
-    this.feedbackSubmitted,
+    required this.feedbackSubmitted,
     required this.qrCode,
     required this.cancellation,
     required this.reschedule,
@@ -53,20 +53,8 @@ class Appointment extends Equatable {
     required this.updatedAt,
   });
 
-  // Helper methods
   bool get isDeleted => deletedAt != null;
-  bool get isPending => status == 'pending';
   bool get isCancelled => cancellation.cancelledAt != null;
-  bool get isCheckedIn => checkInStatus != 'not-checked-in';
-  bool get isOnline => appointmentType == 'Online';
-  bool get isPsychological => appointmentCategory == 'Psychological';
-
-  Duration get duration => scheduledEndAt.difference(scheduledStartAt);
-
-  bool get isUpcoming {
-    final now = DateTime.now();
-    return scheduledStartAt.isAfter(now) && !isCancelled && !isDeleted;
-  }
 
   @override
   List<Object?> get props => [

@@ -82,6 +82,7 @@ class GetStartedPageState extends State<GetStartedPage> {
   }
 
   void handleSubmit(BuildContext context) {
+    FocusScope.of(context).unfocus();
     final isValid = formCubit.validateAll(
       _buildValidationFields(),
       // optionalFields: _optionalFields.map((field) => field.field_key).toList(),

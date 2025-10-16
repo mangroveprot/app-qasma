@@ -20,6 +20,7 @@ class AppointmentCard extends StatefulWidget {
   final VoidCallback onCancel;
   final VoidCallback? onBackPressed;
   final VoidCallback onReschedule;
+
   const AppointmentCard({
     super.key,
     required this.appointment,
@@ -35,40 +36,40 @@ class AppointmentCard extends StatefulWidget {
 
 class _AppointmentCardState extends State<AppointmentCard> {
   bool _showActions = false;
-  late DateTime _now;
-  late Timer _timer;
+  DateTime _now = DateTime.now();
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    _now = DateTime.now();
-    _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
-      if (mounted) {
-        setState(() {
-          _now = DateTime.now();
-        });
-      }
-    });
+    _startTimer();
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 
-  bool get _isOnSession {
-    final utcStartTime = widget.appointment.scheduledStartAt;
-    final utcEndTime = widget.appointment.scheduledEndAt;
+  void _startTimer() {
+    // Only update time if appointment hasn't ended
+    if (_now.isBefore(widget.appointment.scheduledEndAt)) {
+      _timer = Timer.periodic(const Duration(minutes: 1), (_) {
+        if (mounted) {
+          setState(() => _now = DateTime.now());
+        }
+      });
+    }
+  }
 
-    return _now.isAfter(stripMicroseconds(utcStartTime)) &&
-        _now.isBefore(stripMicroseconds(utcEndTime));
+  bool get _isOnSession {
+    return _now
+            .isAfter(stripMicroseconds(widget.appointment.scheduledStartAt)) &&
+        _now.isBefore(stripMicroseconds(widget.appointment.scheduledEndAt));
   }
 
   bool get _isOverdue {
-    final utcEndTime = widget.appointment.scheduledEndAt;
-
-    return stripMicroseconds(utcEndTime).isBefore(_now);
+    return stripMicroseconds(widget.appointment.scheduledEndAt).isBefore(_now);
   }
 
   @override
@@ -76,12 +77,6 @@ class _AppointmentCardState extends State<AppointmentCard> {
     final colors = context.colors;
     final weight = context.weight;
     final radius = context.radii;
-    final textPrimay = colors.textPrimary;
-
-    final _divider = Container(
-      height: 1,
-      color: textPrimay.withOpacity(0.1),
-    );
 
     return Card(
       elevation: 4,
@@ -115,97 +110,152 @@ class _AppointmentCardState extends State<AppointmentCard> {
                 isOnSession: _isOnSession,
                 isOverdue: _isOverdue,
               ),
-              // date/time and status
               AppointmentDateTimeStatus(
                 appointment: widget.appointment,
                 isOverdue: _isOverdue,
                 isOnSession: _isOnSession,
                 user: widget.user,
               ),
-
               Spacing.verticalMedium,
-              _divider,
+              _buildDivider(colors),
               Spacing.verticalMedium,
-
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // left side - Appointment info
-                  Expanded(
-                    child: AppointmentDetailsSection(
-                      appointment: widget.appointment,
-                    ),
-                  ),
-                  if (widget.appointment.qrCode.token != null) ...[
-                    const SizedBox(width: 16),
-                    CardQRCodeSection(
-                      qrData: widget.appointment.qrCode,
-                      onBackPressed: widget.onBackPressed,
-                    ),
-                  ],
-                ],
-              ),
-
+              _buildContentRow(),
               Spacing.verticalMedium,
-              _divider,
+              _buildDivider(colors),
               Spacing.verticalSmall,
-
-              // See More / Actions
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _showActions = !_showActions;
-                  });
-                },
-                child: Center(
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          _showActions ? 'See less' : 'See more',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: colors.textPrimary,
-                            fontWeight: weight.medium,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(
-                          _showActions
-                              ? Icons.keyboard_arrow_up
-                              : Icons.keyboard_arrow_down,
-                          color: colors.textPrimary,
-                          size: 14,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              if (_showActions) ...[
-                Spacing.verticalMedium,
-                // action Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CardRescheduleButton(onPressed: widget.onReschedule),
-                    const SizedBox(width: 8),
-                    CardCancelButton(onPressed: widget.onCancel),
-                  ],
-                ),
-              ],
+              _buildToggleButton(colors, weight),
+              _buildActionButtons(),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDivider(dynamic colors) {
+    return Container(
+      height: 1,
+      color: colors.textPrimary.withOpacity(0.1),
+    );
+  }
+
+  Widget _buildContentRow() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Expanded(
+          child: AppointmentDetailsSection(
+            appointment: widget.appointment,
+          ),
+        ),
+        if (widget.appointment.qrCode.token != null) ...[
+          const SizedBox(width: 16),
+          CardQRCodeSection(
+            qrData: widget.appointment.qrCode,
+            onBackPressed: widget.onBackPressed,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildToggleButton(dynamic colors, dynamic weight) {
+    return GestureDetector(
+      onTap: () => setState(() => _showActions = !_showActions),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _showActions ? 'Collapse' : 'Expand',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: colors.textPrimary,
+                  fontWeight: weight.medium,
+                ),
+              ),
+              const SizedBox(width: 4),
+              AnimatedRotation(
+                turns: _showActions ? 0.5 : 0,
+                duration: const Duration(milliseconds: 200),
+                child: Icon(
+                  Icons.keyboard_arrow_down,
+                  color: colors.textPrimary,
+                  size: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return ClipRect(
+      child: AnimatedAlign(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        heightFactor: _showActions ? 1.0 : 0.0,
+        alignment: Alignment.topCenter,
+        child: Column(
+          children: [
+            Spacing.verticalMedium,
+            Row(
+              children: [
+                Expanded(
+                  child: _PressableButton(
+                    child: CardRescheduleButton(
+                      buttonId:
+                          'reschedule_${widget.appointment.appointmentId}',
+                      onPressed: widget.onReschedule,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _PressableButton(
+                    child: CardCancelButton(
+                      buttonId: 'cancel${widget.appointment.appointmentId}',
+                      onPressed: widget.onCancel,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PressableButton extends StatefulWidget {
+  final Widget child;
+
+  const _PressableButton({required this.child});
+
+  @override
+  State<_PressableButton> createState() => _PressableButtonState();
+}
+
+class _PressableButtonState extends State<_PressableButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedScale(
+        scale: _isPressed ? 0.95 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeInOut,
+        child: widget.child,
       ),
     );
   }

@@ -16,4 +16,7 @@ class ButtonsUniqeKeys {
   static const forgotPassword = ButtonIds(
     id: 'forgot-password',
   );
+  static const feedback = ButtonIds(
+    id: 'feedback',
+  );
 }
