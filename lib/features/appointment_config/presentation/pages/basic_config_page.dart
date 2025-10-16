@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../common/presentation/widgets/basic_save_action_buttons.dart';
+import '../../../../common/utils/tooltips_items.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/custom_app_bar.dart';
 import '../../../../common/widgets/custom_input_field.dart';
@@ -270,6 +271,7 @@ class _BasicConfigPageState extends State<BasicConfigPage> {
                                   controller: _bufferTimeController,
                                   onChanged: _updateBufferTime,
                                   keyboardType: TextInputType.number,
+                                  tooltip: ToolTips.buffer_time.tips,
                                 ),
                                 CustomInputField(
                                   fieldName: 'booking_lead_time',
@@ -279,6 +281,7 @@ class _BasicConfigPageState extends State<BasicConfigPage> {
                                   controller: _bookingLeadTimeController,
                                   onChanged: _updateBookingLeadTime,
                                   keyboardType: TextInputType.number,
+                                  tooltip: ToolTips.booking_lead_time.tips,
                                 ),
                                 CustomInputField(
                                   fieldName: 'slot_days_range',
@@ -288,6 +291,7 @@ class _BasicConfigPageState extends State<BasicConfigPage> {
                                   controller: _slotDaysRangeController,
                                   onChanged: _updateSlotDaysRange,
                                   keyboardType: TextInputType.number,
+                                  tooltip: ToolTips.slot_days_range.tips,
                                 ),
                               ],
                             ),

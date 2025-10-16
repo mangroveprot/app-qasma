@@ -10,11 +10,13 @@ import '../../../../core/_base/_services/base_service/base_service.dart';
 import '../../../../core/_base/_services/storage/shared_preference.dart';
 import '../../../../core/_config/url_provider.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
+import '../../../users/data/models/params/dynamic_param.dart';
 import '../../domain/services/appointment_service.dart';
 import '../models/appointment_model.dart';
 import '../models/params/approved_params.dart';
 import '../models/params/availability_params.dart';
 import '../models/params/cancel_params.dart';
+import '../models/params/qr_scan_params.dart';
 
 class AppointmentServiceImpl extends BaseService<AppointmentModel>
     implements AppointmentService {
@@ -272,11 +274,11 @@ class AppointmentServiceImpl extends BaseService<AppointmentModel>
 
   @override
   Future<Either<AppError, AppointmentModel>> updateAppointment(
-      AppointmentModel model) async {
+      DynamicParam model) async {
     try {
       final response = await _apiClient.patch(
         _urlProviderConfig.updateAppointment,
-        data: model.updateAppointmentToJson(),
+        data: model.toJson(),
         requiresAuth: true,
       );
 
@@ -412,6 +414,51 @@ class AppointmentServiceImpl extends BaseService<AppointmentModel>
           ? e
           : AppError.create(
               message: 'Unexpected error during approving appointment',
+              type: ErrorType.unknown,
+              originalError: e,
+              stackTrace: stack,
+            );
+      return Left(error);
+    }
+  }
+
+  @override
+  Future<Either<AppError, bool>> verifyAppointment(
+    QRScanParams qrRequest,
+  ) async {
+    try {
+      final response = await _apiClient.put(
+        _urlProviderConfig.verifyAppointment,
+        data: qrRequest.toJson(),
+        requiresAuth: true,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final apiResponse = ApiResponse.fromJson(
+          response.data,
+          (json) => AppointmentModel.fromJson(json),
+        );
+
+        if (apiResponse.isSuccess) {
+          return const Right(true);
+        } else {
+          return Left(apiResponse.error ??
+              AppError.create(
+                message: 'Failed to verify appointment',
+                type: ErrorType.server,
+              ));
+        }
+      } else {
+        return Left(AppError.create(
+          message: response.data?['message'] ?? 'Failed to verify appointment',
+          type: ErrorType.server,
+        ));
+      }
+    } catch (e, stack) {
+      final error = e is AppError
+          ? e
+          : AppError.create(
+              message: 'Unexpected error during verifying appointment',
               type: ErrorType.unknown,
               originalError: e,
               stackTrace: stack,

@@ -86,6 +86,42 @@ class CategoryDialogs {
       ),
     );
   }
+
+  static void showRemoveLastTypeDialog(
+    BuildContext context,
+    String category,
+    VoidCallback onConfirm,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Category?'),
+        content: Text(
+          'Deleting the last type will remove the entire "$category" category. Continue?',
+          style: TextStyle(
+            fontSize: 16,
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              onConfirm();
+              Navigator.of(context).pop();
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: context.colors.error,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _AddCategoryDialog extends StatefulWidget {

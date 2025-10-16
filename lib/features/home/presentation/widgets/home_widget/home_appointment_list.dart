@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../../common/helpers/helpers.dart';
 import '../../../../../common/utils/constant.dart';
+import '../../../../../core/_base/_services/storage/shared_preference.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
 import '../../../../users/data/models/user_model.dart';
@@ -12,17 +13,21 @@ import 'home_history_button.dart';
 class HomeAppointmentList extends StatefulWidget {
   final HomePageState state;
   final List<AppointmentModel> appointments;
+  final List<UserModel> users;
   final Function(String) onCancel;
   final Function(String) onReschedule;
+  final Function(String) onVerify;
   final Future<void> Function() onRefresh;
 
   const HomeAppointmentList({
     super.key,
     required this.appointments,
+    required this.users,
     required this.onCancel,
     required this.onReschedule,
     required this.state,
     required this.onRefresh,
+    required this.onVerify,
   });
 
   @override
@@ -34,6 +39,8 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
   late TabController _tabController;
   List<AppointmentModel> _currentSessionAppointments = [];
   List<AppointmentModel> _upcomingAppointments = [];
+  Map<String, UserModel> _userMap = {};
+  static const bool _enableTimeFiltering = false;
 
   @override
   void initState() {
@@ -50,7 +57,8 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
   @override
   void didUpdateWidget(HomeAppointmentList oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.appointments != widget.appointments) {
+    if (oldWidget.appointments != widget.appointments ||
+        oldWidget.users != widget.users) {
       _filterAppointments();
     }
   }
@@ -62,33 +70,52 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
   }
 
   void _filterAppointments() {
+    final currentUserId = SharedPrefs().getString('currentUserId');
+
+    // Build user map once for O(1) lookups
+    _userMap = {for (var user in widget.users) user.idNumber: user};
+
     final approvedAppointments = widget.appointments
         .where((appointment) =>
-            appointment.status.toLowerCase() == StatusType.approved.field)
+            appointment.status.toLowerCase() == StatusType.approved.field &&
+            appointment.counselorId == currentUserId)
         .toList();
 
-    final now = DateTime.now();
-    _currentSessionAppointments = [];
-    _upcomingAppointments = [];
+    if (_enableTimeFiltering) {
+      final now = DateTime.now();
+      _currentSessionAppointments = [];
+      _upcomingAppointments = [];
 
-    for (final appointment in approvedAppointments) {
-      // check if the appoitnment is now or already pass on time
-      if (isNowAppointment(now, appointment.scheduledStartAt) ||
-          appointment.scheduledStartAt.isBefore(now)) {
-        _currentSessionAppointments.add(appointment);
-      } else {
-        _upcomingAppointments.add(appointment);
+      for (final appointment in approvedAppointments) {
+        // check if the appointment is now or already pass on time
+        if (isNowAppointment(now, appointment.scheduledStartAt) ||
+            appointment.scheduledStartAt.isBefore(now)) {
+          _currentSessionAppointments.add(appointment);
+        } else {
+          _upcomingAppointments.add(appointment);
+        }
       }
+
+      _currentSessionAppointments.sort((a, b) {
+        return b.scheduledStartAt.compareTo(a.scheduledStartAt);
+      });
+
+      _upcomingAppointments.sort((a, b) {
+        return a.scheduledStartAt.compareTo(b.scheduledStartAt);
+      });
+    } else {
+      _currentSessionAppointments = List.from(approvedAppointments);
+      _upcomingAppointments = [];
+
+      _currentSessionAppointments.sort((a, b) {
+        return b.scheduledStartAt.compareTo(a.scheduledStartAt);
+      });
     }
+  }
 
-    // sort newest to oldest
-    _currentSessionAppointments.sort((a, b) {
-      return b.scheduledStartAt.compareTo(a.scheduledStartAt);
-    });
-
-    _upcomingAppointments.sort((a, b) {
-      return a.scheduledStartAt.compareTo(b.scheduledStartAt);
-    });
+  UserModel? _getUserById(String? userId) {
+    if (userId == null || userId.isEmpty) return null;
+    return _userMap[userId];
   }
 
   @override
@@ -235,17 +262,16 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
         }
 
         final appointment = appointments[index];
-        final user =
-            widget.state.controller.getUserByIdNumber(appointment.studentId);
 
-        if (user == null) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: HomeSkeletonLoader.appointmentCardSkeleton(),
-          );
+        // Get both users efficiently with O(1) lookup
+        final studentUser = _getUserById(appointment.studentId);
+        final rescheduledByUser =
+            _getUserById(appointment.reschedule.rescheduledBy);
+
+        if (studentUser == null) {
+          return HomeSkeletonLoader.appointmentSingleCardSkeleton();
         }
 
-        final UserModel userData = user;
         final appointmentId = appointments[index].appointmentId;
 
         return RepaintBoundary(
@@ -253,7 +279,8 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
             padding: const EdgeInsets.only(bottom: 8),
             child: AppointmentCard(
               key: ValueKey(appointmentId),
-              userModel: userData,
+              userModel: studentUser,
+              rescheduledByUser: rescheduledByUser,
               appointment: appointments[index],
               isCurrentSessions: isCurrentSession,
               onApproved: () => widget.state.controller
@@ -262,6 +289,8 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
                   .handleCancelAppointment(appointmentId, context),
               onReschedule: () => widget.state.controller
                   .handleRescheduleAppointment(appointmentId),
+              onVerify: () => widget.state.controller
+                  .handleAppointmentVerification(appointmentId),
             ),
           ),
         );
@@ -282,9 +311,7 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(
-                height: MediaQuery.of(context).size.height *
-                    0.1), // Responsive spacing
+            SizedBox(height: MediaQuery.of(context).size.height * 0.1),
             Icon(
               Icons.event_busy_outlined,
               size: 48,

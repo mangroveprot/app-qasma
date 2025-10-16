@@ -4,7 +4,6 @@ import '../../../../../common/helpers/spacing.dart';
 import '../../../../../common/utils/form_field_config.dart';
 import '../../pages/login_page.dart';
 import 'login_field.dart';
-import 'login_forgot_password_btn.dart';
 import 'login_form_error.dart';
 import 'login_header.dart';
 import 'login_logo.dart';
@@ -43,7 +42,6 @@ class LoginForm extends StatelessWidget {
                 child: LoginSubmitButton(
                     onPressed: () => state.handleSubmit(context)),
               ),
-              const RepaintBoundary(child: LoginForgotPasswordBtn()),
             ],
           ),
         ),

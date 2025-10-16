@@ -1,32 +1,78 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-
 import '../../../../../common/helpers/helpers.dart';
 import '../../../../../common/helpers/spacing.dart';
-import '../../../../../common/utils/constant.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
 import '../../../../users/data/models/user_model.dart';
-import 'card_approved_button.dart';
+import 'appointment_date_time_status.dart';
+import 'appointment_details_section.dart';
+import 'appointment_stat_indicator.dart';
 import 'card_cancel_button.dart';
 import 'card_reschedule_button.dart';
-import 'status_chip.dart';
-import 'verify_chip.dart';
 
-class AppointmentCard extends StatelessWidget {
+class AppointmentCard extends StatefulWidget {
   final AppointmentModel appointment;
   final UserModel userModel;
+  final UserModel? rescheduledByUser;
   final VoidCallback onCancel;
   final VoidCallback onReschedule;
   final VoidCallback onApproved;
+  final VoidCallback onVerify;
   final bool isCurrentSessions;
-  const AppointmentCard(
-      {super.key,
-      required this.appointment,
-      required this.onCancel,
-      required this.onReschedule,
-      required this.userModel,
-      required this.onApproved,
-      this.isCurrentSessions = false});
+
+  const AppointmentCard({
+    super.key,
+    required this.appointment,
+    required this.onCancel,
+    required this.onReschedule,
+    required this.userModel,
+    this.rescheduledByUser,
+    required this.onApproved,
+    this.isCurrentSessions = false,
+    required this.onVerify,
+  });
+
+  @override
+  State<AppointmentCard> createState() => _AppointmentCardState();
+}
+
+class _AppointmentCardState extends State<AppointmentCard> {
+  late DateTime _now;
+  late Timer _timer;
+  bool _isDetailsExpanded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _now = DateTime.now();
+    // Update every minute for countdown
+    _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _now = DateTime.now();
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  bool get _isOnSession {
+    final utcStartTime = widget.appointment.scheduledStartAt;
+    final utcEndTime = widget.appointment.scheduledEndAt;
+    return _now.isAfter(stripMicroseconds(utcStartTime)) &&
+        _now.isBefore(stripMicroseconds(utcEndTime));
+  }
+
+  bool get _isOverdue {
+    final utcEndTime = widget.appointment.scheduledEndAt;
+    return stripMicroseconds(utcEndTime).isBefore(_now);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,33 +80,13 @@ class AppointmentCard extends StatelessWidget {
     final weight = context.weight;
     final radius = context.radii;
     final textPrimay = colors.textPrimary;
-    final appointmentDate = formatUtcToLocal(
-        utcTime: appointment.scheduledStartAt.toString(),
-        style: DateTimeFormatStyle.dateOnly);
-    final now = DateTime.now();
 
-    final appointmentId = appointment.appointmentId;
+    final appointmentId = widget.appointment.appointmentId;
 
     final _divider = Container(
       height: 1,
       color: textPrimay.withOpacity(0.1),
     );
-
-    final _labelTextStyle =
-        TextStyle(fontSize: 14, color: colors.black, fontWeight: weight.medium);
-
-    final _subtitleTextStyle = TextStyle(
-      fontSize: 12,
-      color: textPrimay,
-    );
-
-    final _titleTextStyle = TextStyle(
-      fontSize: 16,
-      fontWeight: weight.bold,
-      color: colors.black,
-    );
-
-    final isPassTime = isOverdue(now, appointment.scheduledEndAt);
 
     return Card(
       elevation: 4,
@@ -69,311 +95,132 @@ class AppointmentCard extends StatelessWidget {
       shadowColor: colors.black,
       shape: RoundedRectangleBorder(
         borderRadius: radius.large,
+        side: _isOverdue
+            ? BorderSide(color: colors.error.withOpacity(0.3), width: 1)
+            : _isOnSession
+                ? BorderSide(color: colors.primary.withOpacity(0.4), width: 1)
+                : BorderSide.none,
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // date/time and status
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: radius.large,
+          color: _isOverdue
+              ? colors.error.withOpacity(0.1)
+              : _isOnSession
+                  ? colors.primary.withOpacity(0.1)
+                  : Colors.transparent,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppointmentStatIndicator(
+                isOnSession: _isOnSession,
+                isOverdue: _isOverdue,
+              ),
+              AppointmentDateTimeStatus(
+                appointment: widget.appointment,
+                isOverdue: _isOverdue,
+                isOnSession: _isOnSession,
+                user: widget.userModel,
+                isCurrentSessions: widget.isCurrentSessions,
+                onVerify: widget.onVerify,
+                rescheduledByUser: widget.rescheduledByUser,
+              ),
+              // Spacing.verticalMedium,
+              // _divider,
+              Spacing.verticalSmall,
+
+              // collapssible toggle button
+              InkWell(
+                onTap: () {
+                  setState(() {
+                    _isDetailsExpanded = !_isDetailsExpanded;
+                  });
+                },
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    // color: colors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    // border: Border.all(
+                    //   color: colors.primary.withOpacity(0.3),
+                    // ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today_outlined,
-                            size: 16,
-                            color: colors.black,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              formatUtcToLocal(
-                                  utcTime:
-                                      appointment.scheduledStartAt.toString(),
-                                  style: DateTimeFormatStyle.dateOnly),
-                              style: TextStyle(
-                                fontSize:
-                                    appointmentDate.length <= 15 ? 16 : 14,
-                                fontWeight: weight.bold,
-                                color: colors.black,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.access_time,
-                            size: 16,
-                            color:
-                                isPassTime ? colors.error : colors.textPrimary,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              '${formatUtcToLocal(utcTime: appointment.scheduledStartAt.toString(), style: DateTimeFormatStyle.timeOnly)} - '
-                              '${formatUtcToLocal(
-                                utcTime: appointment.scheduledEndAt.toString(),
-                                style: DateTimeFormatStyle.timeOnly,
-                              )}',
-                              style: _subtitleTextStyle.copyWith(
-                                color: isPassTime ? colors.error : textPrimay,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (isPassTime) ...[
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colors.error.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: colors.error.withOpacity(0.3),
-                              width: 1,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                size: 12,
-                                color: colors.error,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Overdue',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: colors.error,
-                                  fontWeight: weight.medium,
-                                ),
-                              ),
-                            ],
-                          ),
+                      Text(
+                        _isDetailsExpanded
+                            ? 'Hide Details'
+                            : 'Appointment Details',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: weight.medium,
+                          color: colors.textPrimary,
                         ),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                if (isCurrentSessions) ...[
-                  VerifyChip(
-                    onPressed: () {},
-                  )
-                ] else ...[
-                  StatusChip(status: appointment.status)
-                ],
-              ],
-            ),
-
-            Spacing.verticalMedium,
-            _divider,
-            Spacing.verticalMedium,
-
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // left side - Appointment info
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.badge_outlined,
-                            size: 16,
-                            color: colors.textPrimary,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text.rich(
-                              TextSpan(
-                                children: [
-                                  TextSpan(
-                                      text: 'ID: ', style: _labelTextStyle),
-                                  TextSpan(
-                                      text: userModel.idNumber,
-                                      style: _subtitleTextStyle),
-                                ],
-                              ),
-                              softWrap: true,
-                            ),
-                          ),
-                        ],
                       ),
-                      const SizedBox(height: 8),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.person_outline,
-                            size: 16,
-                            color: colors.textPrimary,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text.rich(
-                              TextSpan(
-                                children: [
-                                  TextSpan(
-                                      text: 'Name: ', style: _labelTextStyle),
-                                  TextSpan(
-                                      text: userModel.fullName,
-                                      style: _subtitleTextStyle),
-                                ],
-                              ),
-                              softWrap: true,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                        ],
-                      ),
-                      Spacing.verticalSmall,
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.local_offer_outlined,
-                            size: 16,
-                            color: colors.textPrimary,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: RichText(
-                              text: TextSpan(
-                                style: DefaultTextStyle.of(context).style,
-                                children: [
-                                  TextSpan(
-                                    text: 'Category: ',
-                                    style: _labelTextStyle,
-                                  ),
-                                  TextSpan(
-                                    text: capitalizeWords(
-                                        appointment.appointmentCategory),
-                                    style: _subtitleTextStyle,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Spacing.verticalSmall,
-
-                      // Description with icon
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.description_outlined,
-                            size: 16,
-                            color: colors.textPrimary,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: RichText(
-                              text: TextSpan(
-                                style: DefaultTextStyle.of(context)
-                                    .style, // base style
-                                children: [
-                                  TextSpan(
-                                      text: 'Description: ',
-                                      style: _labelTextStyle),
-                                  TextSpan(
-                                      text: appointment.description,
-                                      style: _subtitleTextStyle),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Spacing.verticalXSmall,
-
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.label_important_outline,
-                            size: 16,
-                            color: colors.textPrimary,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: RichText(
-                              text: TextSpan(
-                                style: DefaultTextStyle.of(context).style,
-                                children: [
-                                  TextSpan(
-                                      text: 'Appointment Type: ',
-                                      style: _labelTextStyle),
-                                  TextSpan(
-                                      text: appointment.appointmentType,
-                                      style: _subtitleTextStyle),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
+                      Icon(
+                        _isDetailsExpanded
+                            ? Icons.keyboard_arrow_up
+                            : Icons.keyboard_arrow_down,
+                        size: 20,
+                        color: colors.textPrimary,
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
 
-            Spacing.verticalMedium,
-            _divider,
-            Spacing.verticalMedium,
-
-            Row(
-              children: [
-                if (appointment.status != StatusType.approved.field) ...[
-                  Expanded(
-                    child: CardApproveButton(
-                      buttonId: 'approved${appointmentId}',
-                      onPressed: onApproved,
+              // animate collapsible details
+              AnimatedCrossFade(
+                firstChild: const SizedBox.shrink(),
+                secondChild: Column(
+                  children: [
+                    Spacing.verticalMedium,
+                    AppointmentDetailsSection(
+                      appointment: widget.appointment,
+                      userModel: widget.userModel,
                     ),
+                  ],
+                ),
+                crossFadeState: _isDetailsExpanded
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
+                duration: const Duration(milliseconds: 300),
+              ),
+
+              Spacing.verticalMedium,
+              // _divider,
+              // Spacing.verticalMedium,
+
+              Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CardRescheduleButton(
+                          buttonId: 'reschedule_${appointmentId}',
+                          onPressed: widget.onReschedule,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: CardCancelButton(
+                          buttonId: 'cancel${appointmentId}',
+                          onPressed: widget.onCancel,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
                 ],
-                Expanded(
-                  child: CardRescheduleButton(
-                    buttonId: 'reschedule_${appointmentId}',
-                    onPressed: onReschedule,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: CardCancelButton(
-                    buttonId: 'cancel${appointmentId}',
-                    onPressed: onCancel,
-                  ),
-                ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );

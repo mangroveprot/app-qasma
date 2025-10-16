@@ -8,15 +8,33 @@ import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugins.GeneratedPluginRegistrant
 import java.io.IOException
 
 class MainActivity: FlutterActivity() {
-    private val CHANNEL = "excel_saver"
+    private val CAMERA_CHANNEL = "camera_release"
+    private val EXCEL_CHANNEL = "excel_saver"
+    private var cameraMethodChannel: MethodChannel? = null
+    private var excelMethodChannel: MethodChannel? = null
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        GeneratedPluginRegistrant.registerWith(flutterEngine)
         
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
+        // Setup camera channel
+        cameraMethodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CAMERA_CHANNEL)
+        cameraMethodChannel?.setMethodCallHandler { call, result ->
+            when (call.method) {
+                "releaseCamera" -> {
+                    releaseCameraNative()
+                    result.success(null)
+                }
+                else -> result.notImplemented()
+            }
+        }
+        
+        excelMethodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, EXCEL_CHANNEL)
+        excelMethodChannel?.setMethodCallHandler { call, result ->
             when (call.method) {
                 "saveToDownloads" -> {
                     val fileName = call.argument<String>("fileName")
@@ -31,6 +49,45 @@ class MainActivity: FlutterActivity() {
                 }
                 else -> result.notImplemented()
             }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Call Flutter method to release camera
+        cameraMethodChannel?.invokeMethod("releaseCamera", null, object : MethodChannel.Result {
+            override fun success(result: Any?) {
+                println("Camera release successful")
+            }
+            override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
+                println("Camera release error: $errorMessage")
+            }
+            override fun notImplemented() {
+                println("Camera release not implemented")
+            }
+        })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Optional: Reinitialize camera when app resumes
+        cameraMethodChannel?.invokeMethod("reinitializeCamera", null)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        releaseCameraNative()
+        cameraMethodChannel = null
+        excelMethodChannel = null
+    }
+
+    private fun releaseCameraNative() {
+        try {
+            // Force release camera at system level
+            System.gc() // Force garbage collection
+            Runtime.getRuntime().gc()
+        } catch (e: Exception) {
+            println("Error releasing camera native: ${e.message}")
         }
     }
 

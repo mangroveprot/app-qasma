@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../common/presentation/widgets/basic_save_action_buttons.dart';
+import '../../../../common/utils/tooltips_items.dart';
 import '../../../../infrastructure/routes/app_route_extractor.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/custom_app_bar.dart';
@@ -266,6 +267,9 @@ class _SchedulePageState extends State<SchedulePage> {
           appBar: CustomAppBar(
             title: isConfig ? 'Available Schedule' : 'My Schedule',
             onBackPressed: _handleBack,
+            tooltipMessage: isConfig
+                ? ToolTips.available_schedule.tips
+                : ToolTips.my_schedule.tips,
           ),
           body: ValueListenableBuilder<bool>(
             valueListenable: _isLoadingNotifier,

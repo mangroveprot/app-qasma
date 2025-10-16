@@ -20,7 +20,7 @@ class HistoryForm extends StatefulWidget {
 class _HistoryFormState extends State<HistoryForm> {
   DateTime? _lastRefreshTime;
   bool _isRefreshing = false;
-  static const Duration _refreshCooldown = Duration(seconds: 30);
+  static const Duration _refreshCooldown = Duration(seconds: 15);
   List<AppointmentModel>? _cachedFilteredAppointments;
   AppointmentsLoadedState? _lastProcessedState;
   AppointmentHistoryStatus _selectedFilter = AppointmentHistoryStatus.all;
@@ -32,7 +32,6 @@ class _HistoryFormState extends State<HistoryForm> {
         final status = appointment.status.toLowerCase();
         return status == 'cancelled' || status == 'completed';
       }).toList();
-
       _cachedFilteredAppointments = _filterByStatus(baseAppointments);
       _lastProcessedState = state;
     }
@@ -62,7 +61,8 @@ class _HistoryFormState extends State<HistoryForm> {
     }
 
     filteredAppointments.sort((a, b) {
-      return b.scheduledStartAt.compareTo(a.scheduledStartAt);
+      return widget.state.controller.appointmentManager
+          .compareAppointments(a, b);
     });
 
     return filteredAppointments;
@@ -111,34 +111,38 @@ class _HistoryFormState extends State<HistoryForm> {
           initialSelection: _selectedFilter,
         ),
         Expanded(
-            child: BlocBuilder<AppointmentsCubit, AppointmentCubitState>(
-                buildWhen: (previous, current) {
-          return previous.runtimeType != current.runtimeType ||
-              previous is AppointmentsLoadingState ||
-              current is AppointmentsLoadingState;
-        }, builder: (context, state) {
-          if (state is AppointmentsLoadingState) {
-            return const _LoadingContent();
-          }
+          child: BlocBuilder<AppointmentsCubit, AppointmentCubitState>(
+            buildWhen: (previous, current) {
+              return previous.runtimeType != current.runtimeType ||
+                  previous is AppointmentsLoadingState ||
+                  current is AppointmentsLoadingState;
+            },
+            builder: (context, state) {
+              if (state is AppointmentsLoadingState) {
+                return const _LoadingContent();
+              }
 
-          if (state is AppointmentsLoadedState) {
-            return _LoadedContent(
-              appointments: _getFilteredAppointments(state),
-              onRefresh: _onRefresh,
-            );
-          }
+              if (state is AppointmentsLoadedState) {
+                return _LoadedContent(
+                  appointments: _getFilteredAppointments(state),
+                  onRefresh: _onRefresh,
+                  state: widget.state,
+                );
+              }
 
-          if (state is AppointmentsFailureState) {
-            return _ErrorContent(
-              error: state.primaryError,
-              onRefresh: _onRefresh,
-              onRetry: widget.state.controller.appointmentRefreshData,
-              isRefreshing: _isRefreshing,
-            );
-          }
+              if (state is AppointmentsFailureState) {
+                return _ErrorContent(
+                  error: state.primaryError,
+                  onRefresh: _onRefresh,
+                  onRetry: widget.state.controller.appointmentRefreshData,
+                  isRefreshing: _isRefreshing,
+                );
+              }
 
-          return _EmptyContent(onRefresh: _onRefresh);
-        }))
+              return _EmptyContent(onRefresh: _onRefresh);
+            },
+          ),
+        ),
       ],
     );
   }
@@ -156,11 +160,13 @@ class _LoadingContent extends StatelessWidget {
 class _LoadedContent extends StatelessWidget {
   final List<AppointmentModel> appointments;
   final Future<void> Function() onRefresh;
+  final AppointmentHistoryState state;
 
   const _LoadedContent({
     Key? key,
     required this.appointments,
     required this.onRefresh,
+    required this.state,
   }) : super(key: key);
 
   @override
@@ -174,11 +180,16 @@ class _LoadedContent extends StatelessWidget {
       child: ListView.builder(
         itemCount: appointments.length,
         itemBuilder: (context, index) {
+          final appointment = appointments[index];
+          // final user = state.controller.getUserByIdNumber(
+          //   appointment.counselorId ?? '',
+          // );
           return RepaintBoundary(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: HistoryCard(
-                appointment: appointments[index],
+                appointment: appointment,
+                users: state.controller.getUsers(),
               ),
             ),
           );

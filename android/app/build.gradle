@@ -30,7 +30,7 @@ apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
     namespace 'com.jrmsu.qasma.counselor'
-    compileSdkVersion 33
+    compileSdkVersion 34
     ndkVersion "25.1.8937393"
 
     compileOptions {
@@ -48,8 +48,8 @@ android {
 
     defaultConfig {
         applicationId "com.jrmsu.qasma.counselor"
-        minSdkVersion 19
-        targetSdkVersion 33
+        minSdkVersion 21
+        targetSdkVersion 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }

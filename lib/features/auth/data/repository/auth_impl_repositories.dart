@@ -18,10 +18,18 @@ import '../models/verify_params.dart';
 
 class AuthRepositoryImpl extends AuthRepository {
   final AuthService _authService = sl<AuthService>();
+
   @override
-  Future<Either> signup(UserModel model) async {
+  Future<Either<AppError, bool>> signup(UserModel model) async {
     final Either result = await _authService.create_account(model);
-    return result;
+    return result.fold(
+      (error) {
+        return Left(error);
+      },
+      (data) {
+        return Right(data);
+      },
+    );
   }
 
   @override

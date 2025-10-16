@@ -61,7 +61,7 @@ const List<MenuItemConfig> menu_items = [
   ),
   MenuItemConfig(
     menu_key: MenuKeys.privacyPolicy,
-    title: 'Privacy Policys',
+    title: 'Privacy Policies',
     icon: Icons.shield_outlined,
   ),
   MenuItemConfig(

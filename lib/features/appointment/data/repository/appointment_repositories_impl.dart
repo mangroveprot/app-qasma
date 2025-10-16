@@ -2,12 +2,14 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../common/error/app_error.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
+import '../../../users/data/models/params/dynamic_param.dart';
 import '../../domain/repository/appointment_repositories.dart';
 import '../../domain/services/appointment_service.dart';
 import '../models/appointment_model.dart';
 import '../models/params/approved_params.dart';
 import '../models/params/availability_params.dart';
 import '../models/params/cancel_params.dart';
+import '../models/params/qr_scan_params.dart';
 
 class AppointmentRepositoryImpl extends AppointmentRepository {
   final AppointmentService _appointmentService = sl<AppointmentService>();
@@ -92,7 +94,7 @@ class AppointmentRepositoryImpl extends AppointmentRepository {
 
   @override
   Future<Either<AppError, AppointmentModel>> updateAppointment(
-    AppointmentModel model,
+    DynamicParam model,
   ) async {
     final Either result = await _appointmentService.updateAppointment(model);
     return result.fold(
@@ -126,6 +128,22 @@ class AppointmentRepositoryImpl extends AppointmentRepository {
     ApprovedParams approvedReq,
   ) async {
     final Either result = await _appointmentService.approved(approvedReq);
+    return result.fold(
+      (error) {
+        return Left(error);
+      },
+      (data) {
+        return Right(data);
+      },
+    );
+  }
+
+  @override
+  Future<Either<AppError, bool>> verifyAppointment(
+    QRScanParams qrRequest,
+  ) async {
+    final Either result =
+        await _appointmentService.verifyAppointment(qrRequest);
     return result.fold(
       (error) {
         return Left(error);

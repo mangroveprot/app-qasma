@@ -210,6 +210,8 @@ class UserModel extends User {
       'email': email,
       'password': password,
       'role': role,
+      'verified': verified,
+      'active': active,
       'first_name': first_name,
       'last_name': last_name,
       'middle_name': middle_name,

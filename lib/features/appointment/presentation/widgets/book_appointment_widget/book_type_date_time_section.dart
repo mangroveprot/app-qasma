@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'book_type_label.dart';
 
 import '../../../../../common/utils/form_field_config.dart';
 import '../../../../../common/widgets/bloc/form/form_cubit.dart';
@@ -91,7 +92,10 @@ class _AppointmentTypeDropdown extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _FieldLabel(text: 'Appointment Type'),
+        const BookTypeLabel(
+          text: 'Appointment Type',
+          tooltip: 'sdaasdsads',
+        ),
         const SizedBox(height: 8),
         BlocSelector<FormCubit, FormValidationState, bool>(
           selector: (state) => state.hasError(field_appointmentType.field_key),
@@ -155,7 +159,10 @@ class _DateTimeDropdown extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _FieldLabel(text: 'Date & Time'),
+        const BookTypeLabel(
+          text: 'Date & Time',
+          tooltip: 'dsadnsakdbjl',
+        ),
         const SizedBox(height: 8),
         BlocSelector<FormCubit, FormValidationState, bool>(
           selector: (state) =>
@@ -242,44 +249,6 @@ class _DateTimeDropdown extends StatelessWidget {
           duration: duration.toString(),
           usecase: await sl<GetSlotsUseCase>(),
         );
-  }
-}
-
-class _FieldLabel extends StatelessWidget {
-  final String text;
-
-  const _FieldLabel({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final weight = context.weight;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8, left: 4),
-      child: RichText(
-        text: TextSpan(
-          children: [
-            TextSpan(
-              text: text,
-              style: TextStyle(
-                color: colors.textPrimary,
-                fontSize: 14,
-                fontWeight: weight.medium,
-              ),
-            ),
-            TextSpan(
-              text: ' *',
-              style: TextStyle(
-                color: colors.error,
-                fontSize: 14,
-                fontWeight: weight.medium,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 

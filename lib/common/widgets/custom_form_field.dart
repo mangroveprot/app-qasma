@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../infrastructure/theme/theme_extensions.dart';
@@ -14,6 +12,8 @@ class CustomFormField extends StatefulWidget {
   final bool required;
   final bool showErrorText;
   final String? customErrorMessage;
+  final TextInputType keyboardType;
+  final TextCapitalization textCapitalization;
 
   const CustomFormField({
     super.key,
@@ -24,6 +24,8 @@ class CustomFormField extends StatefulWidget {
     this.showErrorText = true,
     this.required = false,
     this.customErrorMessage,
+    this.keyboardType = TextInputType.text,
+    this.textCapitalization = TextCapitalization.sentences,
   });
 
   @override
@@ -44,7 +46,6 @@ class _CustomFormFieldState extends State<CustomFormField> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Cache theme values once
     radiusMedium = context.radii.medium;
     colorDanger = context.colors.error;
     textColor = context.colors.textPrimary;
@@ -99,7 +100,7 @@ class _CustomFormFieldState extends State<CustomFormField> {
             widget.name,
             style: TextStyle(
               color: textColor,
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: weightMedium,
             ),
           ),
@@ -108,7 +109,7 @@ class _CustomFormFieldState extends State<CustomFormField> {
               ' *',
               style: TextStyle(
                 color: colorDanger,
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: weightMedium,
               ),
             ),
@@ -118,20 +119,22 @@ class _CustomFormFieldState extends State<CustomFormField> {
   }
 
   Widget _buildTextField(bool hasError) {
+    final fontWeight = context.weight;
+    final colors = context.colors;
     return TextFormField(
       controller: widget.controller,
       style: TextStyle(
-        color: textColor,
-        fontSize: 16,
-        fontWeight: weightRegular,
+        color: colors.black,
+        fontSize: 14,
+        fontWeight: fontWeight.regular,
       ),
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.grey.shade50,
         hintText: widget.hint,
         hintStyle: TextStyle(
-          color: textColor.withOpacity(0.8),
-          fontSize: 16,
+          color: textColor.withOpacity(0.6),
+          fontSize: 14,
           fontWeight: weightRegular,
         ),
         contentPadding: const EdgeInsets.all(16),
@@ -162,6 +165,8 @@ class _CustomFormFieldState extends State<CustomFormField> {
         ),
       ),
       autovalidateMode: AutovalidateMode.disabled,
+      textCapitalization: widget.textCapitalization,
+      keyboardType: widget.keyboardType,
     );
   }
 

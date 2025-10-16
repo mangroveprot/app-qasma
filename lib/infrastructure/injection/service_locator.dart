@@ -29,6 +29,7 @@ import '../../features/appointment/domain/usecases/getall_appointments_by_user_u
 import '../../features/appointment/domain/usecases/getall_appointments_usecase.dart';
 import '../../features/appointment/domain/usecases/sync_appointments_usecase.dart';
 import '../../features/appointment/domain/usecases/update_appointment_usecase.dart';
+import '../../features/appointment/domain/usecases/verify_appointment_usecase.dart';
 import '../../features/appointment_config/data/models/appointment_config_model.dart';
 import '../../features/appointment_config/data/models/appointment_config_table_model.dart';
 import '../../features/appointment_config/data/repository/appointment_config_repositories_impl.dart';
@@ -252,6 +253,8 @@ void _registerUseCases() {
 
   // Appointment use cases
   sl
+    ..registerLazySingleton<VerifyAppointmentUsecase>(
+        () => VerifyAppointmentUsecase())
     ..registerLazySingleton<ApprovedAppointmentUsecase>(
         () => ApprovedAppointmentUsecase())
     ..registerLazySingleton<CancelAppointmentUsecase>(

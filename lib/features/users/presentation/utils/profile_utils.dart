@@ -10,8 +10,7 @@ class ProfileFormUtils {
   static UserModel updateMainUser(
       UserModel user, String fieldName, String newValue) {
     switch (fieldName) {
-      case 'idNumber':
-        return user.copyWith(idNumber: newValue);
+   
       case 'active':
         return user.copyWith(
             active: newValue == activeOption[0] ? true : false);
@@ -68,8 +67,8 @@ class ProfileFormUtils {
 
     if (ProfileFieldConfig.informationFields.contains(fieldName)) {
       switch (fieldName) {
-        case 'idNumber':
-          return user.idNumber;
+        // case 'idNumber': // Removed ID Number handling
+        //   return user.idNumber;
         case 'active':
           return user.active ? activeOption[0] : activeOption[1];
         case 'verified':

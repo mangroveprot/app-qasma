@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../common/presentation/pages/not_found_page.dart';
 import '../../features/appointment/presentation/pages/appointment_history_page.dart';
 import '../../features/appointment/presentation/pages/book_appointment_page.dart';
-import '../../features/appointment/presentation/pages/qrcode_page.dart';
+import '../../features/appointment/presentation/pages/qr_scanner_page.dart';
 import '../../features/appointment_config/presentation/pages/appointment_config_page.dart';
 import '../../features/appointment_config/presentation/pages/basic_config_page.dart';
 import '../../features/appointment_config/presentation/pages/category_and_type_page.dart';
@@ -26,6 +26,7 @@ import '../../features/users/presentation/pages/my_profile_page.dart';
 import '../../features/users/presentation/pages/profile_setup_page.dart';
 import '../../features/users/presentation/pages/user_types_page.dart';
 import '../../features/users/presentation/pages/users_page.dart';
+import '../../features/users/presentation/pages/create_user_page.dart';
 import 'app_routes.dart';
 
 class AppRouter {
@@ -92,7 +93,7 @@ class AppRouter {
           ),
           GoRoute(
             path: Routes.qr_scan,
-            builder: (context, state) => const QrScannerPage(),
+            builder: (context, state) => const QRScannerPage(),
           ),
         ],
       ),
@@ -121,6 +122,10 @@ class AppRouter {
           GoRoute(
             path: Routes.user_page,
             builder: (context, state) => const UsersPage(),
+          ),
+          GoRoute(
+            path: Routes.create_user,
+            builder: (context, state) => const CreateUserPage(),
           ),
           GoRoute(
             path: Routes.user_profile,

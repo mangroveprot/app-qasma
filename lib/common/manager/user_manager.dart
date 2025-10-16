@@ -21,9 +21,7 @@ class UserManager {
   }
 
   void loadAllUser(UserCubit cubit) {
-    cubit.loadUser(
-      usecase: _getAllUserUseCase,
-    );
+    refreshUser(cubit);
   }
 
   void getUserProfile(UserCubit cubit, String idNumber) {

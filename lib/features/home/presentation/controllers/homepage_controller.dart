@@ -99,7 +99,7 @@ class HomePageController {
   }
 
   void _loadUserData() {
-    _userManager.loadAllUser(_userCubit);
+    _userManager.refreshUser(_userCubit);
   }
 
   void _loadAppointmentConfig() {
@@ -108,6 +108,8 @@ class HomePageController {
   }
 
   // PUBLIC METHODS
+
+  AppointmentManager get appointmentManager => _appointmentManager;
 
   String get currentUserId => SharedPrefs().getString('currentUserId') ?? '';
 
@@ -161,7 +163,6 @@ class HomePageController {
     }
   }
 
-  // Handler
   Future<void> handleApprovedAppointment(
     BuildContext context,
     String appointmentId,
@@ -169,10 +170,23 @@ class HomePageController {
     final currentUserId = SharedPrefs().getString('currentUserId') ?? 'staff';
     final appointments = _appointmentsCubit.state;
     AppointmentModel? appointmentsToApprove;
+
     if (appointments is AppointmentsLoadedState) {
       try {
-        appointmentsToApprove = appointments.appointments.firstWhere(
-            (appointment) => appointment.appointmentId == appointmentId);
+        final appointmentsMap = {
+          for (var appointment in appointments.appointments)
+            appointment.appointmentId: appointment
+        };
+
+        appointmentsToApprove = appointmentsMap[appointmentId];
+
+        if (appointmentsToApprove == null) {
+          AppToast.show(
+            message: 'Appointment not found. Please refresh and try again.',
+            type: ToastType.error,
+          );
+          return;
+        }
 
         final List<Map<String, dynamic>> gettingListOfCounselors =
             await _getCounselorsAvailability(
@@ -221,7 +235,6 @@ class HomePageController {
           },
         );
       } catch (e) {
-        debugPrint('Appointment not found for approving: $appointmentId');
         return;
       }
     }
@@ -297,7 +310,6 @@ class HomePageController {
         appointmentToReschedule = appointments.appointments.firstWhere(
             (appointment) => appointment.appointmentId == appointmentId);
       } catch (e) {
-        debugPrint('Appointment not found for rescheduling: $appointmentId');
         return;
       }
     }
@@ -313,13 +325,49 @@ class HomePageController {
         },
       );
     } else {
-      debugPrint('Appointment not found for rescheduling: $appointmentId');
+      return;
     }
+  }
+
+  void handleAppointmentVerification(String appointmentId) {
+    final appointments = _appointmentsCubit.state;
+
+    if (appointments is! AppointmentsLoadedState) {
+      return AppToast.show(
+        message: 'Appointment not found',
+        type: ToastType.error,
+      );
+    }
+
+    final appointmentsMap = {
+      for (var appointment in appointments.appointments)
+        appointment.appointmentId: appointment
+    };
+
+    final appointmentToVerify = appointmentsMap[appointmentId];
+
+    if (appointmentToVerify == null) {
+      return AppToast.show(
+        message: 'Appointment not found. Please refresh and try again.',
+        type: ToastType.error,
+      );
+    }
+
+    final routePath = Routes.buildPath(Routes.appointment, Routes.qr_scan);
+
+    _navigationCallback?.call(
+      routePath,
+      extra: {
+        'appointment': appointmentToVerify,
+        'onSuccess': () async {
+          await appoitnmentRefreshData();
+        },
+      },
+    );
   }
 
   void handleShowHistory() {
     _navigationCallback?.call('/history');
-    debugPrint('Show appointment history');
   }
 
   void handleMenuItemTap(String menuItem, BuildContext context) {

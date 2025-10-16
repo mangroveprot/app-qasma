@@ -20,7 +20,7 @@ class AddCategoryTypeButton extends StatelessWidget {
         onPressed: onPressed,
         icon: const Icon(Icons.add, size: 20),
         label: const Text(
-          'Add Reminder',
+          'Add New Category',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -29,7 +29,10 @@ class AddCategoryTypeButton extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           backgroundColor: colors.white,
           foregroundColor: colors.textPrimary,
-          side: BorderSide(color: colors.textPrimary, width: 2),
+          side: BorderSide(
+            color: colors.textPrimary.withOpacity(0.4),
+            width: 2,
+          ),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           elevation: 0,

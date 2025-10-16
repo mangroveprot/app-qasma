@@ -176,6 +176,60 @@ class HomeSkeletonLoader {
     );
   }
 
+  static Widget appointmentSingleCardSkeleton() {
+    return _SkeletonCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const _SkeletonBox(width: 20, height: 20, borderRadius: 4),
+                  const SizedBox(width: 8),
+                  const _SkeletonBox(width: 120, height: 20, borderRadius: 4),
+                ],
+              ),
+              const _SkeletonBox(width: 65, height: 28, borderRadius: 14),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Time row
+          Row(
+            children: [
+              const _SkeletonBox(width: 16, height: 16, borderRadius: 8),
+              const SizedBox(width: 8),
+              const _SkeletonBox(width: 100, height: 16, borderRadius: 4),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Details section
+          _buildDetailRow(iconWidth: 16, textWidth: 200),
+
+          // Action buttons
+          Row(
+            children: [
+              const Expanded(
+                child: _SkeletonBox(height: 44, borderRadius: 8),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: _SkeletonBox(height: 44, borderRadius: 8),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: _SkeletonBox(height: 44, borderRadius: 8),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   // Helper method for detail rows
   static Widget _buildDetailRow(
       {required double iconWidth, required double textWidth}) {

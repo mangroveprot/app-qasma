@@ -9,6 +9,7 @@ import '../../../../infrastructure/routes/app_route_extractor.dart';
 import '../bloc/user_cubit.dart';
 import '../controller/users_controller.dart';
 import '../widgets/users_widget/users_form.dart';
+import '../widgets/users_widget/user_fab.dart';
 
 class UsersPage extends StatefulWidget {
   const UsersPage({super.key});
@@ -75,15 +76,29 @@ class UsersPageState extends State<UsersPage> {
           appBar: CustomAppBar(
             title: role == null ? '' : capitalizeWords('${role}s'),
           ),
-          body: LayoutBuilder(builder: (context, constraints) {
-            return SizedBox(
-              width: constraints.maxWidth,
-              height: constraints.maxHeight,
-              child: UsersForm(
-                state: this,
-              ),
-            );
-          }),
+          body: Stack(
+            children: [
+              LayoutBuilder(builder: (context, constraints) {
+                return SizedBox(
+                  width: constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  child: UsersForm(
+                    state: this,
+                  ),
+                );
+              }),
+              if (role != null) ...[
+                Positioned(
+                  right: 16,
+                  bottom: 30,
+                  child: UserFab(
+                    role: role!,
+                    onRefresh: controller.loadAllUsers,
+                  ),
+                ),
+              ]
+            ],
+          ),
         ),
       ),
     );

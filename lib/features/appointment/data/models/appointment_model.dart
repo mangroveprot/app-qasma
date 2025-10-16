@@ -3,6 +3,7 @@ import '../../../../common/utils/model_utils.dart';
 import '../../domain/entities/appointment.dart';
 import 'qrcode_model.dart';
 import 'cancellation_model.dart';
+import 'reschedule_model.dart';
 
 class AppointmentModel extends Appointment {
   const AppointmentModel({
@@ -17,8 +18,10 @@ class AppointmentModel extends Appointment {
     super.checkInTime,
     super.staffId,
     super.counselorId,
+    required super.feedbackSubmitted,
     required super.qrCode,
     required super.cancellation,
+    required super.reschedule,
     super.deletedAt,
     super.deletedBy,
     required super.createdBy,
@@ -42,8 +45,10 @@ class AppointmentModel extends Appointment {
       'checkInTime': checkInTime?.toIso8601String(),
       'staffId': staffId,
       'counselorId': counselorId,
+      'feedbackSubmitted': feedbackSubmitted ? 1 : 0,
       'qrCode': jsonEncode(qrCode.toMap()),
       'cancellation': jsonEncode(cancellation.toMap()),
+      'reschedule': jsonEncode(reschedule.toMap()),
       'deletedAt': deletedAt?.toIso8601String(),
       'deletedBy': deletedBy,
       'createdBy': createdBy,
@@ -68,12 +73,18 @@ class AppointmentModel extends Appointment {
       checkInTime: ModelUtils.getNullableDateTime(map, 'checkInTime'),
       staffId: ModelUtils.getString(map, 'staffId'),
       counselorId: ModelUtils.getString(map, 'counselorId'),
+      feedbackSubmitted: ModelUtils.getBool(map, 'feedbackSubmitted'),
       qrCode: QRCodeModel.fromMap(
         map['qrCode'] != null ? jsonDecode(map['qrCode']) : <String, dynamic>{},
       ),
       cancellation: CancellationModel.fromMap(
         map['cancellation'] != null
             ? jsonDecode(map['cancellation'])
+            : <String, dynamic>{},
+      ),
+      reschedule: RescheduleModel.fromMap(
+        map['reschedule'] != null
+            ? jsonDecode(map['reschedule'])
             : <String, dynamic>{},
       ),
       deletedAt: ModelUtils.getNullableDateTime(map, 'deletedAt'),
@@ -99,6 +110,7 @@ class AppointmentModel extends Appointment {
       'checkInTime': checkInTime?.toIso8601String(),
       'staffId': staffId,
       'counselorId': counselorId,
+      'feedbackSubmitted': feedbackSubmitted,
       'qrCode': qrCode.toMap(),
       'cancellation': cancellation.toMap(),
       'appointmentId': appointmentId,
@@ -125,6 +137,8 @@ class AppointmentModel extends Appointment {
       'appointmentType': appointmentType,
       'appointmentCategory': appointmentCategory,
       'description': description,
+      'feedbackSubmitted': feedbackSubmitted,
+      'reschedule': reschedule.toMap(),
     };
   }
 
@@ -148,11 +162,15 @@ class AppointmentModel extends Appointment {
           ModelUtils.getNullableDateTime(json, 'checkInTime', 'check_in_time'),
       staffId: ModelUtils.getString(json, 'staffId', 'staff_id'),
       counselorId: ModelUtils.getString(json, 'counselorId', 'counselor_id'),
+      feedbackSubmitted: ModelUtils.getBool(json, 'feedbackSubmitted'),
       qrCode: QRCodeModel.fromMap(
         json['qrCode'] ?? json['qr_code'] ?? <String, dynamic>{},
       ),
       cancellation: CancellationModel.fromMap(
         json['cancellation'] ?? <String, dynamic>{},
+      ),
+      reschedule: RescheduleModel.fromMap(
+        json['reschedule'] ?? <String, dynamic>{},
       ),
       deletedAt:
           ModelUtils.getNullableDateTime(json, 'deletedAt', 'deleted_at'),
@@ -180,8 +198,10 @@ class AppointmentModel extends Appointment {
       checkInTime: checkInTime,
       staffId: staffId,
       counselorId: counselorId,
+      feedbackSubmitted: feedbackSubmitted,
       qrCode: qrCode,
       cancellation: cancellation,
+      reschedule: reschedule,
       deletedAt: deletedAt,
       deletedBy: deletedBy,
       createdBy: createdBy,
@@ -206,8 +226,10 @@ class AppointmentModel extends Appointment {
       checkInTime: entity.checkInTime,
       staffId: entity.staffId,
       counselorId: entity.counselorId,
+      feedbackSubmitted: entity.feedbackSubmitted,
       qrCode: QRCodeModel.fromEntity(entity.qrCode),
       cancellation: CancellationModel.fromEntity(entity.cancellation),
+      reschedule: RescheduleModel.fromEntity(entity.reschedule),
       deletedAt: entity.deletedAt,
       deletedBy: entity.deletedBy,
       createdBy: entity.createdBy,

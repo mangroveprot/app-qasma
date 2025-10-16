@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../common/presentation/widgets/basic_save_action_buttons.dart';
+import '../../../../common/utils/tooltips_items.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/custom_app_bar.dart';
 import '../../../../common/widgets/toast/app_toast.dart';
@@ -98,11 +99,27 @@ class _CategoryTypePageState extends State<CategoryTypePage> {
   void _removeCategoryType(String category, int index) {
     final updated = CategoryTypeUtils.deepCopy(_categoryTypesNotifier.value);
     if (updated[category] != null && index < updated[category]!.length) {
-      updated[category]!.removeAt(index);
-      if (updated[category]!.isEmpty) updated.remove(category);
+      // Check if this is the last type in the category
+      if (updated[category]!.length == 1) {
+        // Show warning dialog for last type
+        CategoryDialogs.showRemoveLastTypeDialog(
+          context,
+          category,
+          () {
+            // User confirmed, proceed with removal
+            updated[category]!.removeAt(index);
+            updated.remove(category);
+            _categoryTypesNotifier.value = updated;
+            _updateHasChanges();
+          },
+        );
+      } else {
+        // Safe to remove, not the last type
+        updated[category]!.removeAt(index);
+        _categoryTypesNotifier.value = updated;
+        _updateHasChanges();
+      }
     }
-    _categoryTypesNotifier.value = updated;
-    _updateHasChanges();
   }
 
   void _addNewCategory(String categoryName) {
@@ -110,7 +127,9 @@ class _CategoryTypePageState extends State<CategoryTypePage> {
 
     final updated = CategoryTypeUtils.deepCopy(_categoryTypesNotifier.value);
     if (!updated.containsKey(categoryName)) {
-      updated[categoryName] = [];
+      updated[categoryName] = [
+        const CategoryTypeModel(type: 'New Type', duration: 30)
+      ];
     }
     _categoryTypesNotifier.value = updated;
     _updateHasChanges();
@@ -147,8 +166,10 @@ class _CategoryTypePageState extends State<CategoryTypePage> {
     required Map<String, List<CategoryTypeModel>> categoryTypes,
   }) {
     final categoryTypesMap = CategoryTypeUtils.toApiFormat(categoryTypes);
+    // print(['==============', categoryTypesMap.toString()]);
+    // return;
     final param = DynamicParam(
-        fields: {'configId': configId, 'categoryTypes': categoryTypesMap});
+        fields: {'configId': configId, 'category_and_type': categoryTypesMap});
 
     controller.buttonCubit.execute(
       buttonId: 'save_category_types_config',
@@ -192,7 +213,10 @@ class _CategoryTypePageState extends State<CategoryTypePage> {
           onTap: _unfocusAll,
           child: Scaffold(
             appBar: CustomAppBar(
-                title: 'Category Types', onBackPressed: _handleBack),
+              title: 'Category Types',
+              onBackPressed: _handleBack,
+              tooltipMessage: ToolTips.category_types.tips,
+            ),
             body: ValueListenableBuilder<bool>(
               valueListenable: _isLoadingNotifier,
               builder: (context, isLoading, _) {

@@ -21,6 +21,7 @@ class Routes {
   // user route names
   static const String user_profile = 'user-profile';
   static const String user_page = 'user-page';
+  static const String create_user = 'create-user';
   static const String schedule = 'schedule';
 
   // home route names

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../infrastructure/theme/theme_extensions.dart';
+
 class AddReminderButton extends StatelessWidget {
   final VoidCallback onPressed;
 
@@ -10,6 +12,7 @@ class AddReminderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return SizedBox(
       width: double.infinity,
       height: 56,
@@ -17,16 +20,19 @@ class AddReminderButton extends StatelessWidget {
         onPressed: onPressed,
         icon: const Icon(Icons.add, size: 20),
         label: const Text(
-          'Add Reminder',
+          'Add New Reminder',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
         ),
         style: OutlinedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: const Color(0xFF6B7280),
-          side: const BorderSide(color: Color(0xFFD1D5DB), width: 2),
+          backgroundColor: colors.white,
+          foregroundColor: colors.textPrimary,
+          side: BorderSide(
+            color: colors.textPrimary.withOpacity(0.4),
+            width: 2,
+          ),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           elevation: 0,

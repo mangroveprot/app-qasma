@@ -12,4 +12,12 @@ extension UserSelectors on UserCubit {
     }
     return null;
   }
+
+  List<UserModel>? getAllUser() {
+    final s = state;
+    if (s is UserLoadedState) {
+      return s.users;
+    }
+    return null;
+  }
 }

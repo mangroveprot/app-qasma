@@ -19,4 +19,7 @@ class ButtonsUniqeKeys {
   static const downloadReports = ButtonIds(
     id: 'download-reports',
   );
+  static const verifyQR = ButtonIds(
+    id: 'verify-qr',
+  );
 }

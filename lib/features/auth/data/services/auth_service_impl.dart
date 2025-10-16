@@ -124,7 +124,7 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
   }
 
   @override
-  Future<Either<AppError, UserModel>> create_account(UserModel model) async {
+  Future<Either<AppError, bool>> create_account(UserModel model) async {
     try {
       final response = await _apiClient.post(
         _urlProviderConfig.register,
@@ -132,20 +132,15 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
         requiresAuth: false,
       );
 
-      if (response.data['success'] == true &&
-          response.data['document'] != null &&
-          response.data['document']['user'] != null) {
-        final userJson =
-            response.data['document']['user'] as Map<String, dynamic>;
+      final apiResponse = ApiResponse.fromJson(
+        response.data,
+        (json) => json,
+      );
 
-        final userModel = UserModel.fromJson(userJson);
-
-        return Right(userModel);
+      if (apiResponse.isSuccess) {
+        return const Right(true);
       } else {
-        return Left(AppError.create(
-          message: 'Registration failed: Missing user data',
-          type: ErrorType.validation,
-        ));
+        return Left(apiResponse.error!);
       }
     } catch (e, stack) {
       final error = e is AppError
@@ -365,5 +360,11 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
             );
       return Left(error);
     }
+  }
+
+  void _reloadData() {
+    Future.microtask(() async {
+      await Future.wait([sync()]);
+    });
   }
 }

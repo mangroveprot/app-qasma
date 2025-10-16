@@ -78,11 +78,36 @@ class SlotManager {
     final timePart = parts[1].split(' - ')[0];
 
     try {
-      final date = DateTime.parse('${datePart}T${timePart}:00');
+      // Convert 12-hour format to 24-hour format
+      final time24Hour = _convertTo24Hour(timePart);
+      final date = DateTime.parse('${datePart}T${time24Hour}:00');
       return date;
     } catch (e) {
       return DateTime.now();
     }
+  }
+
+  static String _convertTo24Hour(String time12) {
+    final timeParts = time12.split(' ');
+    if (timeParts.length != 2) return time12;
+
+    final time = timeParts[0];
+    final period = timeParts[1].toUpperCase();
+
+    final hourMinute = time.split(':');
+    if (hourMinute.length != 2) return time12;
+
+    int hour = int.parse(hourMinute[0]);
+    final minute = hourMinute[1];
+
+    // Convert 12-hour to 24-hour
+    if (period == 'PM' && hour != 12) {
+      hour += 12;
+    } else if (period == 'AM' && hour == 12) {
+      hour = 0;
+    }
+
+    return '${hour.toString().padLeft(2, '0')}:${minute}';
   }
 
   static Map<String, String> parseSelectedSlot(String formattedSlot) {

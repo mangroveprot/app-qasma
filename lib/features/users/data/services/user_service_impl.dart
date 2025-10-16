@@ -82,7 +82,7 @@ class UserServiceImpl extends BaseService<UserModel> implements UserService {
       final error = e is AppError
           ? e
           : AppError.create(
-              message: 'Unexpected error during getUser',
+              message: 'Unexpected error during checking.',
               type: ErrorType.unknown,
               originalError: e,
               stackTrace: stack,

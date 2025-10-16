@@ -16,11 +16,12 @@ class EmailSection extends StatelessWidget {
         Row(
           children: [
             CustomFormField(
-                field_key: field_idNumber_email.field_key,
-                name: field_idNumber_email.name,
-                required: true,
-                controller: emailController,
-                hint: field_idNumber_email.hint),
+              field_key: field_idNumber_email.field_key,
+              name: field_idNumber_email.name,
+              required: true,
+              controller: emailController,
+              hint: field_idNumber_email.hint,
+            ),
           ],
         ),
       ],
