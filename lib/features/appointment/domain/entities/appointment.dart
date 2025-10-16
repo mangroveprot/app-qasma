@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'qrcode.dart';
 
 import 'cancellation.dart';
+import 'reschedule.dart';
 
 class Appointment extends Equatable {
   final String studentId;
@@ -15,8 +16,10 @@ class Appointment extends Equatable {
   final DateTime? checkInTime;
   final String? staffId;
   final String? counselorId;
+  final bool feedbackSubmitted;
   final QRCode qrCode;
   final Cancellation cancellation;
+  final Reschedule reschedule;
   final DateTime? deletedAt;
   final String? deletedBy;
   final String createdBy;
@@ -37,8 +40,10 @@ class Appointment extends Equatable {
     this.checkInStatus,
     this.staffId,
     this.counselorId,
+    required this.feedbackSubmitted,
     required this.qrCode,
     required this.cancellation,
+    required this.reschedule,
     this.deletedAt,
     this.deletedBy,
     required this.createdBy,
@@ -48,20 +53,8 @@ class Appointment extends Equatable {
     required this.updatedAt,
   });
 
-  // Helper methods
   bool get isDeleted => deletedAt != null;
-  bool get isPending => status == 'pending';
   bool get isCancelled => cancellation.cancelledAt != null;
-  bool get isCheckedIn => checkInStatus != 'not-checked-in';
-  bool get isOnline => appointmentType == 'Online';
-  bool get isPsychological => appointmentCategory == 'Psychological';
-
-  Duration get duration => scheduledEndAt.difference(scheduledStartAt);
-
-  bool get isUpcoming {
-    final now = DateTime.now();
-    return scheduledStartAt.isAfter(now) && !isCancelled && !isDeleted;
-  }
 
   @override
   List<Object?> get props => [
@@ -76,8 +69,10 @@ class Appointment extends Equatable {
         checkInTime,
         staffId,
         counselorId,
+        feedbackSubmitted,
         qrCode,
         cancellation,
+        reschedule,
         deletedAt,
         deletedBy,
         createdBy,

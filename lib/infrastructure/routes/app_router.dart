@@ -16,6 +16,7 @@ import '../../features/preferences/presentation/pages/privacy_policy_page.dart';
 import '../../features/preferences/presentation/pages/settings_page.dart';
 import '../../features/preferences/presentation/pages/terms_and_conditions.dart';
 import '../../features/splash/splash_screen.dart';
+import '../../features/users/presentation/pages/create_user_page.dart';
 import '../../features/users/presentation/pages/my_profile_page.dart';
 import '../../features/users/presentation/pages/profile_setup_page.dart';
 import '../../features/users/presentation/pages/users_page.dart';
@@ -89,6 +90,10 @@ class AppRouter {
         path: Routes.user_path, // user
         builder: (context, state) => const UsersPage(),
         routes: [
+          GoRoute(
+            path: Routes.create_user,
+            builder: (context, state) => const CreateUserPage(),
+          ),
           GoRoute(
             path: Routes.user_profile,
             builder: (context, state) => const MyProfilePage(),

@@ -13,9 +13,11 @@ import '../../../../core/_base/_services/storage/shared_preference.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
 import '../../../appointment_config/domain/usecases/sync_config_usecase.dart';
 import '../../../appointment_config/presentation/bloc/appointment_config_cubit.dart';
+import '../../../users/data/models/params/dynamic_param.dart';
 import '../../data/models/appointment_model.dart';
 import '../../domain/entities/cancellation.dart';
 import '../../domain/entities/qrcode.dart';
+import '../../domain/entities/reschedule.dart';
 import '../../domain/usecases/create_new_appointment_usecase.dart';
 import '../../domain/usecases/update_appointment_usecase.dart';
 import '../widgets/book_appointment_widget/book_appointment_form.dart';
@@ -28,7 +30,10 @@ class BookAppointmentPage extends StatefulWidget {
 }
 
 class BookAppointmentPageState extends State<BookAppointmentPage> {
-  static const _textFields = [field_description];
+  static const _textFields = [
+    field_description,
+    field_remarks,
+  ];
 
   static const _dropdownFields = [
     field_appointmentDateTime,
@@ -80,6 +85,9 @@ class BookAppointmentPageState extends State<BookAppointmentPage> {
 
     textControllers[field_description.field_key]?.text =
         _existingAppointment!.description;
+
+    textControllers[field_remarks.field_key]?.text =
+        _existingAppointment!.reschedule.remarks.toString();
 
     dropdownControllers[field_appointmentType.field_key]?.value =
         _existingAppointment!.appointmentType;
@@ -143,9 +151,10 @@ class BookAppointmentPageState extends State<BookAppointmentPage> {
   }
 
   void handleSubmit(BuildContext context) {
+    FocusScope.of(context).unfocus();
     final isValid = formCubit.validateAll(
       _buildValidationFields(),
-      // optionalFields: _optionalFields.map((field) => field.field_key).toList(),
+      optionalFields: isRescheduling ? <String>[] : [field_remarks.field_key],
     );
 
     if (!isValid) return;
@@ -175,8 +184,10 @@ class BookAppointmentPageState extends State<BookAppointmentPage> {
       description: description,
       status: 'pending',
       checkInStatus: 'not-check-in',
+      feedbackSubmitted: false,
       qrCode: const QRCode(),
       cancellation: const Cancellation(),
+      reschedule: const Reschedule(),
       createdBy: currentUserId,
       appointmentId: '',
       updatedAt: DateTime.now(),
@@ -195,29 +206,54 @@ class BookAppointmentPageState extends State<BookAppointmentPage> {
     final appointmentType = _getDropdownValue(field_appointmentType);
     final dateTimeSelected = _getDropdownValue(field_appointmentDateTime);
     final description = _getTextValue(field_description);
+    final remarks = _getTextValue(field_remarks);
 
     final parsed = parseDateTimeRange(dateTimeSelected);
 
-    final updatedAppointment = AppointmentModel(
-      studentId: _existingAppointment!.studentId,
-      scheduledStartAt: parsed['start']!,
-      scheduledEndAt: parsed['end']!,
-      appointmentCategory: _existingAppointment!.appointmentCategory,
-      appointmentType: appointmentType,
-      description: description,
-      status: 'pending',
-      checkInStatus: _existingAppointment!.checkInStatus,
-      qrCode: _existingAppointment!.qrCode,
-      cancellation: _existingAppointment!.cancellation,
-      createdBy: _existingAppointment!.createdBy,
-      appointmentId: _existingAppointment!.appointmentId,
-      updatedAt: DateTime.now(),
-      createdAt: _existingAppointment!.createdAt,
-    );
+    final isSameTimeSlot =
+        _existingAppointment!.scheduledStartAt == parsed['start'] &&
+            _existingAppointment!.scheduledEndAt == parsed['end'];
+
+    final Map<String, dynamic> updateFields = {
+      'appointmentId': _existingAppointment!.appointmentId,
+      'appointmentType': appointmentType,
+      'description': description,
+    };
+
+    if (!isSameTimeSlot) {
+      updateFields['scheduledStartAt'] = parsed['start']!.toIso8601String();
+      updateFields['scheduledEndAt'] = parsed['end']!.toIso8601String();
+      updateFields['reschedule'] = {
+        'rescheduledBy': SharedPrefs().getString('currentUserId') ?? '',
+        'remarks': remarks,
+        'rescheduledAt': DateTime.now().toIso8601String(),
+        'previousStart':
+            _existingAppointment!.scheduledStartAt.toIso8601String(),
+        'previousEnd': _existingAppointment!.scheduledEndAt.toIso8601String(),
+      };
+    } else if (remarks.isNotEmpty) {
+      updateFields['reschedule'] = {
+        'rescheduledBy': _existingAppointment!.reschedule.rescheduledBy ??
+            SharedPrefs().getString('currentUserId') ??
+            '',
+        'remarks': remarks,
+        'rescheduledAt':
+            (_existingAppointment!.reschedule.rescheduledAt ?? DateTime.now())
+                .toIso8601String(),
+        'previousStart': (_existingAppointment!.reschedule.previousStart ??
+                _existingAppointment!.scheduledStartAt)
+            .toIso8601String(),
+        'previousEnd': (_existingAppointment!.reschedule.previousEnd ??
+                _existingAppointment!.scheduledEndAt)
+            .toIso8601String(),
+      };
+    }
+
+    final dynamicParam = DynamicParam(fields: updateFields);
 
     context.read<ButtonCubit>().execute(
           usecase: sl<UpdateAppointmentUsecase>(),
-          params: updatedAppointment,
+          params: dynamicParam,
         );
   }
 
@@ -256,7 +292,6 @@ class BookAppointmentPageState extends State<BookAppointmentPage> {
 
           return Scaffold(
             appBar: CustomAppBar(
-              leadingText: 'Back',
               title: isRescheduling
                   ? 'Reschedule Appointment'
                   : 'Book Appointment',

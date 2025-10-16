@@ -109,6 +109,8 @@ class HomePageController {
 
   // PUBLIC METHODS
 
+  AppointmentManager get appointmentManager => _appointmentManager;
+
   String get currentUserId => SharedPrefs().getString('currentUserId') ?? '';
 
   Future<void> appoitnmentRefreshData() async {

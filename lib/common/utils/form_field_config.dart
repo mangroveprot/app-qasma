@@ -14,7 +14,7 @@ class FormFieldConfig {
 const FormFieldConfig field_idNumber = FormFieldConfig(
   field_key: 'idNumber',
   name: 'ID Number',
-  hint: 'Enter your id number...',
+  hint: 'e.g., KC-2-123',
 );
 const FormFieldConfig field_idNumber_email = FormFieldConfig(
   field_key: 'idNumber-email',
@@ -56,23 +56,23 @@ const FormFieldConfig field_year_level = FormFieldConfig(
 const FormFieldConfig field_firstName = FormFieldConfig(
   field_key: 'firstName',
   name: 'First Name',
-  hint: 'Enter your first name...',
+  hint: 'Juan',
 );
 
 const FormFieldConfig field_lastName = FormFieldConfig(
   field_key: 'lastName',
   name: 'Last Name',
-  hint: 'Enter your last name...',
+  hint: 'Dela Cruz',
 );
 const FormFieldConfig field_suffix = FormFieldConfig(
   field_key: 'suffix',
   name: 'Suffix',
-  hint: '(optional)',
+  hint: 'e.g, Jr.',
 );
 const FormFieldConfig field_middle_name = FormFieldConfig(
   field_key: 'middle-initial',
-  name: 'Middle Name',
-  hint: '(optional)',
+  name: 'Middle Initial',
+  hint: 'e.g, D',
 );
 const FormFieldConfig field_gender = FormFieldConfig(
   field_key: 'gender',
@@ -100,25 +100,25 @@ const FormFieldConfig field_year = FormFieldConfig(
 const FormFieldConfig field_address = FormFieldConfig(
   field_key: 'address',
   name: 'Address',
-  hint: 'Enter your address...',
+  hint: 'e.g., House No., Street, City',
 );
 
 const FormFieldConfig field_contact_number = FormFieldConfig(
   field_key: 'contact_number',
   name: 'Contact Number',
-  hint: 'Enter your contact number...',
+  hint: 'e.g, 09812487711',
 );
 
 const FormFieldConfig field_email = FormFieldConfig(
   field_key: 'email',
   name: 'Email',
-  hint: 'Enter your email address...',
+  hint: 'e.g, your.active@email.com',
 );
 
 const FormFieldConfig field_facebook = FormFieldConfig(
   field_key: 'facebook',
   name: 'Facebook',
-  hint: 'Enter your Facebook profile link...',
+  hint: 'e.g, www.facebook.com/username',
 );
 
 const FormFieldConfig field_otp_verification = FormFieldConfig(
@@ -148,6 +148,11 @@ const FormFieldConfig field_appointmentDateTime = FormFieldConfig(
 const FormFieldConfig field_description = FormFieldConfig(
   field_key: 'description',
   name: 'Description',
+  hint: 'Write something here...',
+);
+const FormFieldConfig field_remarks = FormFieldConfig(
+  field_key: 'remarks',
+  name: 'Remarks',
   hint: 'Write something here...',
 );
 const FormFieldConfig field_code = FormFieldConfig(

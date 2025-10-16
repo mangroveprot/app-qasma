@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../common/utils/form_field_config.dart';
 import '../../../../../common/widgets/bloc/form/form_cubit.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
+import 'book_type_label.dart';
 
 class BookDescriptionSection extends StatelessWidget {
   final Map<String, TextEditingController> textControllers;
@@ -23,39 +24,10 @@ class BookDescriptionSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8, left: 4),
-          child: Row(
-            children: [
-              Text(
-                'Description',
-                style: TextStyle(
-                  color: colors.textPrimary,
-                  fontSize: 14,
-                  fontWeight: weight.medium,
-                ),
-              ),
-              Text(
-                ' *',
-                style: TextStyle(
-                  color: colors.error,
-                  fontSize: 14,
-                  fontWeight: weight.medium,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        const Padding(
-          padding: EdgeInsets.only(bottom: 8, left: 4),
-          child: Text(
-            'Provide a brief description of your feelings to help the counselor understand your needs.',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.black87,
-            ),
-          ),
+        const BookTypeLabel(
+          text: 'Description',
+          tooltip:
+              'Provide a brief description of your feelings to help the counselor understand your needs.',
         ),
         const SizedBox(height: 16),
         BlocSelector<FormCubit, FormValidationState, bool>(

@@ -4,6 +4,7 @@ import '../../../../common/error/app_error.dart';
 import '../../../../common/helpers/helpers.dart';
 import '../../../../common/networks/api_client.dart';
 import '../../../../common/networks/response/api_response.dart';
+import '../../../../common/utils/constant.dart';
 import '../../../../core/_base/_repository/base_repository/abstract_repositories.dart';
 import '../../../../core/_base/_repository/local_repository/local_repositories.dart';
 import '../../../../core/_base/_services/base_service/base_service.dart';
@@ -55,7 +56,23 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
         if (document['user'] != null) {
           final userData = document['user'] as Map<String, dynamic>;
           final idNumber = userData['idNumber'] as String?;
+          final role = userData['role'] as String?;
           final firstName = userData['first_name'] as String?;
+
+          if (role != null) {
+            if (role.toLowerCase() != RoleType.staff.field) {
+              return Left(AppError.create(
+                message: 'Access denied. Only staff are allowed to sign in.',
+                type: ErrorType.validation,
+              ));
+            }
+          } else {
+            return Left(AppError.create(
+              message: 'User role information is missing.',
+              type: ErrorType.validation,
+            ));
+          }
+
           if (idNumber != null) {
             await SharedPrefs().setString('currentUserId', idNumber);
           }
@@ -106,7 +123,7 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
   }
 
   @override
-  Future<Either<AppError, UserModel>> create_account(UserModel model) async {
+  Future<Either<AppError, bool>> create_account(UserModel model) async {
     try {
       final response = await _apiClient.post(
         _urlProviderConfig.register,
@@ -114,20 +131,15 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
         requiresAuth: false,
       );
 
-      if (response.data['success'] == true &&
-          response.data['document'] != null &&
-          response.data['document']['user'] != null) {
-        final userJson =
-            response.data['document']['user'] as Map<String, dynamic>;
+      final apiResponse = ApiResponse.fromJson(
+        response.data,
+        (json) => json,
+      );
 
-        final userModel = UserModel.fromJson(userJson);
-
-        return Right(userModel);
+      if (apiResponse.isSuccess) {
+        return const Right(true);
       } else {
-        return Left(AppError.create(
-          message: 'Registration failed: Missing user data',
-          type: ErrorType.validation,
-        ));
+        return Left(apiResponse.error!);
       }
     } catch (e, stack) {
       final error = e is AppError
@@ -347,5 +359,11 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
             );
       return Left(error);
     }
+  }
+
+  void _reloadData() {
+    Future.microtask(() async {
+      await Future.wait([sync()]);
+    });
   }
 }

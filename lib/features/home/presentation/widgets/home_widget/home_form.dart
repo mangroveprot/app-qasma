@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../common/helpers/spacing.dart';
+import '../../../../../common/utils/constant.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
 import '../../../../appointment/presentation/bloc/appointments/appointments_cubit.dart';
+import '../../../../users/data/models/user_model.dart';
+import '../../../../users/presentation/bloc/user_cubit.dart';
 import '../../pages/home_page.dart';
 import '../home_skeletonloader.dart';
 import 'home_appointment_list.dart';
@@ -33,8 +36,11 @@ class _HomeFormState extends State<HomeForm> {
   List<AppointmentModel>? _lastRawAppointments;
   List<AppointmentModel> _cachedFilteredAppointments = [];
 
-  static const String _approvedStatus = 'approved';
-  static const String _pendingStatus = 'pending';
+  List<UserModel>? _lastRawUsers;
+  List<UserModel> _cachedUsers = [];
+
+  static final String _approvedStatus = StatusType.approved.field;
+  static final String _pendingStatus = StatusType.pending.field;
 
   @override
   void initState() {
@@ -49,31 +55,28 @@ class _HomeFormState extends State<HomeForm> {
   void _processAppointments(AppointmentsLoadedState state) {
     if (identical(_lastRawAppointments, state.appointments)) return;
 
-    final filtered = <AppointmentModel>[];
-
-    for (final appointment in state.appointments) {
+    _cachedFilteredAppointments = state.appointments.where((appointment) {
       final status = appointment.status.toLowerCase();
+      return status == _approvedStatus || status == _pendingStatus;
+    }).toList();
+    _lastRawAppointments = state.appointments;
 
-      if (status == _approvedStatus || status == _pendingStatus) {
-        filtered.add(appointment);
-      }
-    }
+    _cachedFilteredAppointments.sort((a, b) {
+      return widget.state.controller.appointmentManager.compareAppointments(
+        a,
+        b,
+        sortBy: (m) => m.updatedAt,
+      );
+    });
 
-    filtered.sort(_compareAppointments);
-
-    _cachedFilteredAppointments = filtered;
     _lastRawAppointments = state.appointments;
   }
 
-  static int _compareAppointments(AppointmentModel a, AppointmentModel b) {
-    final priorityA = a.status.toLowerCase() == _approvedStatus ? 1 : 2;
-    final priorityB = b.status.toLowerCase() == _approvedStatus ? 1 : 2;
+  void _processUsers(UserLoadedState state) {
+    if (identical(_lastRawUsers, state.users)) return;
 
-    if (priorityA != priorityB) {
-      return priorityA.compareTo(priorityB);
-    }
-
-    return a.scheduledStartAt.compareTo(b.scheduledStartAt);
+    _cachedUsers = List.from(state.users);
+    _lastRawUsers = state.users;
   }
 
   Future<void> _onRefresh() async {
@@ -102,39 +105,65 @@ class _HomeFormState extends State<HomeForm> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AppointmentsCubit, AppointmentCubitState>(
-      builder: (context, state) {
-        if (_isMinimumLoadingTime || state is AppointmentsLoadingState) {
-          return HomeSkeletonLoader.appointmentDashboard();
+    return BlocBuilder<UserCubit, UserCubitState>(
+      builder: (context, userState) {
+        // Process users when loaded
+        if (userState is UserLoadedState) {
+          _processUsers(userState);
         }
 
-        if (state is AppointmentsLoadedState) {
-          _processAppointments(state);
-        }
+        return BlocBuilder<AppointmentsCubit, AppointmentCubitState>(
+          builder: (context, appointmentState) {
+            // Show skeleton loader if either is loading
+            final bool isLoading = _isMinimumLoadingTime ||
+                appointmentState is AppointmentsLoadingState ||
+                userState is UserLoadingState;
 
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              const HomeStatusCard(),
-              Spacing.verticalSmall,
-              Expanded(
-                child: _buildContent(state),
+            if (isLoading) {
+              return HomeSkeletonLoader.appointmentDashboard();
+            }
+
+            if (appointmentState is AppointmentsLoadedState) {
+              _processAppointments(appointmentState);
+            }
+
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  HomeStatusCard(
+                    appointments: _cachedFilteredAppointments,
+                  ),
+                  Spacing.verticalSmall,
+                  Expanded(
+                    child: _buildContent(appointmentState, userState),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
   }
 
-  Widget _buildContent(AppointmentCubitState state) {
-    if (_isMinimumLoadingTime || state is AppointmentsLoadingState) {
+  Widget _buildContent(
+    AppointmentCubitState appointmentState,
+    UserCubitState userState,
+  ) {
+    if (_isMinimumLoadingTime ||
+        appointmentState is AppointmentsLoadingState ||
+        userState is UserLoadingState) {
       return HomeSkeletonLoader.appointmentCardSkeleton();
     }
 
-    if (state is AppointmentsLoadedState) {
-      _processAppointments(state);
+    // Handle user failure state
+    if (userState is UserFailureState) {
+      return _buildErrorState(userState.primaryError);
+    }
+
+    if (appointmentState is AppointmentsLoadedState) {
+      _processAppointments(appointmentState);
       if (_cachedFilteredAppointments.isEmpty) {
         return _buildEmptyState();
       }
@@ -142,6 +171,7 @@ class _HomeFormState extends State<HomeForm> {
       return HomeAppointmentList(
         state: widget.state,
         appointments: _cachedFilteredAppointments,
+        users: _cachedUsers,
         onCancel: (id) =>
             widget.state.controller.handleCancelAppointment(id, context),
         onReschedule: widget.state.controller.handleRescheduleAppointment,
@@ -149,8 +179,8 @@ class _HomeFormState extends State<HomeForm> {
       );
     }
 
-    if (state is AppointmentsFailureState) {
-      return _buildErrorState(state.primaryError);
+    if (appointmentState is AppointmentsFailureState) {
+      return _buildErrorState(appointmentState.primaryError);
     }
 
     return _buildEmptyState();
@@ -240,7 +270,7 @@ class _HomeFormState extends State<HomeForm> {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'Failed to load appointments',
+                      'Failed to load data',
                       style: TextStyle(
                         color: context.colors.black.withOpacity(0.8),
                         fontWeight: FontWeight.bold,
@@ -262,7 +292,9 @@ class _HomeFormState extends State<HomeForm> {
                     ElevatedButton(
                       onPressed: _isRefreshing
                           ? null
-                          : widget.state.controller.appoitnmentRefreshData,
+                          : () async {
+                              await _onRefresh();
+                            },
                       child: _isRefreshing
                           ? const SizedBox(
                               width: 16,

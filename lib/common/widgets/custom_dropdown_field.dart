@@ -119,7 +119,7 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
             widget.name!,
             style: TextStyle(
               color: textColor,
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: weightMedium,
             ),
           ),
@@ -128,7 +128,7 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
               ' *',
               style: TextStyle(
                 color: colorDanger,
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: weightMedium,
               ),
             ),
@@ -138,6 +138,7 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
   }
 
   Widget _buildDropdownField(bool hasError) {
+    final colors = context.colors;
     return ValueListenableBuilder<String?>(
       valueListenable: widget.controller,
       builder: (context, value, _) {
@@ -161,7 +162,7 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
               hintText: widget.hint,
               hintStyle: TextStyle(
                 color: textColor.withOpacity(0.8),
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: weightRegular,
               ),
               border: OutlineInputBorder(
@@ -207,8 +208,8 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
                     overflow: TextOverflow.fade,
                     maxLines: 1,
                     style: TextStyle(
-                      color: textColor,
-                      fontSize: 16,
+                      color: colors.black,
+                      fontSize: 14,
                       fontWeight: weightRegular,
                     ),
                   ),

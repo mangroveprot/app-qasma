@@ -138,16 +138,6 @@ class _MyProfileFormState extends State<MyProfileForm> {
       _updateCurrentUserWithTextFields();
 
       final emailChanged = _controllers['email']?.text != _originalUser?.email;
-      final idNumberChanged =
-          _controllers['idNumber']?.text != _originalUser?.idNumber;
-
-      if (idNumberChanged) {
-        final idNumber = _controllers['idNumber']?.text.trim() ?? '';
-
-        final bool isNotRegisteredId = await _validate(
-            field: idNumber, message: 'This ID Number is already registered');
-        if (!isNotRegisteredId) return;
-      }
 
       if (emailChanged) {
         final email = _controllers['email']?.text.trim() ?? '';

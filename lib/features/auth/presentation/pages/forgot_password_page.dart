@@ -86,7 +86,7 @@ class ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => ButtonCubit(),
+      create: (context) => ButtonCubit()..emitInitial(),
       child: Scaffold(
         appBar: const CustomAppBar(
           title: 'Forgot Pasword',

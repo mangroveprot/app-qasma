@@ -86,7 +86,7 @@ class MenuHeader extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          'ID: ${idNumber}',
+                          'STAFF : ${idNumber}',
                           style: TextStyle(
                             color: colors.white.withOpacity(0.9),
                             fontSize: 12,

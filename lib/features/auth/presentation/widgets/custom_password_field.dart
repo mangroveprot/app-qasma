@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../common/helpers/spacing.dart';
@@ -133,6 +131,7 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
     final midGroundColor = context.colors.surface;
     final weightMedium = context.weight.medium;
     final double size = 16;
+    final colors = context.colors;
 
     // error message to show
     final String displayErrorMessage =
@@ -151,7 +150,7 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
                   widget.name,
                   style: TextStyle(
                     color: textColor,
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: weightMedium,
                   ),
                 ),
@@ -160,7 +159,7 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
                     ' *',
                     style: TextStyle(
                       color: dangerColor,
-                      fontSize: 14,
+                      fontSize: 12,
                       fontWeight: weightMedium,
                     ),
                   ),
@@ -191,7 +190,7 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
                 hintText: widget.hint,
                 hintStyle: TextStyle(
                   color: textColor.withOpacity(0.8),
-                  fontSize: size,
+                  fontSize: 14,
                   fontWeight: weightRegular,
                 ),
                 suffixIcon: GestureDetector(
@@ -237,7 +236,7 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
                 ),
               ),
               style: TextStyle(
-                color: textColor,
+                color: colors.black,
                 fontSize: size,
                 fontWeight: weightRegular,
               ),
@@ -297,7 +296,6 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
   }
 }
 
-// Extension to easily check if password is valid from outside
 extension CustomPasswordFieldValidation on CustomPasswordField {
   static bool isValid(String password) {
     final rules = [

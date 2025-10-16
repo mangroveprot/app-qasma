@@ -15,7 +15,6 @@ class URLProviderConfig {
   String get otpEndPoint => '${apiPath}/otp';
 
   // Auth URLS
-  String get register => '${authEndPoint}/register';
   String get login => '${authEndPoint}/login';
   String get verify => '${authEndPoint}/verify';
   String get refreshTokenUrl => '${authEndPoint}/refresh';
@@ -33,6 +32,7 @@ class URLProviderConfig {
   // User URLS
   String get getProfile => '${userEndPoint}/getProfile';
   String get isRegister => '${userEndPoint}/isRegister';
+  String get register => '${userEndPoint}/';
 
   // Config URLS
   String get getConfig => '${configEndPoint}/';

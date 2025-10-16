@@ -120,6 +120,17 @@ String getTimeOfDayGreeting() {
   }
 }
 
+DateTime stripMicroseconds(DateTime utcTime) {
+  return DateTime(
+    utcTime.year,
+    utcTime.month,
+    utcTime.day,
+    utcTime.hour,
+    utcTime.minute,
+    utcTime.second,
+  );
+}
+
 enum DateTimeFormatStyle {
   timeOnly,
   dateOnly,

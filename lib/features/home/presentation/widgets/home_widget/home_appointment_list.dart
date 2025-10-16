@@ -11,6 +11,7 @@ import 'home_history_button.dart';
 class HomeAppointmentList extends StatefulWidget {
   final HomePageState state;
   final List<AppointmentModel> appointments;
+  final List<UserModel> users;
   final Function(String) onCancel;
   final Function(String) onReschedule;
   final Future<void> Function() onRefresh;
@@ -18,6 +19,7 @@ class HomeAppointmentList extends StatefulWidget {
   const HomeAppointmentList({
     super.key,
     required this.appointments,
+    required this.users,
     required this.onCancel,
     required this.onReschedule,
     required this.state,
@@ -33,6 +35,7 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
   late TabController _tabController;
   late List<AppointmentModel> _pendingAppointments;
   late List<AppointmentModel> _approvedAppointments;
+  Map<String, UserModel> _userMap = {};
 
   @override
   void initState() {
@@ -49,7 +52,8 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
   @override
   void didUpdateWidget(HomeAppointmentList oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.appointments != widget.appointments) {
+    if (oldWidget.appointments != widget.appointments ||
+        oldWidget.users != widget.users) {
       _filterAppointments();
     }
   }
@@ -61,6 +65,8 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
   }
 
   void _filterAppointments() {
+    _userMap = {for (var user in widget.users) user.idNumber: user};
+
     _pendingAppointments = widget.appointments
         .where((appointment) =>
             appointment.status.toLowerCase() == StatusType.pending.field)
@@ -71,6 +77,11 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
         .toList();
   }
 
+  UserModel? _getUserById(String? userId) {
+    if (userId == null || userId.isEmpty) return null;
+    return _userMap[userId];
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -78,7 +89,6 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
 
     return Column(
       children: [
-        // Header with flexible padding
         Container(
           width: double.infinity,
           padding: const EdgeInsets.fromLTRB(8, 12, 8, 8),
@@ -92,7 +102,6 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
           ),
         ),
 
-        // TabBar with improved responsive design
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 8),
           padding: const EdgeInsets.all(3),
@@ -157,9 +166,9 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
     final isSelected = _tabController.index == tabIndex;
 
     return Container(
-      height: 32, // Reduced height for small screens
+      height: 32,
       child: Row(
-        mainAxisSize: MainAxisSize.min, // Use minimum space needed
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Flexible(
@@ -169,10 +178,9 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
               maxLines: 1,
             ),
           ),
-          const SizedBox(width: 4), // Reduced spacing
+          const SizedBox(width: 4),
           Container(
-            constraints:
-                const BoxConstraints(minWidth: 20), // Minimum width for count
+            constraints: const BoxConstraints(minWidth: 20),
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
               color: isSelected
@@ -206,8 +214,7 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
 
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding:
-          const EdgeInsets.symmetric(horizontal: 8), // Add horizontal padding
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       itemCount: appointments.length + 1,
       itemBuilder: (context, index) {
         if (index == appointments.length) {
@@ -218,25 +225,27 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
         }
 
         final appointment = appointments[index];
-        final user =
-            widget.state.controller.getUserByIdNumber(appointment.studentId);
 
-        if (user == null) {
+        final studentUser = _getUserById(appointment.studentId);
+        final rescheduledByUser =
+            _getUserById(appointment.reschedule.rescheduledBy);
+
+        if (studentUser == null) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
-            child: HomeSkeletonLoader.appointmentCardSkeleton(),
+            child: HomeSkeletonLoader.appointmentSingleCardSkeleton(),
           );
         }
 
-        final UserModel userData = user;
         final appointmentId = appointments[index].appointmentId;
 
         return RepaintBoundary(
           child: Padding(
-            padding: const EdgeInsets.only(bottom: 8), // Reduced bottom padding
+            padding: const EdgeInsets.only(bottom: 8),
             child: AppointmentCard(
               key: ValueKey(appointmentId),
-              userModel: userData,
+              userModel: studentUser,
+              rescheduledByUser: rescheduledByUser,
               appointment: appointments[index],
               onApproved: () => widget.state.controller
                   .handleApprovedAppointment(context, appointmentId),
@@ -264,9 +273,7 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(
-                height: MediaQuery.of(context).size.height *
-                    0.1), // Responsive spacing
+            SizedBox(height: MediaQuery.of(context).size.height * 0.1),
             Icon(
               Icons.event_busy_outlined,
               size: 48,

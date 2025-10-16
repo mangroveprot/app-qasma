@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 
+import '../../../users/data/models/params/dynamic_param.dart';
 import '../../data/models/appointment_model.dart';
 import '../../data/models/params/approved_params.dart';
 import '../../data/models/params/availability_params.dart';
@@ -14,5 +15,5 @@ abstract class AppointmentRepository {
   Future<Either> getAllAppointments();
   Future<Either> getSlots(String duration);
   Future<Either> syncAppointments();
-  Future<Either> updateAppointment(AppointmentModel model);
+  Future<Either> updateAppointment(DynamicParam model);
 }

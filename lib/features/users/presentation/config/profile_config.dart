@@ -13,7 +13,6 @@ class ProfileFieldConfig {
   };
 
   static const Map<String, String> fieldLabels = {
-    'idNumber': 'ID Number',
     'active': 'Active',
     'verified': 'Verified',
     'first_name': 'First Name',
@@ -31,7 +30,6 @@ class ProfileFieldConfig {
   };
 
   static const Map<String, IconData> fieldIcons = {
-    'idNumber': Icons.badge_outlined,
     'active': Icons.check_circle_outline,
     'verified': Icons.verified_outlined,
     'first_name': Icons.person_outline,
@@ -51,7 +49,6 @@ class ProfileFieldConfig {
   static const List<String> otherInfoFields = ['course', 'yearLevel', 'block'];
 
   static const List<String> informationFields = [
-    'idNumber',
     'active',
     'verified',
   ];

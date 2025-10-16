@@ -10,6 +10,7 @@ import 'book_appointment_buttons.dart';
 import 'book_category_section.dart';
 import 'book_description_section.dart';
 import 'book_type_date_time_section.dart';
+import 'reschedule_remarks_section.dart';
 
 class BookAppointmentForm extends StatelessWidget {
   final BookAppointmentPageState state;
@@ -69,7 +70,14 @@ class BookAppointmentForm extends StatelessWidget {
             category: state.category,
           ),
           Spacing.verticalMedium,
-          BookDescriptionSection(textControllers: state.textControllers),
+          if (!state.isRescheduling) ...[
+            Spacing.verticalMedium,
+            BookDescriptionSection(textControllers: state.textControllers),
+          ],
+          if (state.isRescheduling) ...[
+            Spacing.verticalMedium,
+            RescheduleRemarksSection(textControllers: state.textControllers),
+          ],
         ],
       ),
     );

@@ -53,7 +53,7 @@ class ProfileHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user.fullName,
+                  user.idNumber,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: fontWeight.bold,

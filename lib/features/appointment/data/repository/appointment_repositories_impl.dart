@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../common/error/app_error.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
+import '../../../users/data/models/params/dynamic_param.dart';
 import '../../domain/repository/appointment_repositories.dart';
 import '../../domain/services/appointment_service.dart';
 import '../models/appointment_model.dart';
@@ -92,7 +93,7 @@ class AppointmentRepositoryImpl extends AppointmentRepository {
 
   @override
   Future<Either<AppError, AppointmentModel>> updateAppointment(
-    AppointmentModel model,
+    DynamicParam model,
   ) async {
     final Either result = await _appointmentService.updateAppointment(model);
     return result.fold(

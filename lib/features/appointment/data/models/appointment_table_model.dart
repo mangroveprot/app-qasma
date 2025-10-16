@@ -16,8 +16,10 @@ class AppointmentTableModel implements TableModel {
     checkInTime TEXT,                  -- DateTime → ISO8601 String
     staffId TEXT,                      -- Staff ID
     counselorId TEXT,                  -- Counselor ID
+    feedbackSubmitted INTEGER NOT NULL,
     qrCode TEXT NOT NULL,              -- QRCode → JSON stringified TEXT
     cancellation TEXT NOT NULL,        -- Cancellation → JSON stringified TEXT
+    reschedule TEXT NOT NULL,        -- reschedule → JSON stringified TEXT
 
     -- Auditing fields
     createdAt TEXT NOT NULL,           -- DateTime → ISO8601 String

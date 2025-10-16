@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../../infrastructure/theme/theme_extensions.dart';
+import 'book_type_label.dart';
 
 import '../../../../../common/utils/form_field_config.dart';
 import '../../../../../common/widgets/bloc/form/form_cubit.dart';
 import '../../../../../infrastructure/injection/service_locator.dart';
-import '../../../../../infrastructure/theme/theme_extensions.dart';
 import '../../../domain/usecases/get_slots_usecase.dart';
 import '../../bloc/slots/slots_cubit.dart';
 import '../../../../appointment_config/presentation/bloc/appointment_config_cubit.dart';
@@ -56,13 +57,10 @@ class BookTypeDataTimeSection extends StatelessWidget {
 
   Future<void> _onAppointmentTypeSelected(
       BuildContext context, String type) async {
-    // Clear date/time selection when type changes
     dropdownControllers[field_appointmentDateTime.field_key]!.value = null;
 
-    // Clear form errors
     context.read<FormCubit>().clearFieldError(field_appointmentType.field_key);
 
-    // Load slots for the selected appointment type
     final configCubit = context.read<AppointmentConfigCubit>();
     final duration = category != null
         ? configCubit.getDurationByTypeInCategory(category!, type) ?? 10
@@ -91,7 +89,10 @@ class _AppointmentTypeDropdown extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _FieldLabel(text: 'Appointment Type'),
+        const BookTypeLabel(
+          text: 'Appointment Type',
+          tooltip: 'sdaasdsads',
+        ),
         const SizedBox(height: 8),
         BlocSelector<FormCubit, FormValidationState, bool>(
           selector: (state) => state.hasError(field_appointmentType.field_key),
@@ -155,7 +156,10 @@ class _DateTimeDropdown extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _FieldLabel(text: 'Date & Time'),
+        const BookTypeLabel(
+          text: 'Date & Time',
+          tooltip: 'dsadnsakdbjl',
+        ),
         const SizedBox(height: 8),
         BlocSelector<FormCubit, FormValidationState, bool>(
           selector: (state) =>
@@ -242,44 +246,6 @@ class _DateTimeDropdown extends StatelessWidget {
           duration: duration.toString(),
           usecase: await sl<GetSlotsUseCase>(),
         );
-  }
-}
-
-class _FieldLabel extends StatelessWidget {
-  final String text;
-
-  const _FieldLabel({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final weight = context.weight;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8, left: 4),
-      child: RichText(
-        text: TextSpan(
-          children: [
-            TextSpan(
-              text: text,
-              style: TextStyle(
-                color: colors.textPrimary,
-                fontSize: 14,
-                fontWeight: weight.medium,
-              ),
-            ),
-            TextSpan(
-              text: ' *',
-              style: TextStyle(
-                color: colors.error,
-                fontSize: 14,
-                fontWeight: weight.medium,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 

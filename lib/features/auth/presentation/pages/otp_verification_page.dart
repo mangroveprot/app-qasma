@@ -221,7 +221,7 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
   void handleResendOTP(BuildContext context) {
     if (!mounted) return;
 
-    // Check if resend is allowed
+    // check if resend is allowed
     if (!_canResendOtp) {
       AppToast.show(
         message:
@@ -311,8 +311,7 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
         if (otpPurposes == OtpPurposes.passwordReset) {
           final email = getRouteValue(field_email);
           AppToast.show(
-            message:
-                'Successfully verified. You will be redirected to reset password page.',
+            message: 'Successfully verified.',
             type: ToastType.success,
           );
           context.go(
@@ -323,8 +322,7 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
         }
 
         AppToast.show(
-          message:
-              'Account is verified successfully. You will be redirected to login.',
+          message: 'Account is verified successfully.',
           type: ToastType.success,
         );
         context.go(Routes.buildPath(Routes.aut_path, Routes.login));

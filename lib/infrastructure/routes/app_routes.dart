@@ -16,6 +16,8 @@ class Routes {
   static const String forgot_password = 'forgot-password';
   static const String reset_password = 'reset-password';
   static const String change_password = 'change-password';
+
+  static const String create_user = 'create-user';
   static const String user_profile = 'user-profile';
 
   // home route names

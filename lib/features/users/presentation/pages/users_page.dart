@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../common/utils/constant.dart';
 import '../../../../common/widgets/custom_app_bar.dart';
 import '../../../../common/widgets/toast/app_toast.dart';
 import '../bloc/user_cubit.dart';
 import '../controller/users_controller.dart';
+import '../widgets/users_widget/user_fab.dart';
 import '../widgets/users_widget/users_form.dart';
 
 class UsersPage extends StatefulWidget {
@@ -43,15 +45,27 @@ class UsersPageState extends State<UsersPage> {
         ],
         child: Scaffold(
           appBar: const CustomAppBar(title: 'Students'),
-          body: LayoutBuilder(builder: (context, constraints) {
-            return SizedBox(
-              width: constraints.maxWidth,
-              height: constraints.maxHeight,
-              child: UsersForm(
-                state: this,
+          body: Stack(
+            children: [
+              LayoutBuilder(builder: (context, constraints) {
+                return SizedBox(
+                  width: constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  child: UsersForm(
+                    state: this,
+                  ),
+                );
+              }),
+              Positioned(
+                right: 16,
+                bottom: 30,
+                child: UserFab(
+                  role: RoleType.student.field,
+                  onRefresh: controller.loadAllUsers,
+                ),
               ),
-            );
-          }),
+            ],
+          ),
         ),
       ),
     );
