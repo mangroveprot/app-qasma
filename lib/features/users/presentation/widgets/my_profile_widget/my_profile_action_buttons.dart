@@ -33,8 +33,8 @@ class MyProfileActionButtons extends StatelessWidget {
             child: ElevatedButton(
               onPressed: isSaving ? null : onCancel,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[500],
-                foregroundColor: Colors.white,
+                backgroundColor: colors.textPrimary,
+                foregroundColor: colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -52,19 +52,19 @@ class MyProfileActionButtons extends StatelessWidget {
               onPressed: isSaving ? null : onSave,
               style: ElevatedButton.styleFrom(
                 backgroundColor: colors.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
               child: isSaving
-                  ? const SizedBox(
+                  ? SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        valueColor: AlwaysStoppedAnimation<Color>(colors.white),
                       ),
                     )
                   : Row(

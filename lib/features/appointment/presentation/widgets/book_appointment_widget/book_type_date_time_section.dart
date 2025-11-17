@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../../common/utils/tooltips.dart';
 import '../../../../../theme/theme_extensions.dart';
 import 'book_type_label.dart';
 
@@ -89,9 +90,9 @@ class _AppointmentTypeDropdown extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const BookTypeLabel(
-          text: 'Appointment Type',
-          tooltip: 'sdaasdsads',
+        BookTypeLabel(
+          text: ToolTip.appointmentType.key,
+          tooltip: ToolTip.appointmentType.tips,
         ),
         const SizedBox(height: 8),
         BlocSelector<FormCubit, FormValidationState, bool>(
@@ -156,9 +157,9 @@ class _DateTimeDropdown extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const BookTypeLabel(
-          text: 'Date & Time',
-          tooltip: 'dsadnsakdbjl',
+        BookTypeLabel(
+          text: ToolTip.dateAndTime.key,
+          tooltip: ToolTip.dateAndTime.tips,
         ),
         const SizedBox(height: 8),
         BlocSelector<FormCubit, FormValidationState, bool>(

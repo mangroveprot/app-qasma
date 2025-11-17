@@ -17,11 +17,11 @@ class MenuItemConfig {
 class MenuKeys {
   static const String myProfile = 'my_profile';
   static const String history = 'history';
-  static const String privacyPolicy = 'privacy_policy';
-  static const String termsAndCondition = 'terms_and_condition';
   static const String settings = 'settings';
   static const String logout = 'logout';
   static const String about = 'about';
+  static const String helpAndSupport = 'help_and_support';
+  static const String feedback = 'feedback';
 }
 
 const List<MenuItemConfig> menu_items = [
@@ -36,14 +36,14 @@ const List<MenuItemConfig> menu_items = [
     icon: Icons.history,
   ),
   MenuItemConfig(
-    menu_key: MenuKeys.privacyPolicy,
-    title: 'Privacy Policy',
-    icon: Icons.shield_outlined,
+    menu_key: MenuKeys.feedback,
+    title: 'Feedback',
+    icon: Icons.feedback_outlined,
   ),
   MenuItemConfig(
-    menu_key: MenuKeys.termsAndCondition,
-    title: 'Terms And Condition',
-    icon: Icons.description_outlined,
+    menu_key: MenuKeys.about,
+    title: 'About',
+    icon: Icons.info_outline,
   ),
   MenuItemConfig(
     menu_key: MenuKeys.settings,
@@ -51,9 +51,9 @@ const List<MenuItemConfig> menu_items = [
     icon: Icons.settings_outlined,
   ),
   MenuItemConfig(
-    menu_key: MenuKeys.about,
-    title: 'About',
-    icon: Icons.info_outline,
+    menu_key: MenuKeys.helpAndSupport,
+    title: 'Help and Support',
+    icon: Icons.help_outline,
   ),
   MenuItemConfig(
     menu_key: MenuKeys.logout,

@@ -106,16 +106,8 @@ class LoginPageState extends State<LoginPage> {
         create: (_) => ButtonCubit(),
         child: BlocListener<ButtonCubit, ButtonState>(
           listener: _handleButtonState,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SafeArea(
-                child: SizedBox(
-                  width: constraints.maxWidth,
-                  height: constraints.maxHeight,
-                  child: LoginForm(state: this),
-                ),
-              );
-            },
+          child: SafeArea(
+            child: LoginForm(state: this),
           ),
         ),
       ),

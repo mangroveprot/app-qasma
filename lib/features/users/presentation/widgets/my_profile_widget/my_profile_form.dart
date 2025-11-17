@@ -14,7 +14,9 @@ import '../../../../../infrastructure/injection/service_locator.dart';
 import '../../../data/models/params/dynamic_param.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/models/other_info_model.dart';
+import '../../../../../common/utils/constant.dart';
 import '../../../domain/usecases/is_register_usecase.dart';
+import 'profile_birthdate_field.dart';
 import '../../bloc/user_cubit.dart';
 import '../../config/profile_config.dart';
 import '../../pages/my_profile_page.dart';
@@ -37,15 +39,25 @@ class _MyProfileFormState extends State<MyProfileForm> {
   bool _isSaving = false;
   final Map<String, TextEditingController> _controllers = {};
 
+  late final ValueNotifier<String?> _dobMonthController;
+  late final ValueNotifier<String?> _dobDayController;
+  late final ValueNotifier<String?> _dobYearController;
+
   @override
   void initState() {
     super.initState();
+    _dobMonthController = ValueNotifier<String?>(null);
+    _dobDayController = ValueNotifier<String?>(null);
+    _dobYearController = ValueNotifier<String?>(null);
     _initializeControllers();
   }
 
   @override
   void dispose() {
     _controllers.forEach((key, controller) => controller.dispose());
+    _dobMonthController.dispose();
+    _dobDayController.dispose();
+    _dobYearController.dispose();
     super.dispose();
   }
 
@@ -64,6 +76,11 @@ class _MyProfileFormState extends State<MyProfileForm> {
       _controllers[fieldName]?.text =
           ProfileFormUtils.getFieldValue(_currentUser!, fieldName);
     }
+
+    final dob = _currentUser!.date_of_birth;
+    _dobMonthController.value = monthsList[dob.month - 1];
+    _dobDayController.value = dob.day.toString();
+    _dobYearController.value = dob.year.toString();
   }
 
   void _onFieldChanged() {
@@ -90,6 +107,14 @@ class _MyProfileFormState extends State<MyProfileForm> {
       if (currentValue != originalValue) return true;
     }
 
+    final originalDob = _originalUser!.date_of_birth;
+    final currentDob = _currentUser!.date_of_birth;
+    if (originalDob.year != currentDob.year ||
+        originalDob.month != currentDob.month ||
+        originalDob.day != currentDob.day) {
+      return true;
+    }
+
     return false;
   }
 
@@ -105,6 +130,25 @@ class _MyProfileFormState extends State<MyProfileForm> {
         _currentUser =
             ProfileFormUtils.updateMainUser(_currentUser!, fieldName, newValue);
       }
+      _hasChanges = _hasAnyChanges();
+    });
+  }
+
+  void _onDobPicked(DateTime newDob) {
+    if (_currentUser == null) return;
+
+    final currentDob = _currentUser!.date_of_birth;
+    if (newDob.year == currentDob.year &&
+        newDob.month == currentDob.month &&
+        newDob.day == currentDob.day) {
+      return;
+    }
+
+    setState(() {
+      _currentUser = _currentUser!.copyWith(date_of_birth: newDob);
+      _dobMonthController.value = monthsList[newDob.month - 1];
+      _dobDayController.value = newDob.day.toString();
+      _dobYearController.value = newDob.year.toString();
       _hasChanges = _hasAnyChanges();
     });
   }
@@ -128,6 +172,17 @@ class _MyProfileFormState extends State<MyProfileForm> {
       _updateCurrentUserWithTextFields();
 
       final emailChanged = _controllers['email']?.text != _originalUser?.email;
+      final isFacebookUrlChanged =
+          _controllers['facebook']?.text != _originalUser?.facebook;
+
+      if (isFacebookUrlChanged) {
+        final fbUrl = _controllers['facebook']?.text.trim() ?? '';
+        if (!isFacebookValid(fbUrl))
+          return _showError(
+            'We couldn\'t recognize that Facebook link. Example: facebook.com/username or facebook.com/profile.php?id=123456789.',
+          );
+      }
+
       if (emailChanged) {
         final email = _controllers['email']?.text.trim() ?? '';
         if (!isValidEmail(email)) {
@@ -149,7 +204,7 @@ class _MyProfileFormState extends State<MyProfileForm> {
 
       await _performUpdate();
     } catch (e) {
-      _showError('Update failed. Please try again.');
+      //   _showError('Update failed. Please try again.');
     }
   }
 
@@ -219,10 +274,21 @@ class _MyProfileFormState extends State<MyProfileForm> {
 
   List<Widget> _buildFieldsForSection(List<String> fields) {
     return fields.map((fieldName) {
+      if (fieldName == 'date_of_birth') {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: ProfileBirthdateField(
+            monthController: _dobMonthController,
+            dayController: _dobDayController,
+            yearController: _dobYearController,
+            onDateChanged: _onDobPicked,
+          ),
+        );
+      }
+
       final label = ProfileFieldConfig.fieldLabels[fieldName] ?? fieldName;
       final value = ProfileFormUtils.getFieldValue(_currentUser!, fieldName);
       final options = ProfileFieldConfig.dropdownOptions[fieldName];
-      final icon = ProfileFieldConfig.fieldIcons[fieldName];
 
       if (options != null) {
         final List<String> updatedOptions = List.from(options);
@@ -243,7 +309,6 @@ class _MyProfileFormState extends State<MyProfileForm> {
           label: label,
           value: finalValue,
           options: updatedOptions,
-          icon: icon,
           isEnabled: !_isSaving,
           onChanged: (newValue) => _onDropdownChanged(fieldName, newValue),
         );
@@ -252,7 +317,6 @@ class _MyProfileFormState extends State<MyProfileForm> {
           fieldName: fieldName,
           label: label,
           controller: _controllers[fieldName]!,
-          icon: icon,
           isEnabled: !_isSaving,
           keyboardType: ProfileFieldConfig.getKeyboardType(fieldName),
           onChanged: _onFieldChanged,
@@ -313,21 +377,21 @@ class _MyProfileFormState extends State<MyProfileForm> {
               const SizedBox(height: 32),
               ProfileSection(
                 title: 'Personal Information',
-                icon: Icons.person_outline,
+                icon: Icons.person,
                 fields:
                     _buildFieldsForSection(ProfileFieldConfig.personalFields),
               ),
               const SizedBox(height: 24),
               ProfileSection(
                 title: 'Contact Information',
-                icon: Icons.contact_phone_outlined,
+                icon: Icons.contact_phone,
                 fields:
                     _buildFieldsForSection(ProfileFieldConfig.contactFields),
               ),
               const SizedBox(height: 24),
               ProfileSection(
                 title: 'Academic Information',
-                icon: Icons.school_outlined,
+                icon: Icons.school,
                 fields:
                     _buildFieldsForSection(ProfileFieldConfig.otherInfoFields),
               ),

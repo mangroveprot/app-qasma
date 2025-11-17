@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../../common/utils/menu_items_config.dart';
 import 'menu_items.dart';
 
-// ignore: unused_element
 class MenuItemsList extends StatelessWidget {
   final Function(String) onMenuItemTap;
   const MenuItemsList({

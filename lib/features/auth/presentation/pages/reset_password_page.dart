@@ -84,7 +84,6 @@ class ResetPassswordPageState extends State<ResetPassswordPage> {
   void handleSubmit(BuildContext context) {
     final isValid = formCubit.validateAll(
       _buildValidationFields(),
-      // optionalFields: _optionalFields.map((field) => field.field_key).toList(),
     );
 
     if (!isValid) return;
@@ -93,6 +92,7 @@ class ResetPassswordPageState extends State<ResetPassswordPage> {
   }
 
   void _performPasswordReset(BuildContext context) {
+    FocusScope.of(context).unfocus();
     final passwordText = _getTextValue(field_password);
     final confirmPasswordText = _getTextValue(field_confirm_password);
 

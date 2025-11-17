@@ -188,7 +188,6 @@ class RemoteRepository<T> extends BaseRepository
           }
         }
 
-        // Only update sync timestamp if all items were processed successfully
         if (allItemsProcessedSuccessfully) {
           if (latestUpdatedAt != null) {
             await prefs.setString(
@@ -226,7 +225,6 @@ class RemoteRepository<T> extends BaseRepository
           }
         }
 
-        // Only update sync timestamp if all items were processed successfully
         if (allItemsProcessedSuccessfully) {
           final prefs = await SharedPreferences.getInstance();
           final syncTime = latestUpdatedAt?.toIso8601String() ??

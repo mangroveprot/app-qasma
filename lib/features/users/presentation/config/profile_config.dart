@@ -16,6 +16,7 @@ class ProfileFieldConfig {
     'last_name': 'Last Name',
     'suffix': 'Suffix',
     'gender': 'Gender',
+    'date_of_birth': 'Date of Birth',
     'email': 'Email',
     'contact_number': 'Contact Number',
     'address': 'Address',
@@ -25,21 +26,6 @@ class ProfileFieldConfig {
     'block': 'Block',
   };
 
-  static const Map<String, IconData> fieldIcons = {
-    'first_name': Icons.person_outline,
-    'middle_name': Icons.person_outline,
-    'last_name': Icons.person_outline,
-    'suffix': Icons.person_outline,
-    'gender': Icons.wc_outlined,
-    'email': Icons.email_outlined,
-    'contact_number': Icons.phone_outlined,
-    'address': Icons.location_on_outlined,
-    'facebook': Icons.facebook_outlined,
-    'course': Icons.school_outlined,
-    'yearLevel': Icons.grade_outlined,
-    'block': Icons.class_outlined,
-  };
-
   static const List<String> otherInfoFields = ['course', 'yearLevel', 'block'];
 
   static const List<String> personalFields = [
@@ -47,7 +33,8 @@ class ProfileFieldConfig {
     'middle_name',
     'last_name',
     'suffix',
-    'gender'
+    'gender',
+    'date_of_birth',
   ];
 
   static const List<String> contactFields = [

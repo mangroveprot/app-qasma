@@ -7,5 +7,6 @@ abstract class UserRepository {
   Future<Either> getAllUser();
   Future<Either> getUser(String idNumber);
   Future<Either> update(DynamicParam param);
+  Future<Either> saveFcmToken(DynamicParam param);
   Future<Either> syncUser();
 }

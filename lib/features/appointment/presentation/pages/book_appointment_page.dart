@@ -138,7 +138,7 @@ class BookAppointmentPageState extends State<BookAppointmentPage> {
 
   List<String> getCategories() {
     final configCubit = context.read<AppointmentConfigCubit>();
-    return configCubit.allCategories;
+    return configCubit.allCategoriesName;
   }
 
   // helpers

@@ -7,23 +7,59 @@ class LoginLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 98,
-      height: 98,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: context.colors.white,
-        border: Border.all(color: context.colors.white, width: 3),
-        boxShadow: [context.shadows.heavy],
-      ),
-      child: ClipOval(
-        child: Image.asset(
-          'assets/images/logo.webp',
-          fit: BoxFit.cover,
-          cacheWidth: 98,
-          cacheHeight: 98,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          width: 65,
+          height: 65,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: context.colors.white,
+            border: Border.all(color: context.colors.white, width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipOval(
+            child: Image.asset(
+              'assets/images/jrmsu_logo.webp',
+              fit: BoxFit.cover,
+              cacheWidth: 65,
+              cacheHeight: 65,
+            ),
+          ),
         ),
-      ),
+        const SizedBox(width: 20),
+        Container(
+          width: 65,
+          height: 65,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: context.colors.white,
+            border: Border.all(color: context.colors.white, width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipOval(
+            child: Image.asset(
+              'assets/images/logo.webp',
+              fit: BoxFit.cover,
+              cacheWidth: 65,
+              cacheHeight: 65,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -131,10 +131,19 @@ class CreateAccountPageState extends State<CreateAccountPage> {
 
   void handleSubmit(BuildContext context) {
     FocusScope.of(context).unfocus();
+    final fbURL = _getTextValue(field_facebook);
     final isValid = formCubit.validateAll(
       _buildValidationFields(),
       optionalFields: _optionalFields.map((field) => field.field_key).toList(),
     );
+
+    final isValidFbURL = isFacebookValid(fbURL);
+
+    if (fbURL.isNotEmpty && !isValidFbURL)
+      return formCubit.setFieldError(
+        field_facebook.field_key,
+        'We couldn\'t recognize that Facebook link. Example: facebook.com/username or facebook.com/profile.php?id=123456789.',
+      );
 
     if (!isValid) return;
 

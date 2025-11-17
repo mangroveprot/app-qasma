@@ -106,7 +106,7 @@ const FormFieldConfig field_address = FormFieldConfig(
 const FormFieldConfig field_contact_number = FormFieldConfig(
   field_key: 'contact_number',
   name: 'Contact Number',
-  hint: 'e.g, 09812487711',
+  hint: 'e.g, 9812487711',
 );
 
 const FormFieldConfig field_email = FormFieldConfig(

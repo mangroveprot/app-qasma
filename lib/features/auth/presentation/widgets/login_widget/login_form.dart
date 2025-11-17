@@ -5,6 +5,7 @@ import '../../../../../common/utils/form_field_config.dart';
 import '../../pages/login_page.dart';
 import 'login_create_acc_prompt.dart';
 import 'login_field.dart';
+import 'login_footer.dart';
 import 'login_form_error.dart';
 import 'login_header.dart';
 import 'login_logo.dart';
@@ -30,6 +31,7 @@ class LoginForm extends StatelessWidget {
               Spacing.verticalSmall,
               const RepaintBoundary(child: LoginHeader()),
               Spacing.verticalLarge,
+              Spacing.verticalLarge,
               const RepaintBoundary(child: LoginFormError()),
               RepaintBoundary(
                 child: LoginField(
@@ -47,6 +49,8 @@ class LoginForm extends StatelessWidget {
               Spacing.verticalLarge,
               Spacing.verticalLarge,
               const RepaintBoundary(child: LoginCreateAccountPrompt()),
+              Spacing.verticalLarge, // Add spacing before footer
+              const RepaintBoundary(child: LoginFooter()),
             ],
           ),
         ),

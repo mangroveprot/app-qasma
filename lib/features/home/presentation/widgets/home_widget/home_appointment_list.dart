@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../../../../theme/theme_extensions.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
+import '../../../../users/data/models/user_model.dart';
 import '../../pages/home_page.dart';
 import '../appointment_card_widget/appointment_card.dart';
 import 'home_history_button.dart';
 
 class HomeAppointmentList extends StatelessWidget {
   final List<AppointmentModel> appointments;
+  final List<UserModel> users;
   final HomePageState state;
   final Function(String) onCancel;
   final Function(String) onReschedule;
@@ -14,6 +16,7 @@ class HomeAppointmentList extends StatelessWidget {
   const HomeAppointmentList({
     super.key,
     required this.appointments,
+    required this.users,
     required this.onCancel,
     required this.onReschedule,
     required this.state,
@@ -51,18 +54,37 @@ class HomeAppointmentList extends StatelessWidget {
               }
 
               final appointment = appointments[index];
-              final user = state.controller.getUserByIdNumber(
-                appointment.reschedule.rescheduledBy ?? '',
-              );
+
+              final Map<String, UserModel> userMap = {
+                for (final u in users) u.idNumber: u,
+              };
+
+              final UserModel? student = userMap[appointment.studentId];
+
+              final String? counselorLookupId =
+                  (appointment.counselorId != null &&
+                          appointment.counselorId!.isNotEmpty)
+                      ? appointment.counselorId
+                      : null;
+
+              final UserModel? counselor =
+                  counselorLookupId != null ? userMap[counselorLookupId] : null;
+
+              final UserModel? rescheduledBy =
+                  userMap[appointment.reschedule.rescheduledBy];
 
               return RepaintBoundary(
+                key: ValueKey('${appointment.appointmentId}'),
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: AppointmentCard(
+                    key: ValueKey('${appointment.appointmentId}'),
                     appointment: appointment,
+                    student: student,
+                    counselor: counselor,
+                    rescheduledByUser: rescheduledBy,
                     onCancel: () => onCancel(appointment.appointmentId),
                     onReschedule: () => onReschedule(appointment.appointmentId),
-                    user: user,
                     onBackPressed: state.controller.appoitnmentRefreshData,
                   ),
                 ),

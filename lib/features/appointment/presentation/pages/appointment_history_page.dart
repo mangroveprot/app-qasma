@@ -26,14 +26,6 @@ class AppointmentHistoryState extends State<AppointmentHistory> {
 
   @override
   Widget build(BuildContext context) {
-    if (!controller.isInitialized) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-
     return MultiBlocProvider(
       providers: controller.blocProviders,
       child: MultiBlocListener(
@@ -44,15 +36,19 @@ class AppointmentHistoryState extends State<AppointmentHistory> {
         ],
         child: Scaffold(
           appBar: const CustomAppBar(title: 'History'),
-          body: LayoutBuilder(builder: (context, constraints) {
-            return SizedBox(
-              width: constraints.maxWidth,
-              height: constraints.maxHeight,
-              child: HistoryForm(
-                state: this,
-              ),
-            );
-          }),
+          body: !controller.isInitialized
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : LayoutBuilder(builder: (context, constraints) {
+                  return SizedBox(
+                    width: constraints.maxWidth,
+                    height: constraints.maxHeight,
+                    child: HistoryForm(
+                      state: this,
+                    ),
+                  );
+                }),
         ),
       ),
     );

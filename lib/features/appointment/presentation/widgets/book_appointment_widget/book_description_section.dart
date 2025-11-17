@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../common/utils/form_field_config.dart';
+import '../../../../../common/utils/tooltips.dart';
 import '../../../../../common/widgets/bloc/form/form_cubit.dart';
 import '../../../../../theme/theme_extensions.dart';
 import 'book_type_label.dart';
@@ -24,10 +25,9 @@ class BookDescriptionSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const BookTypeLabel(
-          text: 'Description',
-          tooltip:
-              'Provide a brief description of your feelings to help the counselor understand your needs.',
+        BookTypeLabel(
+          text: ToolTip.description.key,
+          tooltip: ToolTip.description.tips,
         ),
         const SizedBox(height: 16),
         BlocSelector<FormCubit, FormValidationState, bool>(
@@ -63,15 +63,15 @@ class BookDescriptionSection extends StatelessWidget {
                       },
                       decoration: InputDecoration(
                         hintText: field_description.hint,
-                        hintStyle: const TextStyle(
-                          color: Colors.grey,
+                        hintStyle: TextStyle(
+                          color: colors.textPrimary.withOpacity(0.8),
                           fontSize: 14,
                         ),
                         border: InputBorder.none,
                       ),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: Colors.black,
+                        color: colors.black,
                       ),
                     ),
                   ),

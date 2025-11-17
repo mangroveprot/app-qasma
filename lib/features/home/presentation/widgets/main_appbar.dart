@@ -6,12 +6,14 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onMenuTap;
   final VoidCallback? onNotificationTap;
   final String title;
+  final int unreadCount;
 
   const MainAppBar({
     super.key,
     this.onMenuTap,
     this.onNotificationTap,
-    this.title = 'JRMSU-KC QASMA',
+    this.title = 'GCare',
+    this.unreadCount = 0,
   });
 
   @override
@@ -37,15 +39,16 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
             color: colors.primary,
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             child: Row(
               children: [
                 // Hamburger Menu
                 Builder(
                   builder: (BuildContext scaffoldContext) {
                     return SizedBox(
-                      width: 54,
-                      height: 48,
+                      width: 40,
+                      height: 40,
                       child: Material(
                         color: Colors.transparent,
                         borderRadius: radius.medium,
@@ -56,27 +59,10 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
                             onMenuTap?.call();
                           },
                           child: Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  width: 24,
-                                  height: 3,
-                                  color: color_white,
-                                  margin: const EdgeInsets.only(bottom: 4),
-                                ),
-                                Container(
-                                  width: 24,
-                                  height: 3,
-                                  color: color_white,
-                                  margin: const EdgeInsets.only(bottom: 4),
-                                ),
-                                Container(
-                                  width: 24,
-                                  height: 3,
-                                  color: color_white,
-                                ),
-                              ],
+                            child: Icon(
+                              Icons.menu,
+                              color: color_white,
+                              size: 24,
                             ),
                           ),
                         ),
@@ -85,56 +71,129 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
                   },
                 ),
 
-                // Title (Centered)
+                const SizedBox(width: 16),
+
                 Expanded(
-                  child: Center(
-                    child: Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: weight.medium,
-                        color: color_white,
-                        letterSpacing: 1.0,
-                      ),
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: weight.medium,
+                      color: color_white,
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ),
 
-                /*
+                const SizedBox(width: 16),
 
-                // Notification Bell
+                // Notification bell with badge
                 SizedBox(
-                  width: 48,
-                  height: 48,
-                  child: Material(
-                    color: Colors.transparent,
-                    borderRadius: radius.medium,
-                    child: InkWell(
-                      borderRadius: radius.medium,
-                      onTap: () {
-                        if (onNotificationTap != null) {
-                          onNotificationTap!();
-                        } else {
-                          debugPrint('Notification bell tapped');
-                        }
-                      },
-                      child: Center(
-                        child: Icon(
-                          Icons.notifications_outlined,
-                          color: color_white,
-                          size: 28,
+                  width: 40,
+                  height: 40,
+                  child: Stack(
+                    children: [
+                      Material(
+                        color: Colors.transparent,
+                        borderRadius: radius.medium,
+                        child: InkWell(
+                          borderRadius: radius.medium,
+                          onTap: () {
+                            if (onNotificationTap != null) {
+                              onNotificationTap!();
+                            } else {
+                              debugPrint('Notification bell tapped');
+                            }
+                          },
+                          child: Center(
+                            child: Icon(
+                              Icons.notifications_outlined,
+                              color: color_white,
+                              size: 24,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                      // Badge
+                      if (unreadCount > 0)
+                        // Notification bell with badge
+                        SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: Stack(
+                            clipBehavior: Clip.none, // Allow badge to overflow
+                            children: [
+                              Material(
+                                color: Colors.transparent,
+                                borderRadius: radius.medium,
+                                child: InkWell(
+                                  borderRadius: radius.medium,
+                                  onTap: () {
+                                    if (onNotificationTap != null) {
+                                      onNotificationTap!();
+                                    } else {
+                                      debugPrint('Notification bell tapped');
+                                    }
+                                  },
+                                  child: Center(
+                                    child: Icon(
+                                      Icons.notifications_outlined,
+                                      color: color_white,
+                                      size: 24,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              if (unreadCount > 0)
+                                Positioned(
+                                  right: -2,
+                                  top: -2,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 5,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: colors.error,
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: colors.primary,
+                                        width: 2,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: colors.black.withOpacity(0.2),
+                                          blurRadius: 3,
+                                          offset: const Offset(0, 1),
+                                        ),
+                                      ],
+                                    ),
+                                    constraints: const BoxConstraints(
+                                      minWidth: 18,
+                                      minHeight: 18,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        unreadCount > 99
+                                            ? '99+'
+                                            : '$unreadCount',
+                                        style: TextStyle(
+                                          color: colors.white,
+                                          fontSize: 10,
+                                          fontWeight: weight.bold,
+                                          height: 1,
+                                          letterSpacing: -0.3,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                    ],
                   ),
-                ),
-
-                */
-
-                // Transparent spacer to balance the hamburger menu
-                const SizedBox(
-                  width: 54,
-                  height: 48,
                 ),
               ],
             ),

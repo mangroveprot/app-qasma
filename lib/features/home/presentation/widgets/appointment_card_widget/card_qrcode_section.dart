@@ -27,43 +27,56 @@ class CardQRCodeSection extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap ?? () => _navigateToQRCodePage(context),
-      child: Container(
-        width: 60,
-        height: 60,
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: colors.accent,
-            width: 1,
-          ),
-          borderRadius: radius.small,
-        ),
-        child: ClipRRect(
-          borderRadius: radius.small,
-          child: QrImage(
-            data: qrData.token.toString(),
-            version: QrVersions.auto,
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black,
-            errorStateBuilder: (cxt, err) {
-              return const Center(
-                child: Text(
-                  'QR Error',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: colors.accent,
+                width: 1,
+              ),
+              borderRadius: radius.small,
+            ),
+            child: ClipRRect(
+              borderRadius: radius.small,
+              child: QrImage(
+                data: qrData.token.toString(),
+                version: QrVersions.auto,
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black,
+                errorStateBuilder: (cxt, err) {
+                  return const Center(
+                    child: Text(
+                      'QR Error',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 8),
+                    ),
+                  );
+                },
+                eyeStyle: const QrEyeStyle(
+                  eyeShape: QrEyeShape.square,
+                  color: Colors.black,
                 ),
-              );
-            },
-            eyeStyle: const QrEyeStyle(
-              eyeShape: QrEyeShape.square,
-              color: Colors.black,
+                dataModuleStyle: const QrDataModuleStyle(
+                  dataModuleShape: QrDataModuleShape.square,
+                  color: Colors.black,
+                ),
+                padding: const EdgeInsets.all(4),
+              ),
             ),
-            dataModuleStyle: const QrDataModuleStyle(
-              dataModuleShape: QrDataModuleShape.square,
-              color: Colors.black,
-            ),
-            padding: const EdgeInsets.all(4),
           ),
-        ),
+          const SizedBox(height: 4),
+          Text(
+            'Tap for full view',
+            style: TextStyle(
+              fontSize: 10,
+              color: colors.textPrimary,
+            ),
+          ),
+        ],
       ),
     );
   }

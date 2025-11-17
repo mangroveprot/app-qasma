@@ -17,7 +17,6 @@ class ApiClient {
   final int maxRetries;
   final URLProviderConfig _urlProvider;
 
-  // Add flags to prevent multiple logout attempts
   static bool _isLoggingOut = false;
   Completer<bool>? _refreshCompleter;
 
@@ -58,12 +57,10 @@ class ApiClient {
   String getBaseUrl() => _urlProvider.baseURL + _urlProvider.apiPath;
 
   Future<bool> _refreshToken() async {
-    // Prevent multiple refresh attempts
     if (_refreshCompleter != null) {
       return _refreshCompleter!.future;
     }
 
-    // If already logging out, don't attempt refresh
     if (_isLoggingOut) {
       _logger.w('Already logging out, skipping token refresh');
       return false;
@@ -112,7 +109,6 @@ class ApiClient {
       _logger.e('Token refresh failed: $e');
       _refreshCompleter!.complete(false);
 
-      // Only perform logout if we're not already logging out
       if (!_isLoggingOut) {
         if (e is DioException && e.response?.statusCode == 401) {
           _logger.w('Refresh token expired, performing auto logout');

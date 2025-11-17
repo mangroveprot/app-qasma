@@ -46,19 +46,20 @@ class AnimatedSelectionContent extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _buildAnimatedOptionsList(context),
-                const SizedBox(height: 30),
+                const SizedBox(height: 24),
                 if (showBackButton)
                   Container(
                     width: double.infinity,
                     child: ModalUI.secondaryButton(
-                        text: backButtonText,
-                        color: colors.black,
-                        width: double.infinity,
-                        height: 48,
-                        backgroundColor: colors.textPrimary.withOpacity(0.1),
-                        onPressed: () => Navigator.pop(context)),
+                      text: backButtonText,
+                      color: colors.black,
+                      width: double.infinity,
+                      height: 48,
+                      backgroundColor: Colors.transparent,
+                      onPressed: () => Navigator.pop(context),
+                    ),
                   ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 38),
               ],
             ),
           ),

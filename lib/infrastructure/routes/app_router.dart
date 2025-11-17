@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../common/presentation/widgets/not_found_page.dart';
 import '../../features/appointment/presentation/pages/appointment_history_page.dart';
 import '../../features/appointment/presentation/pages/book_appointment_page.dart';
 import '../../features/auth/presentation/pages/change_password.dart';
@@ -11,10 +12,12 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/otp_verification_page.dart';
 import '../../features/auth/presentation/pages/reset_password_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
-import '../../features/preferences/features/pages/about_page.dart';
-import '../../features/preferences/features/pages/privacy_policy_page.dart';
-import '../../features/preferences/features/pages/settings_page.dart';
-import '../../features/preferences/features/pages/terms_and_conditions.dart';
+import '../../features/notifications/presentation/pages/notifications_page.dart';
+import '../../features/preferences/presentation/pages/about_page.dart';
+import '../../features/preferences/presentation/pages/help_and_support_page.dart';
+import '../../features/preferences/presentation/pages/privacy_policy_page.dart';
+import '../../features/preferences/presentation/pages/settings_page.dart';
+import '../../features/preferences/presentation/pages/terms_and_conditions.dart';
 import '../../features/splash/splash_screen.dart';
 import '../../features/users/presentation/pages/my_profile_page.dart';
 import 'app_routes.dart';
@@ -27,6 +30,7 @@ class AppRouter {
     navigatorKey: parentNavigatorKey,
     debugLogDiagnostics: true,
     initialLocation: Routes.root,
+    errorBuilder: (context, state) => const NotFoundPage(),
     routes: [
       GoRoute(
         path: Routes.root,
@@ -111,7 +115,16 @@ class AppRouter {
             path: Routes.about,
             builder: (context, state) => const AboutPage(),
           ),
+          GoRoute(
+            path: Routes.helpAndSupport,
+            builder: (context, state) => const HelpAndSupport(),
+          ),
         ],
+      ),
+      GoRoute(
+        path: Routes.notifications, // notifcations
+        builder: (context, state) => const NotificationsPage(),
+        routes: [],
       )
     ],
   );

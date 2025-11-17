@@ -11,34 +11,26 @@ class ProfileHeader extends StatelessWidget {
     final colors = context.colors;
     final fontWeight = context.weight;
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            colors.secondary.withOpacity(0.8),
-            colors.secondary.withOpacity(0.4)
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: colors.secondary.withOpacity(0.4),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 24,
-            backgroundColor: colors.white.withOpacity(0.2),
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: colors.secondary,
+                width: 2,
+              ),
+              shape: BoxShape.circle,
+            ),
             child: Icon(
               Icons.person,
-              size: 24,
-              color: colors.white,
+              size: 28,
+              color: colors.secondary,
             ),
           ),
           const SizedBox(width: 16),
@@ -49,17 +41,20 @@ class ProfileHeader extends StatelessWidget {
                 Text(
                   idNumber,
                   style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: fontWeight.bold,
-                    color: colors.white,
+                    fontSize: 16,
+                    fontWeight: fontWeight.medium,
+                    color: colors.black,
+                    letterSpacing: -0.2,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   'Update your personal information',
                   style: TextStyle(
                     fontSize: 12,
-                    color: colors.white.withOpacity(0.8),
+                    fontWeight: fontWeight.regular,
+                    color: colors.black.withOpacity(0.8),
+                    height: 1.4,
                   ),
                 ),
               ],

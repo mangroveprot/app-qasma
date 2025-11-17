@@ -42,6 +42,7 @@ class HomeFab extends StatelessWidget {
                         title: ContentItems.appointmentSelection.title,
                         subtitle: ContentItems.appointmentSelection.description,
                         options: options,
+                        showBackButton: false,
                       );
                       cubit.emitInitial();
 
@@ -60,6 +61,7 @@ class HomeFab extends StatelessWidget {
               backgroundColor: isLoading ? colors.textPrimary : colors.primary,
               foregroundColor: colors.white,
               elevation: 4,
+              shape: const CircleBorder(),
               child: isLoading
                   ? SizedBox(
                       width: 20,

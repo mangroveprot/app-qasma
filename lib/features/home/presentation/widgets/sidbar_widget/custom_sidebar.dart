@@ -23,21 +23,18 @@ class CustomSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: SafeArea(
-        top: false,
-        child: Column(
-          children: [
-            MenuHeader(
-              user_name: userName,
-              idNumber: idNumber,
+      child: Column(
+        children: [
+          MenuHeader(
+            user_name: userName,
+            idNumber: idNumber,
+          ),
+          Expanded(
+            child: MenuItemsList(
+              onMenuItemTap: (menuKey) => _handleMenuTap(context, menuKey),
             ),
-            Expanded(
-              child: MenuItemsList(
-                onMenuItemTap: (menuKey) => _handleMenuTap(context, menuKey),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

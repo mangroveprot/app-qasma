@@ -50,6 +50,9 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
   void initState() {
     super.initState();
     controller = HomePageController();
+    controller.setUnreadCountCallback(() {
+      setState(() {});
+    });
     controller.initialize(onNavigate: _handleNavigation);
   }
 
@@ -91,8 +94,8 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
               drawerScrimColor: Colors.black54,
               drawerEdgeDragWidth: 60,
               appBar: MainAppBar(
-                title: 'JRMSU-KC QASMA',
                 onNotificationTap: controller.handleNotificationTap,
+                unreadCount: controller.unreadCount,
               ),
               drawer: CustomSidebar(
                 userName: userProfile?.fullName ?? '',

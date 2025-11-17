@@ -41,29 +41,47 @@ class FeedBackSection {
       }).toList();
 
       if (completedWithoutFeedback.isNotEmpty) {
-        _showFeedbackModal(completedWithoutFeedback.first);
+        _showAppointmentFeedback(completedWithoutFeedback.first);
       }
     }
   }
 
-  void _showFeedbackModal(AppointmentModel appointment) {
+  // Show feedback for completed appointment
+  void _showAppointmentFeedback(AppointmentModel appointment) {
     _isFeedbackModalOpen = true;
 
-    FeedbackRequiredDialog.show(
+    FeedbackDialog.showForAppointment(
       context: context,
       appointment: appointment,
-      onSubmitLater: () {
+      onLater: () {
         _isFeedbackModalOpen = false;
       },
       buttonCubit: buttonCubit,
-      onSubmitNow: () async {
-        await _submitFeedback(appointment);
+      onNow: () async {
+        await _submitAppointmentFeedback(appointment);
       },
     ).then((_) => _isFeedbackModalOpen = false);
   }
 
-  Future<void> _submitFeedback(AppointmentModel appointment) async {
-    await openFeedbackLink(appointment);
+  // Show general feedback (from menu)
+  void showGeneralFeedback() {
+    _isFeedbackModalOpen = true;
+
+    FeedbackDialog.showGeneral(
+      context: context,
+      onCancel: () {
+        _isFeedbackModalOpen = false;
+      },
+      onSubmit: () async {
+        await openFeedbackLink();
+        _isFeedbackModalOpen = false;
+      },
+      buttonCubit: buttonCubit,
+    ).then((_) => _isFeedbackModalOpen = false);
+  }
+
+  Future<void> _submitAppointmentFeedback(AppointmentModel appointment) async {
+    await openFeedbackLink();
 
     final params = DynamicParam(fields: {
       'appointmentId': appointment.appointmentId,
@@ -77,14 +95,14 @@ class FeedBackSection {
         );
   }
 
-  Future<void> openFeedbackLink(AppointmentModel appointment) async {
+  Future<void> openFeedbackLink() async {
     final feedbackUrl = Uri.parse(feedback_url);
 
     try {
       if (await canLaunchUrl(feedbackUrl)) {
         await launchUrl(feedbackUrl, mode: LaunchMode.externalApplication);
       } else {
-        _showErrorToast('Could not redirect to JRMSU CSM Online');
+        _showErrorToast('Could not redirect to JRMSU Feedback Form');
       }
     } catch (e) {
       _showErrorToast('Error: ${e.toString()}');

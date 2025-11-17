@@ -196,6 +196,7 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
   }
 
   void handleVerifyOTP(BuildContext context) {
+    FocusScope.of(context).unfocus();
     if (!isOtpComplete) {
       context.read<FormCubit>().setFieldError(
             otp_field_key,
@@ -209,7 +210,11 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
 
   void _performVerifyAccount(BuildContext context) {
     final email = getRouteValue(field_email);
-    final params = VerifyParams(email: email, code: otpCode);
+    final params = VerifyParams(
+      email: email,
+      code: otpCode,
+      purpose: otpPurposes,
+    );
 
     context.read<ButtonCubit>().execute(
           usecase: sl<VerifyUsecase>.call(),
@@ -220,9 +225,9 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
   }
 
   void handleResendOTP(BuildContext context) {
+    FocusScope.of(context).unfocus();
     if (!mounted) return;
 
-    // Check if resend is allowed
     if (!_canResendOtp) {
       AppToast.show(
         message:
@@ -267,9 +272,7 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
       create: (context) => ButtonCubit(),
       child: Scaffold(
         appBar: CustomAppBar(
-          title: isResetPassword
-              ? 'Reset Password Verification'
-              : 'Account Verification',
+          title: isResetPassword ? 'OTP Verification' : 'Account Verification',
         ),
         body: BlocListener<ButtonCubit, ButtonState>(
           listener: _handleButtonState,
@@ -311,11 +314,6 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
       if (!isResend) {
         if (otpPurposes == OtpPurposes.passwordReset) {
           final email = getRouteValue(field_email);
-          AppToast.show(
-            message:
-                'Successfully verified. You will be redirected to reset password page.',
-            type: ToastType.success,
-          );
           context.go(
             Routes.buildPath(Routes.aut_path, Routes.reset_password),
             extra: {field_email.field_key: email},

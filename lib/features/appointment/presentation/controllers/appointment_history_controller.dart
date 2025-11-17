@@ -54,7 +54,7 @@ class AppointmentHistoryController {
   }
 
   Future<void> getAllUser() async {
-    await _userManager.loadAllUser(_userCubit);
+    await _userManager.refreshUser(_userCubit);
   }
 
   UserModel? getUserByIdNumber(String idNumber) {

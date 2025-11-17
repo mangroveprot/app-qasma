@@ -26,7 +26,7 @@ class NotFoundPage extends StatelessWidget {
       scheme: 'mailto',
       path: guidance_email,
       queryParameters: {
-        'subject': 'QASMA Support Request',
+        'subject': 'JRMSU-KC Gcare Support Request',
       },
     );
 

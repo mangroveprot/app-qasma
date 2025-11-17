@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import '../../../../../common/helpers/spacing.dart';
 import '../../../../../theme/theme_extensions.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
+import '../../../../users/data/models/user_model.dart';
 import '../../pages/home_page.dart';
 import 'home_appointment_list.dart';
 import 'home_greeting.dart';
 
-// Loading State
 class LoadingContent extends StatelessWidget {
   const LoadingContent({Key? key}) : super(key: key);
 
@@ -16,11 +16,11 @@ class LoadingContent extends StatelessWidget {
   }
 }
 
-// Loaded State
 class LoadedContent extends StatelessWidget {
   final String userName;
   final HomePageState state;
   final List<AppointmentModel> appointments;
+  final List<UserModel> users;
   final Future<void> Function() onRefresh;
   final void Function(String) onCancel;
   final void Function(String) onReschedule;
@@ -33,6 +33,7 @@ class LoadedContent extends StatelessWidget {
     required this.onReschedule,
     required this.userName,
     required this.state,
+    required this.users,
   }) : super(key: key);
 
   @override
@@ -51,6 +52,7 @@ class LoadedContent extends StatelessWidget {
                   onRefresh: onRefresh,
                   child: HomeAppointmentList(
                     appointments: appointments,
+                    users: users,
                     state: state,
                     onCancel: onCancel,
                     onReschedule: onReschedule,

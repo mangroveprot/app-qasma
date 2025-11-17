@@ -6,6 +6,7 @@ class Routes {
   static const String home_path = '/home';
   static const String appointment = '/appointment';
   static const String preference_path = '/preference';
+  static const String notifications = '/notifications';
 
   // auth route names
   static const String create_account = 'create-account';
@@ -26,6 +27,7 @@ class Routes {
   static const String privacy_policy = 'privacy-policy';
   static const String terms_conditons = 'terms-conditions';
   static const String about = 'about';
+  static const String helpAndSupport = 'help-and-support';
 
   static String buildPath(String basePath, String routeName) {
     if (basePath.isEmpty || routeName.isEmpty) {

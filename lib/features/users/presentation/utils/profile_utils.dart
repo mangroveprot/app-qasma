@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../common/helpers/helpers.dart';
 import '../../data/models/other_info_model.dart';
 import '../../data/models/user_model.dart';
 import '../config/profile_config.dart';
@@ -71,13 +72,15 @@ class ProfileFormUtils {
       case 'suffix':
         return user.suffix;
       case 'gender':
-        return user.gender;
+        return capitalizeWords(user.gender);
       case 'address':
         return user.address;
       case 'contact_number':
         return user.contact_number;
       case 'facebook':
         return user.facebook;
+      case 'date_of_birth':
+        return user.date_of_birth.toIso8601String();
       default:
         return '';
     }
@@ -85,7 +88,7 @@ class ProfileFormUtils {
 
   static Map<String, String> getAllFieldsData(
       UserModel user, Map<String, TextEditingController> controllers) {
-    return {
+    final data = {
       'first_name': controllers['first_name']?.text ?? '',
       'last_name': controllers['last_name']?.text ?? '',
       'middle_name': controllers['middle_name']?.text ?? '',
@@ -98,6 +101,9 @@ class ProfileFormUtils {
       'course': user.other_info.course ?? '',
       'yearLevel': user.other_info.yearLevel ?? '',
       'block': user.other_info.block ?? '',
+      'date_of_birth': user.date_of_birth.toIso8601String(),
     };
+
+    return data;
   }
 }

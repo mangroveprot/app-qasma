@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../theme/theme_extensions.dart';
-import '../../../../preferences/features/pages/privacy_policy_page.dart';
-import '../../../../preferences/features/pages/terms_and_conditions.dart';
+import '../../../../preferences/presentation/pages/privacy_policy_page.dart';
+import '../../../../preferences/presentation/pages/terms_and_conditions.dart';
 
 class CreateAccountTermsFooter extends StatelessWidget {
   const CreateAccountTermsFooter({Key? key}) : super(key: key);

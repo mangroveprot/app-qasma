@@ -11,6 +11,7 @@ import 'status_chip.dart';
 class AppointmentDateTimeStatus extends StatelessWidget {
   final AppointmentModel appointment;
   final UserModel? user;
+  final UserModel? rescheduledByUser;
   final bool isOverdue;
   final bool isOnSession;
 
@@ -20,6 +21,7 @@ class AppointmentDateTimeStatus extends StatelessWidget {
     this.user,
     required this.isOverdue,
     required this.isOnSession,
+    this.rescheduledByUser,
   });
 
   @override
@@ -108,7 +110,7 @@ class AppointmentDateTimeStatus extends StatelessWidget {
                 const SizedBox(height: 4),
                 AppointmentRescheduleIndicator(
                   reschedAppointment: appointment.reschedule as RescheduleModel,
-                  user: user,
+                  user: rescheduledByUser,
                 )
               ]
             ],

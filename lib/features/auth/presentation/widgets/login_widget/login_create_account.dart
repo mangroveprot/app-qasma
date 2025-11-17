@@ -25,10 +25,10 @@ class LoginCreateAccountButton extends StatelessWidget {
             context.push(Routes.buildPath(Routes.aut_path, Routes.get_started));
           },
           style: TextButton.styleFrom(
-            padding: EdgeInsets.zero,
-            minimumSize: Size.zero,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            visualDensity: VisualDensity.compact,
+            padding: const EdgeInsets.fromLTRB(4, 12, 8, 12),
+            minimumSize: const Size(60, 40),
+            tapTargetSize: MaterialTapTargetSize.padded,
+            visualDensity: VisualDensity.standard,
           ),
           child: Text(
             'Signup',

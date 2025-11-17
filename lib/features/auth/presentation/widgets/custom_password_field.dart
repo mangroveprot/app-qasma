@@ -193,26 +193,19 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
                   fontSize: 14,
                   fontWeight: weightRegular,
                 ),
-                suffixIcon: GestureDetector(
-                  onTap: () {
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordVisible
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                    color: textColor.withOpacity(0.6),
+                    size: 20,
+                  ),
+                  onPressed: () {
                     setState(() {
                       _isPasswordVisible = !_isPasswordVisible;
                     });
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 16),
-                    child: Center(
-                      widthFactor: 0,
-                      child: Text(
-                        _isPasswordVisible ? 'HIDE' : 'SHOW',
-                        style: TextStyle(
-                          color: textColor,
-                          fontWeight: weightRegular,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ),
                 ),
                 border: OutlineInputBorder(
                   borderRadius: radiusMedium,

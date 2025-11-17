@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'category.dart';
 import 'time_slot.dart';
-import 'category_type.dart';
 import 'reminder.dart';
 
 class AppointmentConfig extends Equatable {
@@ -10,7 +10,7 @@ class AppointmentConfig extends Equatable {
   final int? slotDaysRange;
   final List<Reminder>? reminders;
   final Map<String, List<TimeSlot>>? availableDayTime;
-  final Map<String, List<CategoryType>>? categoryAndType;
+  final Map<String, Category>? categoryAndType;
   final DateTime? deletedAt;
   final String? deletedBy;
   final String? createdBy;
@@ -54,7 +54,6 @@ class AppointmentConfig extends Equatable {
         updatedAt,
       ];
 
-  // Convenience method to create a copy with updated values
   AppointmentConfig copyWith({
     int? sessionDuration,
     int? bufferTime,
@@ -62,7 +61,7 @@ class AppointmentConfig extends Equatable {
     int? slotDaysRange,
     List<Reminder>? reminders,
     Map<String, List<TimeSlot>>? availableDayTime,
-    Map<String, List<CategoryType>>? categoryAndType,
+    Map<String, Category>? categoryAndType,
     DateTime? deletedAt,
     String? deletedBy,
     String? createdBy,
@@ -91,8 +90,6 @@ class AppointmentConfig extends Equatable {
 
   // Validation methods
   bool get isValid {
-    // Add your validation logic here based on business requirements
-    // For example, you might want to ensure certain fields are not null
     return configId != null && configId!.isNotEmpty;
   }
 

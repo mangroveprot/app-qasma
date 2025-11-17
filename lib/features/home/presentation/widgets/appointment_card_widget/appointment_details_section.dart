@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 
 import '../../../../../common/helpers/helpers.dart';
 import '../../../../../common/helpers/spacing.dart';
+import '../../../../../common/utils/constant.dart';
 import '../../../../../theme/theme_extensions.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
+import '../../../../users/data/models/user_model.dart';
 
 class AppointmentDetailsSection extends StatelessWidget {
   final AppointmentModel appointment;
+  final UserModel? counselor;
 
   const AppointmentDetailsSection({
     super.key,
     required this.appointment,
+    this.counselor,
   });
 
   @override
@@ -33,12 +37,11 @@ class AppointmentDetailsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Category with icon
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Icon(
-              Icons.local_offer_outlined,
+              Icons.person_outline,
               size: 16,
               color: colors.textPrimary,
             ),
@@ -49,11 +52,13 @@ class AppointmentDetailsSection extends StatelessWidget {
                   style: DefaultTextStyle.of(context).style,
                   children: [
                     TextSpan(
-                      text: 'Category: ',
+                      text: 'Your Counselor: ',
                       style: labelTextStyle,
                     ),
                     TextSpan(
-                      text: capitalizeWords(appointment.appointmentCategory),
+                      text: capitalizeWords(
+                        counselor?.fullName ?? 'To be assigned.',
+                      ),
                       style: subtitleTextStyle,
                     ),
                   ],
@@ -63,13 +68,11 @@ class AppointmentDetailsSection extends StatelessWidget {
           ],
         ),
         Spacing.verticalSmall,
-
-        // Description with icon
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Icon(
-              Icons.description_outlined,
+              Icons.category_outlined,
               size: 16,
               color: colors.textPrimary,
             ),
@@ -80,11 +83,15 @@ class AppointmentDetailsSection extends StatelessWidget {
                   style: DefaultTextStyle.of(context).style,
                   children: [
                     TextSpan(
-                      text: 'Description: ',
+                      text: 'Purpose: ',
                       style: labelTextStyle,
                     ),
                     TextSpan(
-                      text: appointment.description,
+                      text: '${capitalizeWords(
+                        appointment.appointmentCategory,
+                      )} - ${capitalizeWords(
+                        appointment.appointmentType,
+                      )}',
                       style: subtitleTextStyle,
                     ),
                   ],
@@ -93,37 +100,38 @@ class AppointmentDetailsSection extends StatelessWidget {
             ),
           ],
         ),
-        Spacing.verticalXSmall,
-
-        // Appointment Type with icon
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              Icons.label_important_outline,
-              size: 16,
-              color: colors.textPrimary,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: RichText(
-                text: TextSpan(
-                  style: DefaultTextStyle.of(context).style,
-                  children: [
-                    TextSpan(
-                      text: 'Appointment Type: ',
-                      style: labelTextStyle,
-                    ),
-                    TextSpan(
-                      text: appointment.appointmentType,
-                      style: subtitleTextStyle,
-                    ),
-                  ],
+        Spacing.verticalSmall,
+        if (appointment.status.toString().toLowerCase() ==
+            StatusType.approved.field.toLowerCase()) ...[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.location_on_outlined,
+                size: 16,
+                color: colors.textPrimary,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: RichText(
+                  text: TextSpan(
+                    style: DefaultTextStyle.of(context).style,
+                    children: [
+                      TextSpan(
+                        text: 'Location: ',
+                        style: labelTextStyle,
+                      ),
+                      TextSpan(
+                        text: 'Guidance Office',
+                        style: subtitleTextStyle,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ]
       ],
     );
   }

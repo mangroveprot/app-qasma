@@ -18,6 +18,16 @@ bool isValidEmail(String email) {
   return emailRegex.hasMatch(email);
 }
 
+bool isFacebookValid(String url) {
+  final facebookRegex = RegExp(
+    r'^(https?:\/\/)?(www\.)?(facebook\.com|m\.facebook\.com|fb\.com)\/'
+    r'([a-zA-Z0-9\.]+|profile\.php\?id=\d+)$',
+    caseSensitive: false,
+  );
+
+  return facebookRegex.hasMatch(url.trim());
+}
+
 DateTime buildDateOfBirth({
   required String year,
   required String month,

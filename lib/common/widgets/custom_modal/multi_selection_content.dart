@@ -4,7 +4,6 @@ import '../button_text/custom_text_button.dart';
 import '../modal.dart';
 import '../models/modal_option.dart';
 
-/// Optimized multi selection content using ValueNotifier
 class MultiSelectionContent extends StatelessWidget {
   const MultiSelectionContent({
     super.key,

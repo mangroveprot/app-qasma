@@ -8,6 +8,9 @@ class FlavorValues {
   final String appTitle;
   final bool enableLogging;
   final String databaseName;
+  final String gitHubOwner;
+  final String githubRepo;
+  final String webUrl;
 
   FlavorValues(Flavor flavor)
       : baseUrl =
@@ -17,7 +20,10 @@ class FlavorValues {
         enableLogging = flavor == Flavor.production
             ? (_getEnvVar('ENABLE_LOGGING', flavor)?.toLowerCase() == 'true')
             : true,
-        databaseName = _getEnvVar('DATABASE_NAME', flavor) ?? 'app_database';
+        databaseName = _getEnvVar('DATABASE_NAME', flavor) ?? 'app_database',
+        webUrl = _getEnvVar('DOWNLOAD_PAGE_URL', flavor) ?? '',
+        gitHubOwner = _getEnvVar('GITHUB_OWNER', flavor) ?? 'GERALD',
+        githubRepo = _getEnvVar('GITHUB_REPO', flavor) ?? 'REPO';
 
   static String? _getEnvVar(String key, Flavor flavor) {
     try {

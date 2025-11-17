@@ -1,5 +1,3 @@
-// ignore_for_file: unused_element
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../common/widgets/bloc/form/form_cubit.dart';
 import '../../../../../theme/theme_extensions.dart';
 
-// Individual OTP Field Component
 class OtplFields extends StatefulWidget {
   final String fieldKey;
   final TextEditingController controller;
@@ -15,6 +12,9 @@ class OtplFields extends StatefulWidget {
   final ValueChanged<String> onChanged;
   final VoidCallback onBackspace;
   final VoidCallback onSubmitted;
+  final ValueChanged<String>? onPaste;
+  final ValueChanged<String>? onSmartInput;
+  final bool Function()? areAllFieldsFilled;
 
   const OtplFields({
     super.key,
@@ -24,6 +24,9 @@ class OtplFields extends StatefulWidget {
     required this.onChanged,
     required this.onBackspace,
     required this.onSubmitted,
+    this.onPaste,
+    this.onSmartInput,
+    this.areAllFieldsFilled,
   });
 
   @override
@@ -34,16 +37,21 @@ class _OtplFieldsState extends State<OtplFields> {
   late final Color textPrimary;
   late final Color colorDanger;
   late final FontWeight weightMedium;
-
   bool _lastHasError = false;
+
+  String previousValue = '';
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Cache theme values once
     textPrimary = context.colors.textPrimary;
     colorDanger = context.colors.error;
     weightMedium = context.weight.medium;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -55,17 +63,14 @@ class _OtplFieldsState extends State<OtplFields> {
         selector: (state) => state.hasError(widget.fieldKey),
         builder: (context, hasError) {
           final hasStateChanged = hasError != _lastHasError;
-
           if (hasStateChanged) {
             _lastHasError = hasError;
           }
-
           return TextField(
             controller: widget.controller,
             focusNode: widget.focusNode,
             textAlign: TextAlign.center,
             keyboardType: TextInputType.number,
-            maxLength: 1,
             style: TextStyle(
               fontSize: 18,
               fontWeight: weightMedium,
@@ -101,17 +106,58 @@ class _OtplFieldsState extends State<OtplFields> {
             ),
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(1),
             ],
-            onChanged: (value) {
-              widget.onChanged(value);
-              if (value.isEmpty) {
+            onChanged: (value) async {
+              final onlyDigits = value.replaceAll(RegExp(r'[^0-9]'), '');
+              final allFilled = widget.areAllFieldsFilled == null
+                  ? false
+                  : widget.areAllFieldsFilled!();
+
+              if (onlyDigits.isEmpty && previousValue.isNotEmpty) {
+                widget.controller.clear();
                 widget.onBackspace();
+                previousValue = onlyDigits;
+                return;
+              }
+
+              if (allFilled && onlyDigits.length > 1) {
+                final lastChar = onlyDigits.substring(onlyDigits.length - 1);
+                widget.controller.value = TextEditingValue(
+                  text: lastChar,
+                  selection: const TextSelection.collapsed(offset: 1),
+                );
+                widget.onChanged(lastChar);
+                previousValue = lastChar;
+                return;
+              }
+
+              if (onlyDigits.length > 1) {
+                if (widget.onSmartInput != null) {
+                  widget.onSmartInput!(onlyDigits);
+                  widget.controller.value = TextEditingValue(
+                    text: onlyDigits[0],
+                    selection: const TextSelection.collapsed(offset: 1),
+                  );
+                  previousValue = onlyDigits[0];
+                }
+                return;
+              }
+              if (onlyDigits.length == 1) {
+                widget.controller.value = TextEditingValue(
+                  text: onlyDigits[0],
+                  selection: const TextSelection.collapsed(offset: 1),
+                );
+                widget.onChanged(onlyDigits[0]);
+                previousValue = onlyDigits[0];
+                return;
+              }
+              if (onlyDigits.isEmpty) {
+                widget.controller.clear();
+                previousValue = '';
               }
             },
             onSubmitted: (_) => widget.onSubmitted(),
             onTap: () {
-              // select all text when tapped
               if (widget.controller.text.isNotEmpty) {
                 widget.controller.selection = TextSelection(
                   baseOffset: 0,

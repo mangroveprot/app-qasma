@@ -172,4 +172,33 @@ class UserServiceImpl extends BaseService<UserModel> implements UserService {
       return Left(error);
     }
   }
+
+  @override
+  Future<Either<AppError, bool>> saveFcmToken(DynamicParam param) async {
+    try {
+      final response = await _apiClient.post(
+        _urlProviderConfig.saveFcmToken,
+        data: param.toJson(),
+        requiresAuth: true,
+      );
+
+      final apiResponse = ApiResponse.fromJson(response.data, (json) => json);
+
+      if (apiResponse.isSuccess) {
+        return const Right(true);
+      } else {
+        return Left(apiResponse.error!);
+      }
+    } catch (e, stack) {
+      final error = e is AppError
+          ? e
+          : AppError.create(
+              message: 'Unexpected error during saving fcm token',
+              type: ErrorType.unknown,
+              originalError: e,
+              stackTrace: stack,
+            );
+      return Left(error);
+    }
+  }
 }

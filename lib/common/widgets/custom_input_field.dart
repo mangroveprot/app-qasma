@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../theme/theme_extensions.dart'; // assuming this contains context.colors, .weight, .radii
+import '../../theme/theme_extensions.dart';
 
-class CustomInputField extends StatelessWidget {
+class CustomInputField extends StatefulWidget {
   final String fieldName;
   final String label;
   final IconData? icon;
@@ -22,6 +22,13 @@ class CustomInputField extends StatelessWidget {
   });
 
   @override
+  State<CustomInputField> createState() => _CustomInputFieldState();
+}
+
+class _CustomInputFieldState extends State<CustomInputField> {
+  bool _isFocused = false;
+
+  @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final fontWeight = context.weight;
@@ -32,8 +39,9 @@ class CustomInputField extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: radius.medium,
         border: Border.all(
-          color: colors.white.withOpacity(0.4),
-          width: 1,
+          color:
+              _isFocused ? colors.textPrimary : colors.black.withOpacity(0.25),
+          width: _isFocused ? 2 : 1.5,
         ),
         color: colors.white,
       ),
@@ -41,8 +49,12 @@ class CustomInputField extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            if (icon != null) ...[
-              Icon(icon, color: colors.textPrimary.withOpacity(0.6), size: 20),
+            if (widget.icon != null) ...[
+              Icon(
+                widget.icon,
+                color: colors.textPrimary.withOpacity(0.6),
+                size: 20,
+              ),
               const SizedBox(width: 12),
             ],
             Expanded(
@@ -50,7 +62,7 @@ class CustomInputField extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    label,
+                    widget.label,
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: fontWeight.medium,
@@ -59,28 +71,37 @@ class CustomInputField extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  TextFormField(
-                    controller: controller,
-                    enabled: isEnabled,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: fontWeight.medium,
-                      color: isEnabled
-                          ? colors.black
-                          : colors.black.withOpacity(0.5),
-                    ),
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      //  hintText: 'Enter $label',
-                      hintStyle: TextStyle(
-                        color: colors.textPrimary,
-                        fontWeight: FontWeight.normal,
+                  Focus(
+                    onFocusChange: (hasFocus) {
+                      setState(() => _isFocused = hasFocus);
+                    },
+                    child: TextFormField(
+                      controller: widget.controller,
+                      enabled: widget.isEnabled,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: fontWeight.medium,
+                        color: widget.isEnabled
+                            ? colors.black
+                            : colors.black.withOpacity(0.5),
                       ),
-                      contentPadding: EdgeInsets.zero,
-                      isDense: true,
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: widget.controller.text.isEmpty
+                            ? 'Not provided'
+                            : null,
+                        hintStyle: TextStyle(
+                          color: colors.textPrimary.withOpacity(0.4),
+                          fontWeight: FontWeight.normal,
+                          fontStyle: FontStyle.italic,
+                          fontSize: 15,
+                        ),
+                        contentPadding: EdgeInsets.zero,
+                        isDense: true,
+                      ),
+                      onChanged: (_) => widget.onChanged(),
+                      keyboardType: widget.keyboardType,
                     ),
-                    onChanged: (_) => onChanged(),
-                    keyboardType: keyboardType,
                   ),
                 ],
               ),
