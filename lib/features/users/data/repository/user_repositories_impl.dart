@@ -58,4 +58,17 @@ class UserRepositoryImpl extends UserRepository {
       },
     );
   }
+
+  @override
+  Future<Either> saveFcmToken(DynamicParam param) async {
+    final result = await _userService.saveFcmToken(param);
+    return result.fold(
+      (error) {
+        return Left(error);
+      },
+      (data) {
+        return Right(data);
+      },
+    );
+  }
 }

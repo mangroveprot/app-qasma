@@ -1,11 +1,11 @@
 import 'dart:convert';
 import '../../../../common/utils/model_utils.dart';
 import '../../domain/entites/appointmet_config.dart';
-import '../../domain/entites/time_slot.dart';
 import '../../domain/entites/category_type.dart';
+import '../../domain/entites/time_slot.dart';
 import '../../domain/entites/reminder.dart';
+import 'category_model.dart';
 import 'time_slot_model.dart';
-import 'category_type_model.dart';
 import 'reminder_model.dart';
 
 class AppointmentConfigModel extends AppointmentConfig {
@@ -57,20 +57,17 @@ class AppointmentConfigModel extends AppointmentConfig {
     return result.isEmpty ? null : result;
   }
 
-  static Map<String, List<CategoryType>>? _parseCategoryAndType(
-      dynamic categoryAndType) {
+  static Map<String, Category>? _parseCategoryAndType(dynamic categoryAndType) {
     if (categoryAndType is! Map<String, dynamic>) {
       return null;
     }
 
-    final Map<String, List<CategoryType>> result = {};
+    final Map<String, Category> result = {};
 
-    categoryAndType.forEach((category, types) {
-      if (types is List) {
-        result[category] = types
-            .whereType<Map<String, dynamic>>()
-            .map((type) => CategoryTypeModel.fromMap(type))
-            .toList();
+    categoryAndType.forEach((key, value) {
+      if (value is Map<String, dynamic>) {
+        final category = CategoryModel.fromMap(value);
+        result[key] = category;
       }
     });
 
@@ -98,11 +95,8 @@ class AppointmentConfigModel extends AppointmentConfig {
           : null,
       'categoryAndType': categoryAndType != null
           ? jsonEncode(categoryAndType!.map(
-              (key, value) => MapEntry(
-                  key,
-                  value
-                      .map((type) => CategoryTypeModel.fromEntity(type).toMap())
-                      .toList()),
+              (key, value) =>
+                  MapEntry(key, CategoryModel.fromEntity(value).toMap()),
             ))
           : null,
       'deletedAt': deletedAt?.toIso8601String(),
@@ -162,11 +156,7 @@ class AppointmentConfigModel extends AppointmentConfig {
                 .toList()),
       ),
       'categoryAndType': categoryAndType?.map(
-        (key, value) => MapEntry(
-            key,
-            value
-                .map((type) => CategoryTypeModel.fromEntity(type).toMap())
-                .toList()),
+        (key, value) => MapEntry(key, CategoryModel.fromEntity(value).toMap()),
       ),
       'configId': configId,
     };
@@ -234,8 +224,7 @@ class AppointmentConfigModel extends AppointmentConfig {
             key, value.map((slot) => TimeSlotModel.fromEntity(slot)).toList()),
       ),
       categoryAndType: entity.categoryAndType?.map(
-        (key, value) => MapEntry(key,
-            value.map((type) => CategoryTypeModel.fromEntity(type)).toList()),
+        (key, value) => MapEntry(key, CategoryModel.fromEntity(value)),
       ),
       deletedAt: entity.deletedAt,
       deletedBy: entity.deletedBy,

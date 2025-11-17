@@ -83,10 +83,10 @@ class AppointmentConfigCubit extends BaseCubit<AppointmentConfigCubitState> {
     return state is AppointmentConfigLoadedState ? state.config : null;
   }
 
-// Get CategoryType objects for a specific category
-  List<CategoryType> getCategoryTypes(String category) {
+  // Get Category object for a specific category key
+  Category? getCategory(String category) {
     final categoryAndType = currentConfig?.categoryAndType;
-    if (categoryAndType == null) return [];
+    if (categoryAndType == null) return null;
 
     // Case-insensitive lookup
     final normalizedCategory = category.toLowerCase();
@@ -95,16 +95,22 @@ class AppointmentConfigCubit extends BaseCubit<AppointmentConfigCubitState> {
         return entry.value;
       }
     }
-    return [];
+    return null;
   }
 
-// Get type names only for a specific category
+  // Get CategoryType objects for a specific category
+  List<CategoryType> getCategoryTypes(String category) {
+    final categoryObj = getCategory(category);
+    return categoryObj?.types ?? [];
+  }
+
+  // Get type names only for a specific category
   List<String> getTypesByCategory(String category) {
     final categoryTypes = getCategoryTypes(category);
     return categoryTypes.map((categoryType) => categoryType.type).toList();
   }
 
-// Get duration for a specific type within a specific category
+  // Get duration for a specific type within a specific category
   int? getDurationByTypeInCategory(String category, String typeName) {
     final categoryTypes = getCategoryTypes(category);
     for (final categoryType in categoryTypes) {
@@ -115,7 +121,13 @@ class AppointmentConfigCubit extends BaseCubit<AppointmentConfigCubitState> {
     return null; // Type not found in this category
   }
 
-// Get all categories (keys)
+  // Get description for a specific category
+  String? getCategoryDescription(String category) {
+    final categoryObj = getCategory(category);
+    return categoryObj?.description;
+  }
+
+  // Get all categories (keys)
   List<String> get allCategories {
     return currentConfig?.categoryAndType?.keys.toList() ?? [];
   }

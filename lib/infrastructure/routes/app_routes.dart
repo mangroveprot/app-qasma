@@ -7,6 +7,7 @@ class Routes {
   static const String home_path = '/home';
   static const String appointment = '/appointment';
   static const String preference_path = '/preference';
+  static const String notifications = '/notifications';
 
   // auth route names
   static const String create_account = 'create-account';

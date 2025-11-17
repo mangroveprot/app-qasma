@@ -25,7 +25,20 @@ class RoleType {
   static Property counselor = Property(field: 'counselor');
 }
 
+class NotificationType {
+  static Property appointmentCancelled =
+      Property(field: 'APPOINTMENT_CANCELLED');
+  static Property appointmentRescheduled =
+      Property(field: 'APPOINTMENT_RESCHEDULED');
+  static Property appointmentConfirmed =
+      Property(field: 'APPOINTMENT_CONFIRMED');
+  static Property appointmentCompleted =
+      Property(field: 'APPOINTMENT_COMPLETED');
+  static Property checkInReminder = Property(field: 'CHECK_IN_REMINDER');
+}
+
 String get guidance_email => 'katipunan.guidance@jrmsu.edu.ph';
+String get feedback_url => 'https://jrmsu.online/feedback/';
 
 const Map<String, dynamic> name = {
   'name': 'First Name',

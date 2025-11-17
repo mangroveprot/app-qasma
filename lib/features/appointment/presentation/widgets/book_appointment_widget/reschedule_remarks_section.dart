@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../common/utils/form_field_config.dart';
+import '../../../../../common/utils/tooltips_items.dart';
 import '../../../../../common/widgets/bloc/form/form_cubit.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
 import 'book_type_label.dart';
 
-class RescheduleRemarksSection extends StatelessWidget {
+class RescheduleRemarksSection extends StatefulWidget {
   final Map<String, TextEditingController> textControllers;
 
   const RescheduleRemarksSection({
@@ -15,22 +16,35 @@ class RescheduleRemarksSection extends StatelessWidget {
   });
 
   @override
+  State<RescheduleRemarksSection> createState() =>
+      _RescheduleRemarksSectionState();
+}
+
+class _RescheduleRemarksSectionState extends State<RescheduleRemarksSection> {
+  @override
+  void initState() {
+    super.initState();
+    final controller = widget.textControllers[field_remarks.field_key]!;
+    if (controller.text == 'null' || controller.text.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.clear();
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final radii = context.radii;
     final weight = context.weight;
 
-    if (textControllers[field_remarks.field_key]!.text == 'null') {
-      textControllers[field_remarks.field_key]!.text = '';
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const BookTypeLabel(
-          text: 'Remarks',
-          tooltip: 'Please provide a reason for your reschedule.',
+        BookTypeLabel(
+          text: ToolTip.remarks.key,
+          tooltip: ToolTip.remarks.tips,
         ),
         const SizedBox(height: 16),
         BlocSelector<FormCubit, FormValidationState, bool>(
@@ -49,14 +63,15 @@ class RescheduleRemarksSection extends StatelessWidget {
                       color: hasError
                           ? colors.error
                           : colors.accent.withOpacity(0.4),
-                      width: hasError ? 1.0 : 1.0,
+                      width: 1.0,
                     ),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: TextField(
                       maxLines: null,
-                      controller: textControllers[field_remarks.field_key],
+                      controller:
+                          widget.textControllers[field_remarks.field_key],
                       onChanged: (value) {
                         if (value.trim().isNotEmpty) {
                           context
@@ -66,15 +81,15 @@ class RescheduleRemarksSection extends StatelessWidget {
                       },
                       decoration: InputDecoration(
                         hintText: field_remarks.hint,
-                        hintStyle: const TextStyle(
-                          color: Colors.grey,
+                        hintStyle: TextStyle(
+                          color: colors.textPrimary.withOpacity(0.8),
                           fontSize: 14,
                         ),
                         border: InputBorder.none,
                       ),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: Colors.black,
+                        color: colors.black,
                       ),
                     ),
                   ),

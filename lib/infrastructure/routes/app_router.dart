@@ -10,6 +10,7 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/otp_verification_page.dart';
 import '../../features/auth/presentation/pages/reset_password_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../../features/preferences/presentation/pages/about_page.dart';
 import '../../features/preferences/presentation/pages/dashboard_page.dart';
 import '../../features/preferences/presentation/pages/privacy_policy_page.dart';
@@ -121,6 +122,11 @@ class AppRouter {
             builder: (context, state) => const AboutPage(),
           ),
         ],
+      ),
+      GoRoute(
+        path: Routes.notifications, // notifcations
+        builder: (context, state) => const NotificationsPage(),
+        routes: [],
       )
     ],
   );

@@ -1,6 +1,4 @@
-// widgets/about_header.dart
 import 'package:flutter/material.dart';
-
 import '../../../../../infrastructure/theme/theme_extensions.dart';
 
 class AboutHeader extends StatelessWidget {
@@ -55,7 +53,7 @@ class _Title extends StatelessWidget {
     final colors = context.colors;
     final fontWeight = context.weight;
     return Text(
-      'About QASMA',
+      'QASMA',
       style: TextStyle(
         fontSize: 28,
         fontWeight: fontWeight.bold,

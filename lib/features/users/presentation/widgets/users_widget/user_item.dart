@@ -22,7 +22,10 @@ class UserItem extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
       child: CustomChevronButton(
-        title: '${count}. ${capitalizeWords(model.fullName)}',
+        title:
+            '$count. ${capitalizeWords(model.fullName.isEmpty ? 'Unnamed User' : model.fullName)}',
+        titleFontStyle:
+            model.fullName.isEmpty ? FontStyle.italic : FontStyle.normal,
         onTap: () => _handleOnPressed(context, model.idNumber),
         fontSize: 14,
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),

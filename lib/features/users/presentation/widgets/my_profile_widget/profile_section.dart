@@ -23,14 +23,14 @@ class ProfileSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(icon, color: colors.secondary, size: 24),
+            Icon(icon, color: colors.secondary, size: 16),
             const SizedBox(width: 8),
             Text(
               title,
               style: TextStyle(
-                fontSize: 20,
-                fontWeight: fontWeight.bold,
-                color: colors.black.withOpacity(0.8),
+                fontSize: 15,
+                fontWeight: fontWeight.medium,
+                color: colors.secondary,
               ),
             ),
           ],

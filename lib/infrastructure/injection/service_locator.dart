@@ -12,6 +12,8 @@ import '../../core/_base/_repository/base_repository/abstract_repositories.dart'
 import '../../core/_base/_repository/remote_repository/remote_reposiories.dart';
 import '../../core/_base/_repository/local_repository/local_repositories.dart';
 import '../../core/_base/_services/db/database_service.dart';
+import '../../core/_base/_services/fcm/fcm_service.dart';
+import '../../core/_base/_services/package_info/package_info_service.dart';
 import '../../core/_config/app_config.dart';
 import '../../core/_config/url_provider.dart';
 import '../../features/appointment/data/models/appointment_model.dart';
@@ -46,6 +48,23 @@ import '../../features/auth/domain/usecases/reset_password_usecase.dart';
 import '../../features/auth/domain/usecases/signin_usecase.dart';
 import '../../features/auth/domain/usecases/signup_usecase.dart';
 import '../../features/auth/domain/usecases/verify_usecase.dart';
+import '../../features/notifications/data/models/notificaiton_model.dart';
+import '../../features/notifications/data/models/notification_table_model.dart';
+import '../../features/notifications/data/repository/notification_repository_impl.dart';
+import '../../features/notifications/data/services/notification_service_impl.dart';
+import '../../features/notifications/domain/repository/notificaiton_repository.dart';
+import '../../features/notifications/domain/services/notification_service.dart';
+import '../../features/notifications/domain/usecases/get_notification_counts_usecase.dart';
+import '../../features/notifications/domain/usecases/get_notification_usecase.dart';
+import '../../features/notifications/domain/usecases/mark_as_read_usecase.dart';
+import '../../features/notifications/domain/usecases/sync_notification_usecase.dart';
+import '../../features/update/data/repository/update_repository_impl.dart';
+import '../../features/update/data/services/update_service_impl.dart';
+import '../../features/update/domain/repository/update_repository.dart';
+import '../../features/update/domain/services/update_service.dart';
+import '../../features/update/domain/usecases/check_update_usecase.dart';
+import '../../features/update/domain/usecases/fetch_latest_usecase.dart';
+import '../../features/update/domain/usecases/is_update_available_usecase.dart';
 import '../../features/users/data/models/user_model.dart';
 import '../../features/auth/data/repository/auth_impl_repositories.dart';
 import '../../features/auth/data/services/auth_service_impl.dart';
@@ -58,6 +77,7 @@ import '../../features/users/domain/services/user_service.dart';
 import '../../features/users/domain/usecases/get_all_user_usecase.dart';
 import '../../features/users/domain/usecases/get_user_usecase.dart';
 import '../../features/users/domain/usecases/is_register_usecase.dart';
+import '../../features/users/domain/usecases/save_fcm_token_usecase.dart';
 import '../../features/users/domain/usecases/sync_user_usecase.dart';
 import '../../features/users/domain/usecases/update_user_usecase.dart';
 
@@ -70,23 +90,27 @@ void setupServiceLocator() {
   _registerServices();
   _registerUseCases();
   _registerAppointmentConfigRepositories();
+  _registerNotificationRepositories();
 }
 
 void _registerCore() {
   sl
     ..registerLazySingleton<AppConfig>(() => AppConfig())
     ..registerLazySingleton<URLProviderConfig>(() => URLProviderConfig())
-    ..registerLazySingleton<Logger>(() => Logger());
+    ..registerLazySingleton<Logger>(() => Logger())
+    ..registerLazySingleton<FCMService>(() => FCMService());
 }
 
 void _registerInfrastructure() {
   sl
+    ..registerLazySingleton<PackageInfoService>(() => PackageInfoService())
     ..registerLazySingleton<ApiClient>(() => ApiClient())
     ..registerLazySingleton<DatabaseService>(
       () => DatabaseService([
         UserTableModel(),
         AppointmentTableModel(),
-        AppointmentConfigTableModel()
+        AppointmentConfigTableModel(),
+        NotificationTableModel(),
       ]),
     );
 }
@@ -115,6 +139,16 @@ void _registerRepositories() {
   // Appointment Config repository
   sl.registerLazySingleton<AppointmentConfigRepository>(
     () => AppointmentConfigRepositoryImpl(),
+  );
+
+  // App update repository
+  sl.registerLazySingleton<UpdateRepository>(
+    () => UpdateRepositoryImpl(),
+  );
+
+  // Notification repository
+  sl.registerLazySingleton<NotificationRepository>(
+    () => NotificationRepositoryImpl(),
   );
 }
 
@@ -207,6 +241,35 @@ void _registerAppointmentConfigRepositories() {
   );
 }
 
+void _registerNotificationRepositories() {
+  sl.registerLazySingleton<LocalRepository<NotificationModel>>(
+    () => LocalRepository<NotificationModel>(
+      tableName: 'notifications',
+      keyField: 'notificationId',
+      fromDb: NotificationModel.fromDb,
+      toDb: (notification) => notification.toDb(),
+      databaseService: sl<DatabaseService>(),
+    ),
+  );
+
+  sl.registerLazySingleton<AbstractRepository<NotificationModel>>(
+    () => RemoteRepository<NotificationModel>(
+      localRepository: sl<LocalRepository<NotificationModel>>(),
+      endpoint: '/api/notifications',
+      fromJson: NotificationModel.fromJson,
+      toJson: (notification) => notification.toJson(),
+      getId: (model) => model.notificationId,
+      getItemPath: (id) => '/$id',
+      deletePath: (id) => '/$id',
+      includeId: true,
+      syncField: SyncField<NotificationModel>(
+        name: 'updatedAt',
+        accessor: (notification) => notification.updatedAt,
+      ),
+    ),
+  );
+}
+
 void _registerServices() {
   sl
     ..registerLazySingleton<MasterlistReportService>(
@@ -224,7 +287,10 @@ void _registerServices() {
     ..registerLazySingleton<AppointmentConfigService>(
       () => AppointmentConfigServiceImpl(
           sl<AbstractRepository<AppointmentConfigModel>>()),
-    );
+    )
+    ..registerLazySingleton<UpdateService>(() => UpdateServiceImpl())
+    ..registerLazySingleton<NotificationService>(() =>
+        NotificationServiceImpl(sl<AbstractRepository<NotificationModel>>()));
 }
 
 void _registerUseCases() {
@@ -243,6 +309,7 @@ void _registerUseCases() {
 
   // User use cases
   sl
+    ..registerLazySingleton<SaveFcmTokenUsecase>(() => SaveFcmTokenUsecase())
     ..registerLazySingleton<GetAllUserUsecase>(() => GetAllUserUsecase())
     ..registerLazySingleton<SyncUserUsecase>(() => SyncUserUsecase())
     ..registerLazySingleton<UpdateUserUsecase>(() => UpdateUserUsecase())
@@ -278,4 +345,22 @@ void _registerUseCases() {
   sl
     ..registerLazySingleton<GenerateMasterListReportUsecase>(
         () => GenerateMasterListReportUsecase());
+
+  // App update use cases
+  sl
+    ..registerLazySingleton<CheckUpdateUsecase>(() => CheckUpdateUsecase())
+    ..registerLazySingleton<FetchLatestReleaseUsecase>(
+        () => FetchLatestReleaseUsecase())
+    ..registerLazySingleton<IsUpdateAvailableUsecase>(
+        () => IsUpdateAvailableUsecase());
+
+  // Notification use cases
+  sl
+    ..registerLazySingleton<GetNotificationCountsUsecase>(
+        () => GetNotificationCountsUsecase())
+    ..registerLazySingleton<GetNotificationUsecase>(
+        () => GetNotificationUsecase())
+    ..registerLazySingleton<MarkAsReadUsecase>(() => MarkAsReadUsecase())
+    ..registerLazySingleton<SyncNotificationsUsecase>(
+        () => SyncNotificationsUsecase());
 }

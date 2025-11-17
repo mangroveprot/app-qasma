@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../../common/helpers/helpers.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../../common/utils/constant.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
 import 'about_section_container.dart';
@@ -45,7 +45,9 @@ class _WebsiteContactButton extends StatelessWidget {
   Future<void> _launchWebsite() async {
     final Uri websiteUri = Uri.parse('http://katipunan.jrmsu.edu.ph/');
 
-    await launchExternalUrl(uri: websiteUri);
+    if (await canLaunchUrl(websiteUri)) {
+      await launchUrl(websiteUri, mode: LaunchMode.externalApplication);
+    }
   }
 }
 
@@ -73,7 +75,9 @@ class _EmailContactButton extends StatelessWidget {
       },
     );
 
-    await launchExternalUrl(uri: emailUri);
+    if (await canLaunchUrl(emailUri)) {
+      await launchUrl(emailUri);
+    }
   }
 }
 
@@ -95,7 +99,9 @@ class _LocationContactButton extends StatelessWidget {
   Future<void> _openMaps() async {
     final Uri mapsUri = Uri.parse('https://maps.app.goo.gl/qywZG2wXxTS6eJov5');
 
-    await launchExternalUrl(uri: mapsUri);
+    if (await canLaunchUrl(mapsUri)) {
+      await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
+    }
   }
 }
 

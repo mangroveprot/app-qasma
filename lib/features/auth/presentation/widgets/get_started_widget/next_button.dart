@@ -5,7 +5,8 @@ import '../../../../../infrastructure/theme/theme_extensions.dart';
 
 class NextButton extends StatelessWidget {
   final VoidCallback onPressed;
-  const NextButton({super.key, required this.onPressed});
+  final String? title;
+  const NextButton({super.key, required this.onPressed, this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +17,7 @@ class NextButton extends StatelessWidget {
       child: SizedBox(
         width: 100,
         child: CustomTextButton(
-          text: 'Next',
+          text: title ?? 'Next',
           textColor: colorToUse,
           fontSize: 16,
           borderRadius: context.radii.medium,
