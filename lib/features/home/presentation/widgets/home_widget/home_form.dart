@@ -89,6 +89,7 @@ class _HomeFormState extends State<HomeForm> {
         widget.state.controller.appoitnmentRefreshData(),
         widget.state.controller.appointConfigRefreshData(),
         widget.state.controller.userRefreshData(),
+        widget.state.controller.notificationsRefreshData(),
       ]);
       _lastRefreshTime = DateTime.now();
     } catch (e) {

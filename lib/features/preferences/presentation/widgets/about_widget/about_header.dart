@@ -53,7 +53,7 @@ class _Title extends StatelessWidget {
     final colors = context.colors;
     final fontWeight = context.weight;
     return Text(
-      'QASMA',
+      'GCare',
       style: TextStyle(
         fontSize: 28,
         fontWeight: fontWeight.bold,
@@ -72,7 +72,7 @@ class _Description extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Text(
-        'QRCode-Enable Appointment And Scheduling Management Application for the Guidance Office at Jose Rizal Memorial State University - Katipunan Campus.',
+        'Guidance Care',
         style: TextStyle(
           fontSize: 14,
           color: colors.textPrimary,

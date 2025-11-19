@@ -23,7 +23,6 @@ class PaginationWidget extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Previous button
           InkWell(
             onTap:
                 currentPage > 0 ? () => onPageChanged(currentPage - 1) : null,
@@ -49,7 +48,6 @@ class PaginationWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          // Page indicator
           Text(
             '${currentPage + 1} of $totalPages',
             style: const TextStyle(
@@ -59,7 +57,6 @@ class PaginationWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          // Next button
           InkWell(
             onTap: currentPage < totalPages - 1
                 ? () => onPageChanged(currentPage + 1)

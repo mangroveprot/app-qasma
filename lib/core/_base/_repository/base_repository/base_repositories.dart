@@ -88,7 +88,6 @@ abstract class BaseRepository {
 
       return await fallbackOperation();
     } catch (error, stackTrace) {
-      // Fixed: Use positional parameters instead of named parameters
       _logger.w(
         'Cache operation failed in ${runtimeType.toString()}, falling back. Error: $error\nStackTrace: $stackTrace',
       );

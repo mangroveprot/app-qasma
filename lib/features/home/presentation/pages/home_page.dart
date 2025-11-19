@@ -52,7 +52,9 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
   Future<void> _initializeController() async {
     controller = HomePageController();
     controller.initialize(onNavigate: _handleNavigation);
-
+    controller.setUnreadCountCallback(() {
+      setState(() {});
+    });
     setState(() {
       _isControllerInitialized = true;
     });
@@ -91,8 +93,9 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
               drawerEnableOpenDragGesture: true,
               drawerScrimColor: Colors.black54,
               drawerEdgeDragWidth: 60,
-              appBar: const MainAppBar(
-                title: 'JRMSU-KC QASMA',
+              appBar: MainAppBar(
+                onNotificationTap: controller.handleNotificationTap,
+                unreadCount: controller.unreadCount,
               ),
               drawer: CustomSidebar(
                 userName: userProfile?.fullName ?? '',

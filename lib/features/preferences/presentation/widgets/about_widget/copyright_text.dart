@@ -11,7 +11,7 @@ class CopyrightText extends StatelessWidget {
     final currentYear = DateTime.now().year;
 
     return Text(
-      '©$currentYear QASMA',
+      '©$currentYear Gcare',
       style: TextStyle(
         fontSize: 11,
         color: colors.textPrimary,

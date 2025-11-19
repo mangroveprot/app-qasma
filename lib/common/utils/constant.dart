@@ -38,7 +38,7 @@ class NotificationType {
 }
 
 String get guidance_email => 'katipunan.guidance@jrmsu.edu.ph';
-String get feedback_url => 'https://jrmsu.online/feedback/';
+String get guidance_fb_url => 'https://m.facebook.com/jrmsuk.guidanceoffice';
 
 const Map<String, dynamic> name = {
   'name': 'First Name',
@@ -52,7 +52,8 @@ const Map<String, dynamic> lastname = {
 const List<String> courseList = [
   'Bachelor of Elementary Education',
   'Bachelor of Physical Education',
-  'Bachelor of Science in Agriculture - Majors: Animal Science and Crop Science',
+  'Bachelor of Science in Agriculture - Animal Science',
+  'Bachelor of Science in Agriculture - Crop Science',
   'Bachelor of Science in Agricultural and Biosystems Engineering',
   'Bachelor of Science in Criminology',
   'Bachelor of Science in Forestry',
@@ -60,10 +61,11 @@ const List<String> courseList = [
   'Bachelor of Secondary Education - Mathematics',
   'Bachelor of Secondary Education - Science',
   'Bachelor of Secondary Education - Social Studies',
-  'Bachelor of Science in Agribusiness',
+  'Bachelor of Science in Agribusiness Management',
+  'Bachelor of Science in Business Administration - Human Resource Management',
   'Bachelor of Science in Computer Science',
   'Bachelor of Science in Hospitality Management',
-  'Bachelor of Science in Information Systems'
+  'Bachelor of Science in Information Systems',
 ];
 
 const List<String> blockList = [

@@ -13,7 +13,7 @@ class URLProviderConfig {
   String get configEndPoint => '${apiPath}/config';
   String get appointmentEndPoint => '${apiPath}/appointment';
   String get otpEndPoint => '${apiPath}/otp';
-  String get notificationEndPoint => '${apiPath}/notificaitons';
+  String get notificationEndPoint => '${apiPath}/notifications';
 
   // Auth URLS
   String get login => '${authEndPoint}/login';

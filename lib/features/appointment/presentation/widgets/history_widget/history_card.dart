@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../../../../infrastructure/theme/theme_extensions.dart';
 import '../../../../users/data/models/user_model.dart';
 import '../../../data/models/appointment_model.dart';

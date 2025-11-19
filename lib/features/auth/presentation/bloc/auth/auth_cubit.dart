@@ -20,6 +20,7 @@ class AuthCubit extends BaseCubit<AuthState> {
   static bool _isAutoLoggingOut = false;
   Logger logger = sl<Logger>();
 
+  // FCM token management
   StreamSubscription<String>? _fcmTokenSubscription;
   Timer? _fcmRetryTimer;
   int _fcmRetryAttempts = 0;
@@ -107,6 +108,7 @@ class AuthCubit extends BaseCubit<AuthState> {
     }
   }
 
+  /// schedule FCM token retry with exponential backoff
   void _scheduleTokenRetry({String? token}) {
     _fcmRetryAttempts++;
     final delaySeconds = _fcmRetryAttempts * 10; // 10s, 20s, 30s
@@ -131,18 +133,6 @@ class AuthCubit extends BaseCubit<AuthState> {
         }
       },
     );
-  }
-
-  // invalidate fcm token
-  Future<void> _cleanupFCMToken() async {
-    try {
-      await sl<FCMService>().deleteToken();
-      _fcmRetryTimer?.cancel();
-      _fcmRetryAttempts = 0;
-      logger.i('FCM token cleaned up');
-    } catch (e) {
-      logger.e('Error cleaning up FCM token: $e');
-    }
   }
 
   @override
@@ -212,7 +202,7 @@ class AuthCubit extends BaseCubit<AuthState> {
     emit(LogoutLoadingState(isAutoLogout: isAutoLogout));
 
     try {
-      await _cleanupFCMToken();
+      unawaited(_cleanupFCMTokenWithRetry());
 
       final Either result = await usecase.call(param: params);
 
@@ -245,7 +235,7 @@ class AuthCubit extends BaseCubit<AuthState> {
     _isAutoLoggingOut = true;
 
     try {
-      await _cleanupFCMToken();
+      unawaited(_cleanupFCMTokenWithRetry());
 
       await _clearAuthData();
 
@@ -260,6 +250,35 @@ class AuthCubit extends BaseCubit<AuthState> {
       ));
     } finally {
       _isAutoLoggingOut = false;
+    }
+  }
+
+  Future<void> _cleanupFCMTokenWithRetry() async {
+    const maxAttempts = 3;
+    const delayBetweenRetries = Duration(seconds: 2);
+
+    for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        logger.i('FCM cleanup attempt $attempt/$maxAttempts');
+
+        await sl<FCMService>().deleteToken();
+
+        _fcmRetryTimer?.cancel();
+        _fcmRetryAttempts = 0;
+        logger.i('FCM token cleaned up successfully');
+        return;
+      } catch (e) {
+        logger.e('FCM cleanup attempt $attempt failed: $e');
+
+        if (attempt < maxAttempts) {
+          logger.i(
+              'Retrying FCM cleanup in ${delayBetweenRetries.inSeconds}s...');
+          await Future.delayed(delayBetweenRetries);
+        } else {
+          logger
+              .e('FCM cleanup failed after $maxAttempts attempts - giving up');
+        }
+      }
     }
   }
 
