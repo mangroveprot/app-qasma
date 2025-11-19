@@ -1,0 +1,124 @@
+{
+  "project_info": {
+    "project_number": "876021665353",
+    "project_id": "qasma-2824d",
+    "storage_bucket": "qasma-2824d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:876021665353:android:54eade9f57479a13ddb998",
+        "android_client_info": {
+          "package_name": "com.jrmsu.qasma"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5i6sL8pf1-dq2n7x6rn2AkYSdAK3OwcE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:876021665353:android:fd53be419aebf7bcddb998",
+        "android_client_info": {
+          "package_name": "com.jrmsu.qasma.counselor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5i6sL8pf1-dq2n7x6rn2AkYSdAK3OwcE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:876021665353:android:dfd72560359838a1ddb998",
+        "android_client_info": {
+          "package_name": "com.jrmsu.qasma.counselor.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5i6sL8pf1-dq2n7x6rn2AkYSdAK3OwcE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:876021665353:android:78d196665e881a03ddb998",
+        "android_client_info": {
+          "package_name": "com.jrmsu.qasma.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5i6sL8pf1-dq2n7x6rn2AkYSdAK3OwcE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:876021665353:android:89f401b51d08bd9addb998",
+        "android_client_info": {
+          "package_name": "com.jrmsu.qasma.staff"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5i6sL8pf1-dq2n7x6rn2AkYSdAK3OwcE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:876021665353:android:4808795db1319a3fddb998",
+        "android_client_info": {
+          "package_name": "com.jrmsu.qasma.staff.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5i6sL8pf1-dq2n7x6rn2AkYSdAK3OwcE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

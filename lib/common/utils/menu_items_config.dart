@@ -21,8 +21,6 @@ class MenuKeys {
   static const String appointmentPreference = 'appointment_preference';
   static const String history = 'history';
   static const String users = 'users';
-  static const String privacyPolicy = 'privacy_policy';
-  static const String termsAndCondition = 'terms_and_condition';
   static const String settings = 'settings';
   static const String logout = 'logout';
   static const String about = 'about';
@@ -58,16 +56,6 @@ const List<MenuItemConfig> menu_items = [
     menu_key: MenuKeys.users,
     title: 'Users',
     icon: Icons.people_alt_outlined,
-  ),
-  MenuItemConfig(
-    menu_key: MenuKeys.privacyPolicy,
-    title: 'Privacy Policies',
-    icon: Icons.shield_outlined,
-  ),
-  MenuItemConfig(
-    menu_key: MenuKeys.termsAndCondition,
-    title: 'Terms And Conditions',
-    icon: Icons.description_outlined,
   ),
   MenuItemConfig(
     menu_key: MenuKeys.settings,

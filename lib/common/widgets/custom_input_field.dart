@@ -45,6 +45,7 @@ class _CustomInputFieldState extends State<CustomInputField>
   final GlobalKey _fieldKey = GlobalKey();
   final GlobalKey _infoIconKey = GlobalKey();
   bool _isTooltipVisible = false;
+  bool _isFocused = false;
   OverlayEntry? _overlayEntry;
 
   @override
@@ -190,108 +191,106 @@ class _CustomInputFieldState extends State<CustomInputField>
     return Container(
       key: _fieldKey,
       margin: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: radius.medium,
-              border: Border.all(
-                color: colors.white.withOpacity(0.4),
-                width: 1,
+      decoration: BoxDecoration(
+        borderRadius: radius.medium,
+        border: Border.all(
+          color:
+              _isFocused ? colors.textPrimary : colors.black.withOpacity(0.25),
+          width: _isFocused ? 2 : 1.5,
+        ),
+        color: colors.white,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (widget.icon != null) ...[
+              Icon(
+                widget.icon,
+                color: widget.iconColor ?? colors.textPrimary.withOpacity(0.6),
+                size: 20,
               ),
-              color: colors.white,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
+              const SizedBox(width: 12),
+            ],
+            Expanded(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (widget.icon != null) ...[
-                    Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: (widget.iconColor?.withOpacity(0.1)) ??
-                              Colors.transparent,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(widget.icon,
-                            color: widget.iconColor ?? colors.textPrimary,
-                            size: 20)),
-                    const SizedBox(width: 12),
-                  ],
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  if (widget.label != null) ...[
+                    Row(
                       children: [
-                        if (widget.label != null) ...[
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  widget.label!,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: customFontWeight.medium,
-                                    color: colors.textPrimary,
-                                    letterSpacing: 0.3,
-                                  ),
-                                ),
-                              ),
-                              if (widget.tooltip != null) ...[
-                                const SizedBox(width: 8),
-                                GestureDetector(
-                                  key: _infoIconKey,
-                                  onTap: _showTooltip,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(4),
-                                    child: Icon(
-                                      Icons.info_outline,
-                                      size: 16,
-                                      color:
-                                          colors.textPrimary.withOpacity(0.6),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                        ],
-                        TextFormField(
-                          controller: widget.controller,
-                          enabled: widget.isEnabled,
-                          maxLines: widget.maxLines,
-                          minLines: widget.minLines,
-                          expands: widget.expands,
-                          style: TextStyle(
-                            fontSize: widget.fontSize ?? 16,
-                            fontWeight:
-                                widget.fontWeight ?? customFontWeight.medium,
-                            color: widget.isEnabled
-                                ? colors.black
-                                : colors.black.withOpacity(0.5),
-                          ),
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintStyle: TextStyle(
+                        Expanded(
+                          child: Text(
+                            widget.label!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: customFontWeight.medium,
                               color: colors.textPrimary,
-                              fontWeight: FontWeight.normal,
+                              letterSpacing: 0.3,
                             ),
-                            contentPadding: EdgeInsets.zero,
-                            isDense: true,
                           ),
-                          onChanged: (_) => widget.onChanged(),
-                          keyboardType: widget.keyboardType,
                         ),
+                        if (widget.tooltip != null) ...[
+                          const SizedBox(width: 8),
+                          GestureDetector(
+                            key: _infoIconKey,
+                            onTap: _showTooltip,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              child: Icon(
+                                Icons.info_outline,
+                                size: 16,
+                                color: colors.textPrimary.withOpacity(0.6),
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
+                    ),
+                    const SizedBox(height: 4),
+                  ],
+                  Focus(
+                    onFocusChange: (hasFocus) {
+                      setState(() => _isFocused = hasFocus);
+                    },
+                    child: TextFormField(
+                      controller: widget.controller,
+                      enabled: widget.isEnabled,
+                      maxLines: widget.maxLines,
+                      minLines: widget.minLines,
+                      expands: widget.expands,
+                      style: TextStyle(
+                        fontSize: widget.fontSize ?? 16,
+                        fontWeight:
+                            widget.fontWeight ?? customFontWeight.medium,
+                        color: widget.isEnabled
+                            ? colors.black
+                            : colors.black.withOpacity(0.5),
+                      ),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: widget.controller.text.isEmpty
+                            ? 'Not provided'
+                            : null,
+                        hintStyle: TextStyle(
+                          color: colors.textPrimary.withOpacity(0.4),
+                          fontWeight: FontWeight.normal,
+                          fontStyle: FontStyle.italic,
+                          fontSize: 15,
+                        ),
+                        contentPadding: EdgeInsets.zero,
+                        isDense: true,
+                      ),
+                      onChanged: (_) => widget.onChanged(),
+                      keyboardType: widget.keyboardType,
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,5 +1,3 @@
-//counselor
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -91,6 +89,7 @@ class _HomeFormState extends State<HomeForm> {
         widget.state.controller.appoitnmentRefreshData(),
         widget.state.controller.appointConfigRefreshData(),
         widget.state.controller.userRefreshData(),
+        widget.state.controller.notificationsRefreshData(),
       ]);
       _lastRefreshTime = DateTime.now();
     } catch (e) {
@@ -109,7 +108,6 @@ class _HomeFormState extends State<HomeForm> {
   Widget build(BuildContext context) {
     return BlocBuilder<UserCubit, UserCubitState>(
       builder: (context, userState) {
-        // Process users when loaded
         if (userState is UserLoadedState) {
           _processUsers(userState);
         }
@@ -219,32 +217,9 @@ class _HomeFormState extends State<HomeForm> {
             textAlign: TextAlign.center,
           ),
           Spacing.verticalMedium,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Tap the ',
-                style: TextStyle(color: colors.textPrimary),
-              ),
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: colors.textPrimary,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.add,
-                  color: colors.white,
-                  size: 14,
-                ),
-              ),
-              Text(
-                ' button to book an appointment',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-              ),
-            ],
+          Text(
+            'Waiting for student bookings',
+            style: TextStyle(color: colors.textPrimary),
           ),
         ],
       ),

@@ -27,8 +27,8 @@ class LoginField extends StatelessWidget {
             children: [
               CustomFormField(
                 field_key: field_idNumber.field_key,
-                name: 'ID Number',
-                hint: 'Enter ID Number',
+                name: 'ID or Username',
+                hint: 'Enter your ID or username',
                 controller: idNumberController,
                 required: true,
               ),
@@ -41,7 +41,7 @@ class LoginField extends StatelessWidget {
               CustomPasswordField(
                 field_key: field_password.field_key,
                 name: 'Password',
-                hint: 'Enter Password',
+                hint: 'Enter your password',
                 controller: passwordController,
                 showErrorText: false,
                 showPasswordRule: false,

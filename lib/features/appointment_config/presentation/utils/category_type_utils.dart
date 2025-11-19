@@ -2,29 +2,59 @@
 
 import '../../data/models/category_type_model.dart';
 
+class CategoryView {
+  final String description;
+  final List<CategoryTypeModel> types;
+
+  const CategoryView({
+    this.description = '',
+    required this.types,
+  });
+
+  CategoryView copyWith({
+    String? description,
+    List<CategoryTypeModel>? types,
+  }) {
+    return CategoryView(
+      description: description ?? this.description,
+      types: types ?? this.types,
+    );
+  }
+}
+
 class CategoryTypeUtils {
-  /// Deep copy a map of category types
-  static Map<String, List<CategoryTypeModel>> deepCopy(
-      Map<String, List<CategoryTypeModel>> original) {
-    return original.map((category, types) => MapEntry(
-        category,
-        types
-            .map((type) =>
-                CategoryTypeModel(type: type.type, duration: type.duration))
-            .toList()));
+  /// Deep copy a map of categories (with description and types)
+  static Map<String, CategoryView> deepCopy(
+      Map<String, CategoryView> original) {
+    return original.map((category, view) => MapEntry(
+          category,
+          CategoryView(
+            description: view.description,
+            types: view.types
+                .map((t) =>
+                    CategoryTypeModel(type: t.type, duration: t.duration))
+                .toList(),
+          ),
+        ));
   }
 
-  /// Check if two category type maps are equal
-  static bool isEqual(Map<String, List<CategoryTypeModel>> map1,
-      Map<String, List<CategoryTypeModel>> map2) {
+  /// Check if two category maps are equal (both description and types)
+  static bool isEqual(
+      Map<String, CategoryView> map1, Map<String, CategoryView> map2) {
     if (map1.length != map2.length) return false;
 
     for (final category in map1.keys) {
       if (!map2.containsKey(category)) return false;
-      final list1 = map1[category]!;
-      final list2 = map2[category]!;
 
+      final a = map1[category]!;
+      final b = map2[category]!;
+
+      if ((a.description.trim()) != (b.description.trim())) return false;
+
+      final list1 = a.types;
+      final list2 = b.types;
       if (list1.length != list2.length) return false;
+
       for (int i = 0; i < list1.length; i++) {
         if (list1[i].type.trim() != list2[i].type.trim() ||
             list1[i].duration != list2[i].duration) {
@@ -35,48 +65,153 @@ class CategoryTypeUtils {
     return true;
   }
 
-  /// Process category types by filtering out empty types
-  static Map<String, List<CategoryTypeModel>> processForSave(
-      Map<String, List<CategoryTypeModel>> categoryTypes) {
-    final processed = <String, List<CategoryTypeModel>>{};
+  /// Process categories by:
+  /// - trimming names/descriptions
+  /// - filtering out empty types
+  /// - keeping only categories that have at least one non-empty type
+  static Map<String, CategoryView> processForSave(
+      Map<String, CategoryView> categories) {
+    final processed = <String, CategoryView>{};
 
-    categoryTypes.forEach((category, types) {
+    categories.forEach((category, view) {
       final filteredTypes =
-          types.where((type) => type.type.trim().isNotEmpty).toList();
+          view.types.where((type) => type.type.trim().isNotEmpty).toList();
       if (filteredTypes.isNotEmpty) {
-        processed[category] = filteredTypes;
+        processed[category.trim()] = view.copyWith(
+            description: view.description.trim(), types: filteredTypes);
       }
     });
 
     return processed;
   }
 
-  /// Convert category types to map format for API
-  static Map<String, List<Map<String, dynamic>>> toApiFormat(
-      Map<String, List<CategoryTypeModel>> categoryTypes) {
-    return categoryTypes.map((category, types) => MapEntry(
-        category,
-        types
-            .map(
-                (type) => {'type': type.type.trim(), 'duration': type.duration})
-            .toList()));
+  /// Convert categories to API format:
+  /// {
+  ///   "<categoryName>": {
+  ///     "description": "<desc>",
+  ///     "types": [ { "type": "...", "duration": 30 }, ... ]
+  ///   },
+  ///   ...
+  /// }
+  static Map<String, Map<String, dynamic>> toApiFormat(
+      Map<String, CategoryView> categories) {
+    return categories.map((category, view) => MapEntry(
+          category,
+          {
+            'description': view.description.trim(),
+            'types': view.types
+                .map((t) => {'type': t.type.trim(), 'duration': t.duration})
+                .toList(),
+          },
+        ));
   }
 
-  /// Initialize category types from config data
-  static Map<String, List<CategoryTypeModel>> fromConfigData(
+  /// Initialize categories from config data (backward compatible):
+  /// Accepts either:
+  /// - { "<name>": { "description": "...", "types": [ {type, duration}, ... ] } }
+  /// - { "<name>": [ CategoryType or {type,duration}, ... ] }  // legacy
+  /// - { "<name>": Category/CategoryModel }  // parsed entity
+  static Map<String, CategoryView> fromConfigData(
       Map<String, dynamic>? categoryAndType) {
     if (categoryAndType == null) return {};
 
-    final newCategoryTypes = <String, List<CategoryTypeModel>>{};
-    categoryAndType.forEach((category, types) {
-      if (types is List) {
-        newCategoryTypes[category] = types
-            .map((type) => CategoryTypeModel(
-                type: type.type.trim(), duration: type.duration))
-            .toList();
+    final result = <String, CategoryView>{};
+
+    categoryAndType.forEach((category, value) {
+      String description = '';
+      List<CategoryTypeModel> types = [];
+
+      if (value is Map<String, dynamic>) {
+        // New structure
+        description = (value['description'] ?? '').toString();
+
+        final dynamic list = value['types'];
+        if (list is List) {
+          types = list.map((e) {
+            if (e is CategoryTypeModel) {
+              return CategoryTypeModel(type: e.type, duration: e.duration);
+            } else if (e is Map<String, dynamic>) {
+              final t = e['type']?.toString() ?? '';
+              final d = e['duration'];
+              final duration =
+                  d is int ? d : int.tryParse(d?.toString() ?? '') ?? 0;
+              return CategoryTypeModel(type: t, duration: duration);
+            } else {
+              // Try dynamic access (legacy entity with fields)
+              try {
+                final t = (e as dynamic).type?.toString() ?? '';
+                final d = (e as dynamic).duration;
+                final duration =
+                    d is int ? d : int.tryParse(d?.toString() ?? '') ?? 0;
+                return CategoryTypeModel(type: t, duration: duration);
+              } catch (_) {
+                return const CategoryTypeModel(type: '', duration: 0);
+              }
+            }
+          }).toList();
+        }
+      } else if (value is List) {
+        // Legacy structure: only list of types
+        types = value.map((e) {
+          if (e is CategoryTypeModel) {
+            return CategoryTypeModel(type: e.type, duration: e.duration);
+          } else if (e is Map<String, dynamic>) {
+            final t = e['type']?.toString() ?? '';
+            final d = e['duration'];
+            final duration =
+                d is int ? d : int.tryParse(d?.toString() ?? '') ?? 0;
+            return CategoryTypeModel(type: t, duration: duration);
+          } else {
+            try {
+              final t = (e as dynamic).type?.toString() ?? '';
+              final d = (e as dynamic).duration;
+              final duration =
+                  d is int ? d : int.tryParse(d?.toString() ?? '') ?? 0;
+              return CategoryTypeModel(type: t, duration: duration);
+            } catch (_) {
+              return const CategoryTypeModel(type: '', duration: 0);
+            }
+          }
+        }).toList();
+      } else {
+        // Parsed entity object (Category/CategoryModel)
+        try {
+          description = (value as dynamic).description?.toString() ?? '';
+          final dynamic list = (value as dynamic).types;
+          if (list is List) {
+            types = list.map((e) {
+              if (e is CategoryTypeModel) {
+                return CategoryTypeModel(type: e.type, duration: e.duration);
+              } else if (e is Map<String, dynamic>) {
+                final t = e['type']?.toString() ?? '';
+                final d = e['duration'];
+                final duration =
+                    d is int ? d : int.tryParse(d?.toString() ?? '') ?? 0;
+                return CategoryTypeModel(type: t, duration: duration);
+              } else {
+                try {
+                  final t = (e as dynamic).type?.toString() ?? '';
+                  final d = (e as dynamic).duration;
+                  final duration =
+                      d is int ? d : int.tryParse(d?.toString() ?? '') ?? 0;
+                  return CategoryTypeModel(type: t, duration: duration);
+                } catch (_) {
+                  return const CategoryTypeModel(type: '', duration: 0);
+                }
+              }
+            }).toList();
+          }
+        } catch (_) {
+          // leave defaults
+        }
       }
+
+      result[category] = CategoryView(
+        description: description,
+        types: types,
+      );
     });
 
-    return newCategoryTypes;
+    return result;
   }
 }

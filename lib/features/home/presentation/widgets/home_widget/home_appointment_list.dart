@@ -40,7 +40,7 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
   List<AppointmentModel> _currentSessionAppointments = [];
   List<AppointmentModel> _upcomingAppointments = [];
   Map<String, UserModel> _userMap = {};
-  static const bool _enableTimeFiltering = false;
+  static const bool _enableTimeFiltering = true;
 
   @override
   void initState() {
@@ -72,7 +72,6 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
   void _filterAppointments() {
     final currentUserId = SharedPrefs().getString('currentUserId');
 
-    // Build user map once for O(1) lookups
     _userMap = {for (var user in widget.users) user.idNumber: user};
 
     final approvedAppointments = widget.appointments
@@ -87,7 +86,6 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
       _upcomingAppointments = [];
 
       for (final appointment in approvedAppointments) {
-        // check if the appointment is now or already pass on time
         if (isNowAppointment(now, appointment.scheduledStartAt) ||
             appointment.scheduledStartAt.isBefore(now)) {
           _currentSessionAppointments.add(appointment);
@@ -263,7 +261,6 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
 
         final appointment = appointments[index];
 
-        // Get both users efficiently with O(1) lookup
         final studentUser = _getUserById(appointment.studentId);
         final rescheduledByUser =
             _getUserById(appointment.reschedule.rescheduledBy);

@@ -37,7 +37,7 @@ class CategoryTypeField extends StatelessWidget {
           initialValue: initialValue,
           keyboardType: keyboardType,
           decoration: _inputDecoration(colors, hintText, suffixText),
-          style: const TextStyle(fontSize: 16),
+          style: const TextStyle(fontSize: 15),
           onChanged: onChanged,
         ),
       ],
@@ -50,22 +50,22 @@ class CategoryTypeField extends StatelessWidget {
       hintText: hint,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: colors.textPrimary.withOpacity(0.3)),
+        borderSide: BorderSide(color: colors.textPrimary.withOpacity(0.18)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: colors.textPrimary.withOpacity(0.3)),
+        borderSide: BorderSide(color: colors.textPrimary.withOpacity(0.18)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: colors.textPrimary, width: 2),
+        borderSide: BorderSide(color: colors.textPrimary, width: 1.6),
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       filled: true,
       fillColor: colors.white,
       suffixText: suffix,
       suffixStyle: suffix != null
-          ? TextStyle(color: colors.textPrimary, fontSize: 14)
+          ? TextStyle(color: colors.textPrimary, fontSize: 13)
           : null,
     );
   }

@@ -15,14 +15,14 @@ class AddCategoryTypeButton extends StatelessWidget {
     final colors = context.colors;
     return SizedBox(
       width: double.infinity,
-      height: 56,
+      height: 54,
       child: OutlinedButton.icon(
         onPressed: onPressed,
-        icon: const Icon(Icons.add, size: 20),
+        icon: const Icon(Icons.add_rounded, size: 20),
         label: const Text(
           'Add New Category',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -30,8 +30,8 @@ class AddCategoryTypeButton extends StatelessWidget {
           backgroundColor: colors.white,
           foregroundColor: colors.textPrimary,
           side: BorderSide(
-            color: colors.textPrimary.withOpacity(0.4),
-            width: 2,
+            color: colors.textPrimary.withOpacity(0.28),
+            width: 1.4,
           ),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

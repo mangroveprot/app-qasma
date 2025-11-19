@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../common/manager/appointment_config_manager.dart';
 import '../../../../common/manager/appointment_manager.dart';
 import '../../../../common/manager/auth_manager.dart';
+import '../../../../common/manager/notificaitons_manager.dart';
 import '../../../../common/manager/user_manager.dart';
 import '../../../../common/utils/constant.dart';
 import '../../../../common/utils/menu_items_config.dart';
@@ -28,6 +29,7 @@ import '../../../appointment/domain/usecases/cancel_appointment_usecase.dart';
 import '../../../appointment/domain/usecases/counselors_availability_usecase.dart';
 import '../../../appointment/presentation/bloc/appointments/appointments_cubit.dart';
 import '../../../appointment_config/presentation/bloc/appointment_config_cubit.dart';
+import '../../../notifications/presentation/bloc/notifications_cubit.dart';
 import '../../../users/data/models/user_model.dart';
 import '../../../users/presentation/bloc/user_cubit.dart';
 import '../../../appointment/data/models/appointment_model.dart';
@@ -39,13 +41,26 @@ class HomePageController {
   late final UserCubit _userCubit;
   late final AppointmentConfigCubit _appointmentConfigCubit;
   late final ButtonCubit _buttonCubit;
+  late final NotificationsCubit _notificationCubit;
 
   // Managers
   late final AppointmentManager _appointmentManager;
   late final UserManager _userManager;
   late final AppointmentConfigManager _appointmentConfigManager;
+  late final NotificationsManager _notificationsManager;
 
   Function(String route, {Object? extra})? _navigationCallback;
+
+  int _unreadCount = 0;
+  int get unreadCount {
+    return _unreadCount;
+  }
+
+  VoidCallback? _onUnreadCountChanged;
+
+  void setUnreadCountCallback(VoidCallback callback) {
+    _onUnreadCountChanged = callback;
+  }
 
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
@@ -73,6 +88,7 @@ class HomePageController {
     _appointmentManager = AppointmentManager();
     _userManager = UserManager();
     _appointmentConfigManager = AppointmentConfigManager();
+    _notificationsManager = NotificationsManager();
   }
 
   void _initializeCubits() {
@@ -80,6 +96,7 @@ class HomePageController {
     _userCubit = UserCubit();
     _appointmentConfigCubit = AppointmentConfigCubit();
     _buttonCubit = ButtonCubit();
+    _notificationCubit = NotificationsCubit();
   }
 
   void _createBlocProviders() {
@@ -89,6 +106,9 @@ class HomePageController {
       BlocProvider<AppointmentConfigCubit>.value(
           value: _appointmentConfigCubit),
       BlocProvider<ButtonCubit>.value(value: _buttonCubit),
+      BlocProvider<NotificationsCubit>(
+        create: (context) => _notificationCubit,
+      ),
     ];
   }
 
@@ -96,6 +116,7 @@ class HomePageController {
     _loadUserData();
     appoitnmentRefreshData();
     _loadAppointmentConfig();
+    _loadNotificationsData();
   }
 
   void _loadUserData() {
@@ -104,7 +125,15 @@ class HomePageController {
 
   void _loadAppointmentConfig() {
     _appointmentConfigManager
-        .loadAllAppointmentsConfig(_appointmentConfigCubit);
+        .refreshAppointmentsConfig(_appointmentConfigCubit);
+  }
+
+  void _loadNotificationsData() {
+    _notificationsManager.refreshNotifications(_notificationCubit);
+    _notificationsManager.getUnreadCounts().then((count) {
+      _unreadCount = count;
+      _onUnreadCountChanged?.call();
+    });
   }
 
   // PUBLIC METHODS
@@ -133,6 +162,10 @@ class HomePageController {
   Future<void> appointConfigRefreshData() async {
     await _appointmentConfigManager
         .refreshAppointmentsConfig(_appointmentConfigCubit);
+  }
+
+  Future<void> notificationsRefreshData() async {
+    await _notificationsManager.refreshNotifications(_notificationCubit);
   }
 
   void filterAppointmentsByStatus(String status) {
@@ -379,11 +412,6 @@ class HomePageController {
     }
   }
 
-  void handleNotificationTap() {
-    _navigationCallback?.call('/notifications');
-    debugPrint('Notification bell tapped');
-  }
-
   // PRIVATE METHODS
 
   Map<String, VoidCallback> _getMenuHandlers(BuildContext context) {
@@ -401,15 +429,6 @@ class HomePageController {
       MenuKeys.users: () => _navigationCallback?.call(
             Routes.user_path,
           ),
-      MenuKeys.privacyPolicy: () => _navigationCallback?.call(Routes.buildPath(
-            Routes.preference_path,
-            Routes.privacy_policy,
-          )),
-      MenuKeys.termsAndCondition: () =>
-          _navigationCallback?.call(Routes.buildPath(
-            Routes.preference_path,
-            Routes.terms_conditons,
-          )),
       MenuKeys.settings: () => _navigationCallback?.call(Routes.buildPath(
             Routes.preference_path,
             Routes.settings,
@@ -543,6 +562,18 @@ class HomePageController {
       extra: {
         'onSuccess': () async {
           await userRefreshData();
+        },
+      },
+    );
+  }
+
+  void handleNotificationTap() {
+    _navigationCallback?.call(
+      '/notifications',
+      extra: {
+        'onSuccess': () async {
+          _unreadCount = await _notificationsManager.getUnreadCounts();
+          _onUnreadCountChanged?.call();
         },
       },
     );

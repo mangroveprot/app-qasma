@@ -268,8 +268,8 @@ class _SchedulePageState extends State<SchedulePage> {
             title: isConfig ? 'Available Schedule' : 'My Schedule',
             onBackPressed: _handleBack,
             tooltipMessage: isConfig
-                ? ToolTips.available_schedule.tips
-                : ToolTips.my_schedule.tips,
+                ? ToolTip.available_schedule.tips
+                : ToolTip.my_schedule.tips,
           ),
           body: ValueListenableBuilder<bool>(
             valueListenable: _isLoadingNotifier,

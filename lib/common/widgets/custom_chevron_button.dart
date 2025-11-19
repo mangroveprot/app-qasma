@@ -9,6 +9,7 @@ class CustomChevronButton extends StatelessWidget {
   final IconData? icon;
   final double? iconSize;
   final double? fontSize;
+  final FontStyle? titleFontStyle;
   final Color? iconColor;
   final Color? iconBackgroundColor;
   final EdgeInsetsGeometry? padding;
@@ -24,6 +25,7 @@ class CustomChevronButton extends StatelessWidget {
     this.icon,
     this.iconSize,
     this.fontSize,
+    this.titleFontStyle,
     this.iconColor,
     this.iconBackgroundColor,
     this.padding,
@@ -88,6 +90,7 @@ class CustomChevronButton extends StatelessWidget {
                                 fontSize: fontSize ?? 16,
                                 fontWeight: fontWeight.medium,
                                 color: colors.black,
+                                fontStyle: titleFontStyle ?? FontStyle.normal,
                               ),
                             ),
                             if (subtitle != null) ...[

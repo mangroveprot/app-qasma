@@ -29,7 +29,10 @@ class CreateUserForm extends StatelessWidget {
                 state.textControllers[field_password.field_key]!,
           ),
           Spacing.verticalLarge,
-          NextButton(onPressed: () => state.handleSubmit(context)),
+          NextButton(
+            title: 'Done',
+            onPressed: () => state.handleSubmit(context),
+          ),
           SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 20),
         ],
       ),

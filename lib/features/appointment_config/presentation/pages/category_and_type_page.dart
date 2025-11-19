@@ -29,12 +29,12 @@ class CategoryTypePage extends StatefulWidget {
 class _CategoryTypePageState extends State<CategoryTypePage> {
   late final AppointmentConfigController controller;
 
-  final ValueNotifier<Map<String, List<CategoryTypeModel>>>
-      _categoryTypesNotifier = ValueNotifier({});
+  final ValueNotifier<Map<String, CategoryView>> _categoryTypesNotifier =
+      ValueNotifier({});
   final ValueNotifier<bool> _hasChangesNotifier = ValueNotifier(false);
   final ValueNotifier<bool> _isLoadingNotifier = ValueNotifier(true);
 
-  Map<String, List<CategoryTypeModel>> _originalCategoryTypes = {};
+  Map<String, CategoryView> _originalCategoryTypes = {};
   bool configDataLoaded = false;
 
   @override
@@ -79,57 +79,69 @@ class _CategoryTypePageState extends State<CategoryTypePage> {
   void _updateCategoryType(
       String category, int index, String type, int duration) {
     final updated = CategoryTypeUtils.deepCopy(_categoryTypesNotifier.value);
-    if (updated[category] != null && index < updated[category]!.length) {
-      updated[category]![index] =
+    final view = updated[category];
+    if (view != null && index < view.types.length) {
+      final newTypes = List<CategoryTypeModel>.from(view.types);
+      newTypes[index] =
           CategoryTypeModel(type: type.trim(), duration: duration);
+      updated[category] = view.copyWith(types: newTypes);
     }
     _categoryTypesNotifier.value = updated;
     _updateHasChanges();
   }
 
+  void _updateCategoryDescription(String category, String description) {
+    final updated = CategoryTypeUtils.deepCopy(_categoryTypesNotifier.value);
+    final view = updated[category];
+    if (view != null) {
+      updated[category] = view.copyWith(description: description);
+      _categoryTypesNotifier.value = updated;
+      _updateHasChanges();
+    }
+  }
+
   void _addCategoryType(String category) {
     final updated = CategoryTypeUtils.deepCopy(_categoryTypesNotifier.value);
-    updated[category] ??= [];
-    updated[category]!
-        .add(const CategoryTypeModel(type: 'New Type', duration: 30));
-    _categoryTypesNotifier.value = updated;
-    _updateHasChanges();
+    final view = updated[category];
+    if (view != null) {
+      final newTypes = List<CategoryTypeModel>.from(view.types)
+        ..insert(0, const CategoryTypeModel(type: '', duration: 30));
+
+      updated[category] = view.copyWith(types: newTypes);
+      _categoryTypesNotifier.value = updated;
+      _updateHasChanges();
+    }
   }
 
   void _removeCategoryType(String category, int index) {
     final updated = CategoryTypeUtils.deepCopy(_categoryTypesNotifier.value);
-    if (updated[category] != null && index < updated[category]!.length) {
-      // Check if this is the last type in the category
-      if (updated[category]!.length == 1) {
-        // Show warning dialog for last type
+    final view = updated[category];
+    if (view == null) return;
+
+    if (view.types.isNotEmpty && index < view.types.length) {
+      if (view.types.length == 1) {
         CategoryDialogs.showRemoveLastTypeDialog(
           context,
           category,
           () {
-            // User confirmed, proceed with removal
-            updated[category]!.removeAt(index);
             updated.remove(category);
             _categoryTypesNotifier.value = updated;
             _updateHasChanges();
           },
         );
-      } else {
-        // Safe to remove, not the last type
-        updated[category]!.removeAt(index);
-        _categoryTypesNotifier.value = updated;
-        _updateHasChanges();
       }
     }
   }
 
-  void _addNewCategory(String categoryName) {
+  void _addNewCategory(String categoryName, String description) {
     if (categoryName.trim().isEmpty) return;
 
     final updated = CategoryTypeUtils.deepCopy(_categoryTypesNotifier.value);
     if (!updated.containsKey(categoryName)) {
-      updated[categoryName] = [
-        const CategoryTypeModel(type: 'New Type', duration: 30)
-      ];
+      updated[categoryName] = CategoryView(
+        description: description.trim(),
+        types: const [CategoryTypeModel(type: 'New Type', duration: 30)],
+      );
     }
     _categoryTypesNotifier.value = updated;
     _updateHasChanges();
@@ -163,11 +175,10 @@ class _CategoryTypePageState extends State<CategoryTypePage> {
 
   void _performUpdate({
     required String configId,
-    required Map<String, List<CategoryTypeModel>> categoryTypes,
+    required Map<String, CategoryView> categoryTypes,
   }) {
     final categoryTypesMap = CategoryTypeUtils.toApiFormat(categoryTypes);
-    // print(['==============', categoryTypesMap.toString()]);
-    // return;
+
     final param = DynamicParam(
         fields: {'configId': configId, 'category_and_type': categoryTypesMap});
 
@@ -213,9 +224,9 @@ class _CategoryTypePageState extends State<CategoryTypePage> {
           onTap: _unfocusAll,
           child: Scaffold(
             appBar: CustomAppBar(
-              title: 'Category Types',
+              title: ToolTip.category_types.key,
               onBackPressed: _handleBack,
-              tooltipMessage: ToolTips.category_types.tips,
+              tooltipMessage: ToolTip.category_types.tips,
             ),
             body: ValueListenableBuilder<bool>(
               valueListenable: _isLoadingNotifier,
@@ -228,24 +239,28 @@ class _CategoryTypePageState extends State<CategoryTypePage> {
                   child: Column(
                     children: [
                       Expanded(
-                        child: ValueListenableBuilder<
-                            Map<String, List<CategoryTypeModel>>>(
+                        child:
+                            ValueListenableBuilder<Map<String, CategoryView>>(
                           valueListenable: _categoryTypesNotifier,
-                          builder: (context, categoryTypes, _) {
-                            return categoryTypes.isEmpty
+                          builder: (context, categories, _) {
+                            return categories.isEmpty
                                 ? const EmptyCategoryTypesSection()
                                 : ListView.builder(
                                     padding: EdgeInsets.zero,
-                                    itemCount: categoryTypes.keys.length,
+                                    itemCount: categories.keys.length,
                                     itemBuilder: (context, index) {
                                       final category =
-                                          categoryTypes.keys.elementAt(index);
+                                          categories.keys.elementAt(index);
+                                      final view = categories[category]!;
                                       return CategorySection(
                                         category: category,
-                                        types: categoryTypes[category]!,
+                                        description: view.description,
+                                        types: view.types,
                                         onAddType: _addCategoryType,
                                         onDeleteCategory: _deleteCategory,
                                         onUpdateType: _updateCategoryType,
+                                        onUpdateDescription:
+                                            _updateCategoryDescription,
                                         onRemoveType: _removeCategoryType,
                                       );
                                     },
@@ -256,7 +271,9 @@ class _CategoryTypePageState extends State<CategoryTypePage> {
                       const SizedBox(height: 24),
                       AddCategoryTypeButton(
                         onPressed: () => CategoryDialogs.showAddCategoryDialog(
-                            context, _addNewCategory),
+                          context,
+                          _addNewCategory,
+                        ),
                       ),
                       const SizedBox(height: 20),
                     ],
@@ -283,9 +300,7 @@ class _CategoryTypePageState extends State<CategoryTypePage> {
       _originalCategoryTypes =
           CategoryTypeUtils.deepCopy(_categoryTypesNotifier.value);
       _hasChangesNotifier.value = false;
-      AppToast.show(
-          message: 'Category types saved successfully!',
-          type: ToastType.success);
+      AppToast.show(message: 'Saved successfully!', type: ToastType.success);
     } else if (state is ButtonFailureState &&
         state.buttonId == 'save_category_types_config') {
       AppToast.show(message: state.errorMessages.first, type: ToastType.error);

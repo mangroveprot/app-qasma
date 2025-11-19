@@ -23,21 +23,11 @@ class UserTypesPage extends StatefulWidget {
 class _UserTypesPageState extends State<UserTypesPage> {
   late final UserTypesController controller;
   bool _hasInitialized = false;
-  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     controller = UserTypesController();
-
-    // delay to load the user data
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    });
   }
 
   @override
@@ -62,61 +52,73 @@ class _UserTypesPageState extends State<UserTypesPage> {
         ],
         child: Scaffold(
           appBar: const CustomAppBar(title: 'Users'),
-          body: _isLoading
-              ? const Center(
+          body: BlocBuilder<UserCubit, UserCubitState>(
+            builder: (context, state) {
+              if (state is UserLoadingState) {
+                return const Center(
                   child: CircularProgressIndicator(),
-                )
-              : Builder(builder: (context) {
-                  final userCubit = context.read<UserCubit>();
+                );
+              }
 
-                  return LayoutBuilder(builder: (context, constraints) {
-                    return SizedBox(
-                        width: constraints.maxWidth,
-                        height: constraints.maxHeight,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Column(
-                            children: [
-                              _Chevron(
-                                roleType: RoleType.student.field,
-                                icons: Icons.school_outlined,
-                                onPressed: () {},
-                                userLength: userCubit
-                                    .filterUsers(
-                                      predicate: (user) =>
-                                          user.role == RoleType.student.field,
-                                    )
-                                    .length,
-                              ),
-                              Spacing.verticalMedium,
-                              _Chevron(
-                                roleType: RoleType.staff.field,
-                                icons: Icons.work_outline,
-                                onPressed: () {},
-                                userLength: userCubit
-                                    .filterUsers(
-                                      predicate: (user) =>
-                                          user.role == RoleType.staff.field,
-                                    )
-                                    .length,
-                              ),
-                              Spacing.verticalMedium,
-                              _Chevron(
-                                roleType: RoleType.counselor.field,
-                                icons: Icons.admin_panel_settings_outlined,
-                                onPressed: () {},
-                                userLength: userCubit
-                                    .filterUsers(
-                                      predicate: (user) =>
-                                          user.role == RoleType.counselor.field,
-                                    )
-                                    .length,
-                              ),
-                            ],
+              if (state is UserLoadedState) {
+                final userCubit = context.read<UserCubit>();
+
+                return LayoutBuilder(builder: (context, constraints) {
+                  return SizedBox(
+                    width: constraints.maxWidth,
+                    height: constraints.maxHeight,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        children: [
+                          _Chevron(
+                            roleType: RoleType.student.field,
+                            icons: Icons.school_outlined,
+                            onPressed: () {},
+                            userLength: userCubit
+                                .filterUsers(
+                                  predicate: (user) =>
+                                      user.role == RoleType.student.field,
+                                )
+                                .length,
                           ),
-                        ));
-                  });
-                }),
+                          Spacing.verticalMedium,
+                          _Chevron(
+                            roleType: RoleType.staff.field,
+                            icons: Icons.work_outline,
+                            onPressed: () {},
+                            userLength: userCubit
+                                .filterUsers(
+                                  predicate: (user) =>
+                                      user.role == RoleType.staff.field,
+                                )
+                                .length,
+                          ),
+                          Spacing.verticalMedium,
+                          _Chevron(
+                            roleType: RoleType.counselor.field,
+                            icons: Icons.admin_panel_settings_outlined,
+                            onPressed: () {},
+                            userLength: userCubit
+                                .filterUsers(
+                                  predicate: (user) =>
+                                      user.role == RoleType.counselor.field,
+                                )
+                                .length,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                });
+              }
+
+              // Handle error state if you have one
+              return const Center(
+                child: Text('Unable to load users'),
+              );
+            },
+          ),
         ),
       ),
     );

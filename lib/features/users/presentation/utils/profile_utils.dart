@@ -10,7 +10,6 @@ class ProfileFormUtils {
   static UserModel updateMainUser(
       UserModel user, String fieldName, String newValue) {
     switch (fieldName) {
-   
       case 'active':
         return user.copyWith(
             active: newValue == activeOption[0] ? true : false);
@@ -67,7 +66,7 @@ class ProfileFormUtils {
 
     if (ProfileFieldConfig.informationFields.contains(fieldName)) {
       switch (fieldName) {
-        // case 'idNumber': // Removed ID Number handling
+        // case 'idNumber':
         //   return user.idNumber;
         case 'active':
           return user.active ? activeOption[0] : activeOption[1];
@@ -97,6 +96,8 @@ class ProfileFormUtils {
         return user.contact_number;
       case 'facebook':
         return user.facebook;
+      case 'date_of_birth':
+        return user.date_of_birth.toIso8601String();
       default:
         return '';
     }
@@ -125,6 +126,7 @@ class ProfileFormUtils {
         'yearLevel': user.other_info.yearLevel ?? '',
       if (user.role == RoleType.student.field)
         'block': user.other_info.block ?? '',
+      'date_of_birth': user.date_of_birth.toIso8601String(),
     };
   }
 }

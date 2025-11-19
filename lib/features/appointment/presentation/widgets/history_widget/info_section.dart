@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../../../../infrastructure/theme/theme_extensions.dart';
 
 class InfoSection extends StatelessWidget {

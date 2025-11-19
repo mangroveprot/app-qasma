@@ -25,9 +25,9 @@ class CategoryTypeItem extends StatelessWidget {
     final colors = context.colors;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 12),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
             flex: 3,
@@ -56,18 +56,20 @@ class CategoryTypeItem extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Container(
-            margin: const EdgeInsets.only(bottom: 2),
+            margin: const EdgeInsets.only(top: 24),
             child: IconButton(
               onPressed: () => onRemove(category, index),
-              icon: Icon(Icons.delete_outline, color: colors.error, size: 22),
+              icon: Icon(Icons.delete_outline, color: colors.error, size: 20),
               style: IconButton.styleFrom(
-                backgroundColor: colors.error.withOpacity(0.1),
+                backgroundColor: colors.error.withOpacity(0.08),
                 foregroundColor: colors.error,
                 padding: const EdgeInsets.all(12),
-                minimumSize: const Size(48, 48),
+                minimumSize: const Size(44, 44),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
+              tooltip: 'Remove',
             ),
           ),
         ],

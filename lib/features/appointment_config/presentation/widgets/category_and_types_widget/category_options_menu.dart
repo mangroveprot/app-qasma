@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../infrastructure/theme/theme_extensions.dart';
+import 'add_category_dialog.dart';
 
 class CategoryOptionsMenu extends StatelessWidget {
   final String category;
@@ -31,7 +32,6 @@ class CategoryOptionsMenu extends StatelessWidget {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            // color: colors.textPrimary.withOpacity(0.1),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Icon(Icons.more_vert, color: colors.textPrimary, size: 18),
@@ -55,10 +55,10 @@ class CategoryOptionsMenu extends StatelessWidget {
 
 class CategoryDialogs {
   static void showAddCategoryDialog(
-      BuildContext context, Function(String) onAddCategory) {
+      BuildContext context, Function(String, String) onAddCategory) {
     showDialog(
       context: context,
-      builder: (context) => _AddCategoryDialog(onAddCategory: onAddCategory),
+      builder: (context) => AddCategoryDialog(onAddCategory: onAddCategory),
     );
   }
 
@@ -120,67 +120,6 @@ class CategoryDialogs {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _AddCategoryDialog extends StatefulWidget {
-  final Function(String) onAddCategory;
-
-  const _AddCategoryDialog({required this.onAddCategory});
-
-  @override
-  State<_AddCategoryDialog> createState() => _AddCategoryDialogState();
-}
-
-class _AddCategoryDialogState extends State<_AddCategoryDialog> {
-  late final TextEditingController textController;
-
-  @override
-  void initState() {
-    super.initState();
-    textController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    textController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Add New Category'),
-      content: TextField(
-        controller: textController,
-        decoration: const InputDecoration(
-          labelText: 'Category Name',
-          hintText: 'e.g., Meeting, Interview',
-        ),
-        autofocus: true,
-        onSubmitted: (value) {
-          if (value.trim().isNotEmpty) {
-            widget.onAddCategory(value.trim());
-            Navigator.of(context).pop();
-          }
-        },
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: () {
-            if (textController.text.trim().isNotEmpty) {
-              widget.onAddCategory(textController.text.trim());
-              Navigator.of(context).pop();
-            }
-          },
-          child: const Text('Add'),
-        ),
-      ],
     );
   }
 }

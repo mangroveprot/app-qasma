@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../../common/utils/tooltips_items.dart';
 import 'book_type_label.dart';
 
 import '../../../../../common/utils/form_field_config.dart';
@@ -57,13 +58,10 @@ class BookTypeDataTimeSection extends StatelessWidget {
 
   Future<void> _onAppointmentTypeSelected(
       BuildContext context, String type) async {
-    // Clear date/time selection when type changes
     dropdownControllers[field_appointmentDateTime.field_key]!.value = null;
 
-    // Clear form errors
     context.read<FormCubit>().clearFieldError(field_appointmentType.field_key);
 
-    // Load slots for the selected appointment type
     final configCubit = context.read<AppointmentConfigCubit>();
     final duration = category != null
         ? configCubit.getDurationByTypeInCategory(category!, type) ?? 10
@@ -92,9 +90,9 @@ class _AppointmentTypeDropdown extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const BookTypeLabel(
-          text: 'Appointment Type',
-          tooltip: 'sdaasdsads',
+        BookTypeLabel(
+          text: ToolTip.appointmentType.key,
+          tooltip: ToolTip.appointmentType.tips,
         ),
         const SizedBox(height: 8),
         BlocSelector<FormCubit, FormValidationState, bool>(
@@ -159,9 +157,9 @@ class _DateTimeDropdown extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const BookTypeLabel(
-          text: 'Date & Time',
-          tooltip: 'dsadnsakdbjl',
+        BookTypeLabel(
+          text: ToolTip.dateAndTime.key,
+          tooltip: ToolTip.dateAndTime.tips,
         ),
         const SizedBox(height: 8),
         BlocSelector<FormCubit, FormValidationState, bool>(

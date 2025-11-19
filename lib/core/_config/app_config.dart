@@ -30,6 +30,9 @@ class AppConfig {
   // config getters
   static String get baseUrl => FlavorConfig.instance.values.baseUrl;
   static String get appTitle => FlavorConfig.instance.values.appTitle;
+  static String get webUrl => FlavorConfig.instance.values.webUrl;
+  static String get githubOwner => FlavorConfig.instance.values.gitHubOwner;
+  static String get githubRepo => FlavorConfig.instance.values.githubRepo;
   static bool get shouldShowLogs => FlavorConfig.instance.values.enableLogging;
 
   // flavor type check

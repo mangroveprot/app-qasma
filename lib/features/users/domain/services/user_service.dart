@@ -7,5 +7,6 @@ abstract class UserService {
   Future<Either> getUser(String idNumber);
   Future<Either> isRegister(String identifier);
   Future<Either> update(DynamicParam param);
+  Future<Either> saveFcmToken(DynamicParam param);
   Future<Either> syncUser();
 }

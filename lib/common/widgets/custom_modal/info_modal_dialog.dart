@@ -20,72 +20,82 @@ class InfoModalDialog {
     String? buttonId,
     double? maxWidth,
     double? maxHeight,
+    bool isDismissible = true,
   }) {
     return showDialog(
       context: context,
-      barrierDismissible: true,
+      barrierDismissible: isDismissible,
       builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            constraints: BoxConstraints(
-              maxWidth: maxWidth ?? MediaQuery.of(context).size.width * 0.9,
-              maxHeight: maxHeight ?? MediaQuery.of(context).size.height * 0.85,
-            ),
-            child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+        return WillPopScope(
+          onWillPop: () async {
+            if (!isDismissible) {
+              return false;
+            }
+            return true;
+          },
+          child: Dialog(
+            backgroundColor: Colors.transparent,
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: maxWidth ?? MediaQuery.of(context).size.width * 0.9,
+                maxHeight:
+                    maxHeight ?? MediaQuery.of(context).size.height * 0.85,
               ),
-              elevation: 8,
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: context.colors.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(24),
+              child: Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 8,
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: context.colors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Icon(icon,
+                              size: 24, color: context.colors.primary),
                         ),
-                        child:
-                            Icon(icon, size: 24, color: context.colors.primary),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: context.weight.bold,
-                          color: context.colors.black,
+                        const SizedBox(height: 12),
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: context.weight.bold,
+                            color: context.colors.black,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        subtitle,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: context.colors.textPrimary,
-                          fontWeight: context.weight.regular,
+                        const SizedBox(height: 6),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: context.colors.textPrimary,
+                            fontWeight: context.weight.regular,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      content,
-                      const SizedBox(height: 20),
-                      _buildButtons(
-                        context,
-                        buttonText: primaryButtonText,
-                        onButtonPressed: onPrimaryPressed,
-                        secondaryButtonText: secondaryButtonText,
-                        onSecondaryButtonPressed: onSecondaryPressed,
-                        cubit: buttonCubit,
-                        buttonId: buttonId,
-                      ),
-                    ],
+                        const SizedBox(height: 16),
+                        content,
+                        const SizedBox(height: 20),
+                        _buildButtons(
+                          context,
+                          buttonText: primaryButtonText,
+                          onButtonPressed: onPrimaryPressed,
+                          secondaryButtonText: secondaryButtonText,
+                          onSecondaryButtonPressed: onSecondaryPressed,
+                          cubit: buttonCubit,
+                          buttonId: buttonId,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

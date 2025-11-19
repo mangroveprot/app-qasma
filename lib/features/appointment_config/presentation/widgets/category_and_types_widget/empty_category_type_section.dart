@@ -10,25 +10,26 @@ class EmptyCategoryTypesSection extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.notification_add_outlined,
-            size: 64,
+            Icons.category_outlined,
+            size: 72,
             color: Colors.grey[400],
           ),
           const SizedBox(height: 16),
           Text(
-            'No reminders yet',
+            'No categories yet',
             style: TextStyle(
               fontSize: 18,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
+              color: Colors.grey[700],
+              fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
-            'Tap "Add Reminder" to get started',
+            'Add your first category to organize appointment types',
+            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
+              fontSize: 13,
+              color: Colors.grey[600],
             ),
           ),
         ],

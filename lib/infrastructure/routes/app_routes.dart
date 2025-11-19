@@ -8,6 +8,7 @@ class Routes {
   static const String appointment = '/appointment';
   static const String appointment_config = '/appointment-config';
   static const String preference_path = '/preference';
+  static const String notifications = '/notifications';
 
   // auth route names
   static const String create_account = 'create-account';

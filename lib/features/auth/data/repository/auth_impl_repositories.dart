@@ -5,6 +5,7 @@ import '../../../../core/_base/_services/storage/shared_preference.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
 import '../../../appointment/domain/usecases/getall_appointments_usecase.dart';
 import '../../../appointment_config/domain/usecases/get_config_usecase.dart';
+import '../../../notifications/domain/usecases/get_notification_usecase.dart';
 import '../../../users/data/models/user_model.dart';
 import '../../../users/domain/usecases/get_all_user_usecase.dart';
 import '../../domain/repository/auth_repositories.dart';
@@ -41,19 +42,6 @@ class AuthRepositoryImpl extends AuthRepository {
     }
 
     return result;
-  }
-
-  void _preloadData() {
-    Future.microtask(() async {
-      final userId = SharedPrefs().getString('currentUserId');
-      if (userId != null) {
-        await Future.wait([
-          sl<GetAllAppointmentsUsecase>().call(),
-          sl<GetConfigUseCase>().call(),
-          sl<GetAllUserUsecase>().call(),
-        ]);
-      }
-    });
   }
 
   @override
@@ -136,5 +124,19 @@ class AuthRepositoryImpl extends AuthRepository {
         return Right(data);
       },
     );
+  }
+
+  void _preloadData() {
+    Future.microtask(() async {
+      final userId = SharedPrefs().getString('currentUserId');
+      if (userId != null) {
+        await Future.wait([
+          sl<GetAllAppointmentsUsecase>().call(),
+          sl<GetConfigUseCase>().call(),
+          sl<GetAllUserUsecase>().call(),
+          sl<GetNotificationUsecase>().call(),
+        ]);
+      }
+    });
   }
 }

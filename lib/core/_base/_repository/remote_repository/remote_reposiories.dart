@@ -62,60 +62,29 @@ class RemoteRepository<T> extends BaseRepository
   }
 
   @override
-  Future<List<T>> getAllItems({
-    int page = 1,
-    int limit = 999,
-    bool paginate = false,
-    bool includeDeleted = false,
-    String? searchTerm,
-    Map<String, dynamic>? extraParams,
-  }) async {
+  Future<List<T>> getAllItems() async {
     final result = await handleCacheOperation(
       () => _localRepository.getAllItems(),
       () async {
-        bool hasMore = true;
+        final response = await handleApiCall(
+          () => apiClient.get(
+            endpoint,
+            requiresAuth: true,
+          ),
+        );
 
-        final List<T> allItems = [];
+        final apiResponse = ApiResponse<T>.fromJson(
+          response.data,
+          fromJson,
+        );
 
-        while (hasMore) {
-          final queryParams = {
-            'page': page,
-            'limit': limit,
-            'paginate': true,
-            'includeDeleted': includeDeleted,
-            if (searchTerm != null) 'searchTerm': searchTerm,
-            ...?extraParams,
-          };
-
-          final response = await handleApiCall(
-            () => apiClient.get(
-              endpoint,
-              requiresAuth: true,
-              queryParameters: queryParams,
-            ),
-          );
-
-          final apiResponse = ApiResponse<T>.fromJson(
-            response.data,
-            fromJson,
-          );
-
-          if (!apiResponse.isSuccess || apiResponse.documents == null) {
-            throw Exception(
-                apiResponse.error?.message ?? 'Failed to fetch items');
-          }
-
-          allItems.addAll(apiResponse.documents!);
-
-          final total = apiResponse.total ?? 0;
-          final resultsSoFar = allItems.length;
-
-          hasMore = resultsSoFar < total;
-          page++;
+        if (!apiResponse.isSuccess || apiResponse.documents == null) {
+          throw Exception('Failed to fetch items');
         }
 
-        await _localRepository.saveAllItems(allItems);
-        return allItems;
+        final items = apiResponse.documents!;
+        await _localRepository.saveAllItems(items);
+        return items;
       },
       allowEmpty: false,
     );

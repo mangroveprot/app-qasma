@@ -46,7 +46,6 @@ class _AppointmentCardState extends State<AppointmentCard> {
   void initState() {
     super.initState();
     _now = DateTime.now();
-    // Update every minute for countdown
     _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
       if (mounted) {
         setState(() {
