@@ -1,5 +1,4 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:flutter/material.dart';
 
 import '../widgets/models/modal_option.dart';
 
@@ -38,6 +37,8 @@ class SharedPrefStrings {
 
 String get guidance_email => 'katipunan.guidance@jrmsu.edu.ph';
 String get feedback_url => 'https://jrmsu.online/feedback/';
+String get guidance_fb_url => 'https://m.facebook.com/jrmsuk.guidanceoffice';
+String get jrmsu_guidance_map => 'https://maps.app.goo.gl/qywZG2wXxTS6eJov5';
 
 const Map<String, dynamic> name = {
   'name': 'First Name',
@@ -51,7 +52,8 @@ const Map<String, dynamic> lastname = {
 const List<String> courseList = [
   'Bachelor of Elementary Education',
   'Bachelor of Physical Education',
-  'Bachelor of Science in Agriculture - Majors: Animal Science and Crop Science',
+  'Bachelor of Science in Agriculture - Animal Science',
+  'Bachelor of Science in Agriculture - Crop Science',
   'Bachelor of Science in Agricultural and Biosystems Engineering',
   'Bachelor of Science in Criminology',
   'Bachelor of Science in Forestry',
@@ -59,10 +61,11 @@ const List<String> courseList = [
   'Bachelor of Secondary Education - Mathematics',
   'Bachelor of Secondary Education - Science',
   'Bachelor of Secondary Education - Social Studies',
-  'Bachelor of Science in Agribusiness',
+  'Bachelor of Science in Agribusiness Management',
+  'Bachelor of Science in Business Administration - Human Resource Management',
   'Bachelor of Science in Computer Science',
   'Bachelor of Science in Hospitality Management',
-  'Bachelor of Science in Information Systems'
+  'Bachelor of Science in Information Systems',
 ];
 
 const List<String> blockList = [
@@ -101,7 +104,7 @@ const List<String> genderList = ['Male', 'Female', 'Other'];
 
 final currentYear = DateTime.now().year;
 final yearsList = List.generate(
-  YEARS_TO_GENERATE, // years to generate start from current year
+  YEARS_TO_GENERATE,
   (index) => (currentYear - index).toString(),
 );
 
@@ -130,23 +133,6 @@ class AppointmentSelection {
   static const title = 'Select Your Appointment Category';
   static const description = 'Choose from the list of available services.';
 }
-
-final List<ModalOption> newAppointmentOptions = [
-  const ModalOption(
-    value: 'counseling',
-    title: 'Counseling',
-    subtitle:
-        'Get support through emotional, mental, or personal challenges with our counseling staff',
-    icon: Icon(Icons.psychology, size: 40, color: Colors.blue),
-  ),
-  const ModalOption(
-    value: 'testing',
-    title: 'Testing',
-    subtitle:
-        'Take psychological tests to better understand your mental health and create personalized plans',
-    icon: Icon(Icons.assignment, size: 40, color: Colors.green),
-  ),
-];
 
 final List<ModalOption> reasonOptionList = [
   const ModalOption(

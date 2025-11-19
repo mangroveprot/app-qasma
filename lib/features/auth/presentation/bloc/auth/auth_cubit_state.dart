@@ -88,7 +88,6 @@ class LogoutFailureState extends AuthFailureState {
       [errorMessages, suggestions, operation, isAutoLogout];
 }
 
-// New state specifically for auto logout
 class AutoLogoutState extends AuthFailureState {
   final String reason;
 

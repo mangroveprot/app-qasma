@@ -13,7 +13,7 @@ class SocialMediaRow extends StatelessWidget {
       children: [
         // Facebook
         InkWell(
-          onTap: () => launchExternalUrl(uri: Uri.parse(feedback_url)),
+          onTap: () => launchExternalUrl(uri: Uri.parse(guidance_fb_url)),
           borderRadius: BorderRadius.circular(25),
           child: Container(
             width: 45,

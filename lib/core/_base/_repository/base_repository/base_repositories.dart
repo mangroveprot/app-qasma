@@ -70,16 +70,24 @@ abstract class BaseRepository {
     throw Exception('Database operation failed after $maxRetries attempts');
   }
 
-  Future<T?> handleCacheOperation<T>(
-    Future<T?> Function() cacheOperation,
-    Future<T?> Function() fallbackOperation,
-  ) async {
+  Future<T?> handleCacheOperation<T>(Future<T?> Function() cacheOperation,
+      Future<T?> Function() fallbackOperation,
+      {bool allowEmpty = false}) async {
     try {
       final result = await cacheOperation();
-      if (result != null) return result;
+
+      if (result == null) {
+        return await fallbackOperation();
+      }
+
+      final shouldUseResult = allowEmpty || _isNotEmpty(result);
+
+      if (shouldUseResult) {
+        return result;
+      }
+
       return await fallbackOperation();
     } catch (error, stackTrace) {
-      // Fixed: Use positional parameters instead of named parameters
       _logger.w(
         'Cache operation failed in ${runtimeType.toString()}, falling back. Error: $error\nStackTrace: $stackTrace',
       );
@@ -145,6 +153,14 @@ abstract class BaseRepository {
         stackTrace: stackTrace,
       );
     }
+  }
+
+  bool _isNotEmpty<T>(T result) {
+    if (result is List) return result.isNotEmpty;
+    if (result is Map) return result.isNotEmpty;
+    if (result is String) return result.isNotEmpty;
+    if (result is Set) return result.isNotEmpty;
+    return true;
   }
 }
 

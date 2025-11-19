@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../common/networks/response/api_response.dart';
 import '../../../_config/url_provider.dart';
 import '../../_models/sync_model.dart';
 import '../base_repository/abstract_repositories.dart';
@@ -61,35 +62,31 @@ class RemoteRepository<T> extends BaseRepository
   }
 
   @override
-  Future<List<T>> getAllItems({
-    int page = 1,
-    int limit = 10,
-    bool paginate = false,
-    bool includeDeleted = false,
-    String? searchTerm,
-    Map<String, dynamic>? extraParams,
-  }) async {
-    final queryParams = {
-      'page': page,
-      'limit': limit,
-      'paginate': paginate,
-      'includeDeleted': includeDeleted,
-      if (searchTerm != null) 'searchTerm': searchTerm,
-      ...?extraParams,
-    };
+  Future<List<T>> getAllItems() async {
     final result = await handleCacheOperation(
       () => _localRepository.getAllItems(),
       () async {
         final response = await handleApiCall(
-          () => apiClient.get(endpoint,
-              requiresAuth: true, queryParameters: queryParams),
+          () => apiClient.get(
+            endpoint,
+            requiresAuth: true,
+          ),
         );
-        final data = response.data as List;
-        final items =
-            data.map((e) => fromJson(Map<String, dynamic>.from(e))).toList();
+
+        final apiResponse = ApiResponse<T>.fromJson(
+          response.data,
+          fromJson,
+        );
+
+        if (!apiResponse.isSuccess || apiResponse.documents == null) {
+          throw Exception('Failed to fetch items');
+        }
+
+        final items = apiResponse.documents!;
         await _localRepository.saveAllItems(items);
         return items;
       },
+      allowEmpty: false,
     );
 
     return result ?? [];
