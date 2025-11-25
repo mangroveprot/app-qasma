@@ -183,6 +183,10 @@ class _MyProfileFormState extends State<MyProfileForm> {
       final emailChanged = _controllers['email']?.text != _originalUser?.email;
       final isFacebookUrlChanged =
           _controllers['facebook']?.text != _originalUser?.facebook;
+      final isVerified =
+          _controllers['verified']?.text != _originalUser?.verified;
+
+      print(['=====================', isVerified]);
 
       if (isFacebookUrlChanged) {
         final fbUrl = _controllers['facebook']?.text.trim() ?? '';

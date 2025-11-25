@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../common/manager/notificaitons_manager.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
+import '../../domain/usecases/delete_notifications_usecase.dart';
 import '../../domain/usecases/mark_as_read_usecase.dart';
 import '../bloc/notifications_cubit.dart';
 
@@ -11,6 +12,7 @@ class NotificationsController {
   late final NotificationsManager _notificationsManager;
 
   late final MarkAsReadUsecase _markAsReadUsecase;
+  late final DeleteNotificationsUsecase _deleteNotificationsUsecase;
 
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
@@ -35,6 +37,7 @@ class NotificationsController {
 
   void _initializeUsecases() {
     _markAsReadUsecase = sl<MarkAsReadUsecase>();
+    _deleteNotificationsUsecase = sl<DeleteNotificationsUsecase>();
   }
 
   void _initializeManagers() {
@@ -50,4 +53,6 @@ class NotificationsController {
   }
 
   MarkAsReadUsecase get markAsReadUsecase => _markAsReadUsecase;
+  DeleteNotificationsUsecase get deleteNotificationsUsecase =>
+      _deleteNotificationsUsecase;
 }

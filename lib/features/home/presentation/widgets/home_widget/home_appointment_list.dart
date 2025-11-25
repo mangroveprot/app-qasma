@@ -1,5 +1,6 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import '../../../../../common/helpers/helpers.dart';
 import '../../../../../common/utils/constant.dart';
 import '../../../../../core/_base/_services/storage/shared_preference.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
@@ -41,6 +42,7 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
   List<AppointmentModel> _upcomingAppointments = [];
   Map<String, UserModel> _userMap = {};
   static const bool _enableTimeFiltering = true;
+  Timer? _refreshTimer;
 
   @override
   void initState() {
@@ -51,6 +53,13 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
 
     _tabController.addListener(() {
       if (mounted) setState(() {});
+    });
+
+    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      if (mounted) {
+        _filterAppointments();
+        setState(() {});
+      }
     });
   }
 
@@ -66,6 +75,7 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
   @override
   void dispose() {
     _tabController.dispose();
+    _refreshTimer?.cancel();
     super.dispose();
   }
 
@@ -86,8 +96,15 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
       _upcomingAppointments = [];
 
       for (final appointment in approvedAppointments) {
-        if (isNowAppointment(now, appointment.scheduledStartAt) ||
-            appointment.scheduledStartAt.isBefore(now)) {
+        final appointmentLocal = DateTime(
+          appointment.scheduledStartAt.year,
+          appointment.scheduledStartAt.month,
+          appointment.scheduledStartAt.day,
+          appointment.scheduledStartAt.hour,
+          appointment.scheduledStartAt.minute,
+        );
+
+        if (!appointmentLocal.isAfter(now)) {
           _currentSessionAppointments.add(appointment);
         } else {
           _upcomingAppointments.add(appointment);

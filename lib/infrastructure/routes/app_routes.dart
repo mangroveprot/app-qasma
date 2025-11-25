@@ -38,8 +38,6 @@ class Routes {
 
   // preference routes name
   static const String settings = 'settings';
-  static const String privacy_policy = 'privacy-policy';
-  static const String terms_conditons = 'terms-conditions';
   static const String about = 'about';
 
   static String buildPath(String basePath, String routeName) {

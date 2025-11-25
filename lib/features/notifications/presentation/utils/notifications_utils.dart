@@ -30,11 +30,11 @@ class NotificationsUtils {
         'bgColor': const Color(0xFFDCFCE7),
         'iconColor': const Color(0xFF16A34A),
       };
-    } else if (upperType == NotificationType.checkInReminder.field) {
+    } else if (upperType == NotificationType.general.field) {
       return {
-        'icon': Icons.alarm,
-        'bgColor': const Color(0xFFDDD6FE),
-        'iconColor': const Color(0xFF7C3AED),
+        'icon': Icons.info_outline,
+        'bgColor': const Color(0xFFDCEEFB),
+        'iconColor': const Color(0xFF2563EB),
       };
     } else {
       return {

@@ -129,7 +129,7 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
       final response = await _apiClient.post(
         _urlProviderConfig.register,
         data: model.toJson(),
-        requiresAuth: false,
+        requiresAuth: true,
       );
 
       final apiResponse = ApiResponse.fromJson(

@@ -11,6 +11,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Future<void> Function(BuildContext context)? onBackPressed;
   final String? tooltipMessage;
   final VoidCallback? onTooltipTap;
+  final List<Widget>? actions;
 
   const CustomAppBar({
     super.key,
@@ -20,6 +21,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onBackPressed,
     this.tooltipMessage,
     this.onTooltipTap,
+    this.actions,
   });
 
   @override
@@ -37,8 +39,22 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: true,
       leadingWidth: 100,
       leading: _buildLeadingGesture(context),
-      actions: tooltipMessage != null ? [_buildTooltipAction(context)] : null,
+      actions: _buildActions(context),
     );
+  }
+
+  List<Widget>? _buildActions(BuildContext context) {
+    final List<Widget> actionWidgets = [];
+
+    if (actions != null && actions!.isNotEmpty) {
+      actionWidgets.addAll(actions!);
+    }
+
+    if (tooltipMessage != null) {
+      actionWidgets.add(_buildTooltipAction(context));
+    }
+
+    return actionWidgets.isEmpty ? null : actionWidgets;
   }
 
   Widget _buildLeadingGesture(BuildContext context) {
@@ -69,13 +85,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
         if (leadingText.isNotEmpty)
-          Text(
-            leadingText,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 12,
-              color: lowColor,
-              fontWeight: fontWeight.medium,
+          Flexible(
+            child: Text(
+              leadingText,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 12,
+                color: lowColor,
+                fontWeight: fontWeight.medium,
+              ),
             ),
           ),
       ],

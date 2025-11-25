@@ -5,6 +5,7 @@ import '../../../../../common/error/app_error.dart';
 import '../../../../../core/_base/_bloc_cubit/base_cubit.dart';
 import '../../../../../core/_usecase/usecase.dart';
 import '../../data/models/notificaiton_model.dart';
+import '../../data/models/params/notifcations_params.dart';
 
 part 'notifications_cubit_state.dart';
 
@@ -112,65 +113,6 @@ class NotificationsCubit extends BaseCubit<NotificationCubitState> {
     }
   }
 
-  Future<void> loadNotificationsByStatus({
-    required String status,
-    required Usecase usecase,
-    bool isRefreshing = false,
-  }) async {
-    if (isClosed) return;
-    _logger.d('Loading notifications by status: $status');
-    await loadNotifications(
-      params: {'status': status},
-      usecase: usecase,
-      isRefreshing: isRefreshing,
-    );
-  }
-
-  Future<void> loadNotificationsByType({
-    required String type,
-    required Usecase usecase,
-    bool isRefreshing = false,
-  }) async {
-    if (isClosed) return;
-    _logger.d('Loading notifications by type: $type');
-    await loadNotifications(
-      params: {'type': type},
-      usecase: usecase,
-      isRefreshing: isRefreshing,
-    );
-  }
-
-  Future<void> loadUnreadNotifications({
-    required Usecase usecase,
-    bool isRefreshing = false,
-  }) async {
-    if (isClosed) return;
-    _logger.d('Loading unread notifications');
-    await loadNotifications(
-      params: {'status': 'unread'},
-      usecase: usecase,
-      isRefreshing: isRefreshing,
-    );
-  }
-
-  Future<void> loadNotificationsByDateRange({
-    required DateTime startDate,
-    required DateTime endDate,
-    required Usecase usecase,
-    bool isRefreshing = false,
-  }) async {
-    if (isClosed) return;
-    _logger.d('Loading notifications from $startDate to $endDate');
-    await loadNotifications(
-      params: {
-        'startDate': startDate.toIso8601String(),
-        'endDate': endDate.toIso8601String(),
-      },
-      usecase: usecase,
-      isRefreshing: isRefreshing,
-    );
-  }
-
   Future<void> refreshNotifications({
     dynamic params,
     required Usecase usecase,
@@ -184,155 +126,34 @@ class NotificationsCubit extends BaseCubit<NotificationCubitState> {
     );
   }
 
-  void filterByStatus(String status) {
+  void markManyAsReadLocally(List<String> notificationIds) {
     if (isClosed) return;
 
     if (state is NotificationsLoadedState) {
       final currentState = state as NotificationsLoadedState;
-      final filteredNotifications = currentState.allNotifications
-          .where((notification) =>
-              notification.status.toLowerCase() == status.toLowerCase())
-          .toList();
+      final now = DateTime.now();
+      final idSet = notificationIds.toSet();
 
-      if (isClosed) return;
-
-      _logger.d(
-          'Filtered notifications by status: $status (${filteredNotifications.length} results)');
-      emit(NotificationsLoadedState(
-        filteredNotifications,
-        allNotifications: currentState.allNotifications,
-      ));
-    }
-  }
-
-  void filterByType(String type) {
-    if (isClosed) return;
-
-    if (state is NotificationsLoadedState) {
-      final currentState = state as NotificationsLoadedState;
-      final filteredNotifications = currentState.allNotifications
-          .where((notification) =>
-              notification.type.toLowerCase() == type.toLowerCase())
-          .toList();
-
-      if (isClosed) return;
-
-      _logger.d(
-          'Filtered notifications by type: $type (${filteredNotifications.length} results)');
-      emit(NotificationsLoadedState(
-        filteredNotifications,
-        allNotifications: currentState.allNotifications,
-      ));
-    }
-  }
-
-  void filterUnread() {
-    if (isClosed) return;
-
-    if (state is NotificationsLoadedState) {
-      final currentState = state as NotificationsLoadedState;
-      final unreadNotifications = currentState.allNotifications
-          .where((notification) => notification.readAt == null)
-          .toList();
-
-      if (isClosed) return;
-
-      _logger.d(
-          'Filtered unread notifications (${unreadNotifications.length} results)');
-      emit(NotificationsLoadedState(
-        unreadNotifications,
-        allNotifications: currentState.allNotifications,
-      ));
-    }
-  }
-
-  void filterRead() {
-    if (isClosed) return;
-
-    if (state is NotificationsLoadedState) {
-      final currentState = state as NotificationsLoadedState;
-      final readNotifications = currentState.allNotifications
-          .where((notification) => notification.readAt != null)
-          .toList();
-
-      if (isClosed) return;
-
-      _logger.d(
-          'Filtered read notifications (${readNotifications.length} results)');
-      emit(NotificationsLoadedState(
-        readNotifications,
-        allNotifications: currentState.allNotifications,
-      ));
-    }
-  }
-
-  void clearFilters() {
-    if (isClosed) return;
-
-    if (state is NotificationsLoadedState) {
-      final currentState = state as NotificationsLoadedState;
-      if (currentState.allNotifications.isNotEmpty) {
-        if (isClosed) return;
-        _logger.d(
-            'Cleared all filters, showing all ${currentState.allNotifications.length} notifications');
-        emit(NotificationsLoadedState(currentState.allNotifications));
-      }
-    }
-  }
-
-  void searchNotifications(String query) {
-    if (isClosed) return;
-
-    if (state is NotificationsLoadedState) {
-      final currentState = state as NotificationsLoadedState;
-      final searchResults = currentState.allNotifications
-          .where((notification) =>
-              notification.title.toLowerCase().contains(query.toLowerCase()) ||
-              notification.body.toLowerCase().contains(query.toLowerCase()) ||
-              notification.type.toLowerCase().contains(query.toLowerCase()))
-          .toList();
-
-      if (isClosed) return;
-
-      _logger.d('Search for "$query" returned ${searchResults.length} results');
-      emit(NotificationsLoadedState(
-        searchResults,
-        allNotifications: currentState.allNotifications,
-      ));
-    }
-  }
-
-  // mark notification as read locally
-  void markAsReadLocally(String notificationId) {
-    if (isClosed) return;
-
-    if (state is NotificationsLoadedState) {
-      final currentState = state as NotificationsLoadedState;
       final updatedNotifications =
           currentState.allNotifications.map((notification) {
-        if (notification.notificationId == notificationId) {
-          return notification.copyWith(
-            readAt: DateTime.now(),
-            status: 'read',
-          );
+        if (idSet.contains(notification.notificationId)) {
+          return notification.copyWith(readAt: now, status: 'read');
         }
         return notification;
       }).toList();
 
       final updatedFilteredNotifications =
           currentState.notifications.map((notification) {
-        if (notification.notificationId == notificationId) {
-          return notification.copyWith(
-            readAt: DateTime.now(),
-            status: 'read',
-          );
+        if (idSet.contains(notification.notificationId)) {
+          return notification.copyWith(readAt: now, status: 'read');
         }
         return notification;
       }).toList();
 
       if (isClosed) return;
 
-      _logger.d('Marked notification as read locally: $notificationId');
+      _logger
+          .d('Marked ${notificationIds.length} notifications as read locally');
       emit(NotificationsLoadedState(
         updatedFilteredNotifications,
         allNotifications: updatedNotifications,
@@ -340,32 +161,80 @@ class NotificationsCubit extends BaseCubit<NotificationCubitState> {
     }
   }
 
-  // revert notif if api fails
-  void _revertMarkAsRead(
-      String notificationId, NotificationModel originalNotification) {
+  void deleteManyLocally(List<String> notificationIds) {
     if (isClosed) return;
 
     if (state is NotificationsLoadedState) {
       final currentState = state as NotificationsLoadedState;
+      final idSet = notificationIds.toSet();
+
+      final updatedNotifications = currentState.allNotifications
+          .where((notification) => !idSet.contains(notification.notificationId))
+          .toList();
+
+      final updatedFilteredNotifications = currentState.notifications
+          .where((notification) => !idSet.contains(notification.notificationId))
+          .toList();
+
+      if (isClosed) return;
+
+      _logger.d('Deleted ${notificationIds.length} notifications locally');
+      emit(NotificationsLoadedState(
+        updatedFilteredNotifications,
+        allNotifications: updatedNotifications,
+      ));
+    }
+  }
+
+  void _revertDeleteMany(List<NotificationModel> deletedNotifications) {
+    if (isClosed) return;
+
+    if (state is NotificationsLoadedState) {
+      final currentState = state as NotificationsLoadedState;
+
+      final restoredNotifications = [
+        ...currentState.allNotifications,
+        ...deletedNotifications,
+      ];
+
+      final restoredFilteredNotifications = [
+        ...currentState.notifications,
+        ...deletedNotifications,
+      ];
+
+      if (isClosed) return;
+
+      _logger.w(
+          'Reverted deletion of ${deletedNotifications.length} notifications');
+      emit(NotificationsLoadedState(
+        restoredFilteredNotifications,
+        allNotifications: restoredNotifications,
+      ));
+    }
+  }
+
+  void _revertMarkManyAsRead(List<NotificationModel> originalNotifications) {
+    if (isClosed) return;
+
+    if (state is NotificationsLoadedState) {
+      final currentState = state as NotificationsLoadedState;
+      final originalMap = {
+        for (var n in originalNotifications) n.notificationId: n
+      };
+
       final revertedNotifications =
           currentState.allNotifications.map((notification) {
-        if (notification.notificationId == notificationId) {
-          return originalNotification;
-        }
-        return notification;
+        return originalMap[notification.notificationId] ?? notification;
       }).toList();
 
       final revertedFilteredNotifications =
           currentState.notifications.map((notification) {
-        if (notification.notificationId == notificationId) {
-          return originalNotification;
-        }
-        return notification;
+        return originalMap[notification.notificationId] ?? notification;
       }).toList();
 
       if (isClosed) return;
 
-      _logger.w('Reverted mark as read for notification: $notificationId');
+      _logger.w('Reverted ${originalNotifications.length} notifications');
       emit(NotificationsLoadedState(
         revertedFilteredNotifications,
         allNotifications: revertedNotifications,
@@ -373,105 +242,103 @@ class NotificationsCubit extends BaseCubit<NotificationCubitState> {
     }
   }
 
-  void markAllAsReadLocally() {
-    if (isClosed) return;
-
-    if (state is NotificationsLoadedState) {
-      final currentState = state as NotificationsLoadedState;
-      final now = DateTime.now();
-      final updatedNotifications =
-          currentState.allNotifications.map((notification) {
-        if (notification.readAt == null) {
-          return notification.copyWith(
-            readAt: now,
-            status: 'read',
-          );
-        }
-        return notification;
-      }).toList();
-
-      final updatedFilteredNotifications =
-          currentState.notifications.map((notification) {
-        if (notification.readAt == null) {
-          return notification.copyWith(
-            readAt: now,
-            status: 'read',
-          );
-        }
-        return notification;
-      }).toList();
-
-      if (isClosed) return;
-
-      final unreadCount =
-          currentState.allNotifications.where((n) => n.readAt == null).length;
-      _logger.d('Marked all $unreadCount notifications as read locally');
-      emit(NotificationsLoadedState(
-        updatedFilteredNotifications,
-        allNotifications: updatedNotifications,
-      ));
-    }
-  }
-
-  // API level
   Future<void> markAsRead({
-    required String notificationId,
+    required List<String> notificationIds,
     required Usecase usecase,
   }) async {
     if (isClosed) return;
 
-    _logger.d('Attempting to mark notification as read: $notificationId');
+    _logger.d(
+        'Attempting to mark ${notificationIds.length} notifications as read');
 
-    // Store the original notification before modifying
-    NotificationModel? originalNotification;
+    List<NotificationModel> originalNotifications = [];
     if (state is NotificationsLoadedState) {
       final currentState = state as NotificationsLoadedState;
-      try {
-        originalNotification = currentState.allNotifications.firstWhere(
-          (notification) => notification.notificationId == notificationId,
-        );
-      } catch (e) {
-        _logger
-            .w('Could not find notification to mark as read: $notificationId');
-        return;
-      }
+      final idSet = notificationIds.toSet();
+      originalNotifications = currentState.allNotifications
+          .where((n) => idSet.contains(n.notificationId))
+          .toList();
     }
 
-    // Optimistically update locally first
-    markAsReadLocally(notificationId);
+    markManyAsReadLocally(notificationIds);
 
     if (isClosed) return;
 
     try {
-      final Either result = await usecase.call(param: notificationId);
+      final Either result = await usecase.call(
+        param: NotificationsParams(notificationIds: notificationIds),
+      );
 
       if (isClosed) return;
 
       result.fold(
         (error) {
-          // API call failed - revert the local change
           _logger.e(
-              'Failed to mark notification as read on server: $notificationId - Error: $error');
-
-          if (originalNotification != null) {
-            _revertMarkAsRead(notificationId, originalNotification);
+              'Failed to mark notifications as read on server - Error: $error');
+          if (originalNotifications.isNotEmpty) {
+            _revertMarkManyAsRead(originalNotifications);
           }
         },
         (success) {
-          // Successfully synced with server
           _logger.i(
-              'Notification marked as read on server successfully: $notificationId');
+              '${notificationIds.length} notifications marked as read successfully');
         },
       );
     } catch (e, stackTrace) {
       if (isClosed) return;
+      _logger
+          .e('Exception while marking notifications as read: $e\n$stackTrace');
+      if (originalNotifications.isNotEmpty) {
+        _revertMarkManyAsRead(originalNotifications);
+      }
+    }
+  }
 
-      _logger.e(
-          'Exception while marking notification as read: $notificationId - Error: $e\n$stackTrace');
+  Future<void> deleteNotifications({
+    required List<String> notificationIds,
+    required Usecase usecase,
+  }) async {
+    if (isClosed) return;
 
-      // Exception occurred - revert the local change
-      if (originalNotification != null) {
-        _revertMarkAsRead(notificationId, originalNotification);
+    _logger.d('Attempting to delete ${notificationIds.length} notifications');
+
+    List<NotificationModel> deletedNotifications = [];
+    if (state is NotificationsLoadedState) {
+      final currentState = state as NotificationsLoadedState;
+      final idSet = notificationIds.toSet();
+      deletedNotifications = currentState.allNotifications
+          .where((n) => idSet.contains(n.notificationId))
+          .toList();
+    }
+
+    deleteManyLocally(notificationIds);
+
+    if (isClosed) return;
+
+    try {
+      final Either result = await usecase.call(
+        param: NotificationsParams(notificationIds: notificationIds),
+      );
+
+      if (isClosed) return;
+
+      result.fold(
+        (error) {
+          _logger.e('Failed to delete notifications on server - Error: $error');
+          if (deletedNotifications.isNotEmpty) {
+            _revertDeleteMany(deletedNotifications);
+          }
+        },
+        (success) {
+          _logger.i(
+              '${notificationIds.length} notifications deleted successfully');
+        },
+      );
+    } catch (e, stackTrace) {
+      if (isClosed) return;
+      _logger.e('Exception while deleting notifications: $e\n$stackTrace');
+      if (deletedNotifications.isNotEmpty) {
+        _revertDeleteMany(deletedNotifications);
       }
     }
   }
@@ -483,54 +350,20 @@ class NotificationsCubit extends BaseCubit<NotificationCubitState> {
 
     _logger.d('Attempting to mark all notifications as read');
 
-    // Store original state
-    final originalState = state is NotificationsLoadedState
-        ? (state as NotificationsLoadedState)
-        : null;
+    if (state is! NotificationsLoadedState) return;
 
-    if (originalState != null) {
-      final unreadCount =
-          originalState.allNotifications.where((n) => n.readAt == null).length;
-      _logger.d('Found $unreadCount unread notifications to mark as read');
+    final currentState = state as NotificationsLoadedState;
+    final unreadIds = currentState.allNotifications
+        .where((n) => n.readAt == null)
+        .map((n) => n.notificationId)
+        .toList();
+
+    if (unreadIds.isEmpty) {
+      _logger.d('No unread notifications to mark');
+      return;
     }
 
-    // Optimistically update locally
-    markAllAsReadLocally();
-
-    if (isClosed) return;
-
-    try {
-      final Either result = await usecase.call(param: null);
-
-      if (isClosed) return;
-
-      result.fold(
-        (error) {
-          // API call failed - revert to original state
-          _logger.e(
-              'Failed to mark all notifications as read on server - Error: $error');
-
-          if (originalState != null) {
-            if (isClosed) return;
-            emit(originalState);
-          }
-        },
-        (success) {
-          _logger.i('All notifications marked as read on server successfully');
-        },
-      );
-    } catch (e, stackTrace) {
-      if (isClosed) return;
-
-      _logger.e(
-          'Exception while marking all notifications as read - Error: $e\n$stackTrace');
-
-      // Exception occurred - revert to original state
-      if (originalState != null) {
-        if (isClosed) return;
-        emit(originalState);
-      }
-    }
+    await markAsRead(notificationIds: unreadIds, usecase: usecase);
   }
 
   @override

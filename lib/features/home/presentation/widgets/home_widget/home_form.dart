@@ -191,37 +191,54 @@ class _HomeFormState extends State<HomeForm> {
 
     return RefreshIndicator(
       onRefresh: _onRefresh,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(24),
-        children: [
-          const SizedBox(height: 60),
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: colors.textPrimary.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.calendar_today_outlined,
-              size: 58,
-              color: colors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 32),
-          Text(
-            'No appointments yet',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight,
+              ),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: colors.textPrimary.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.calendar_today_outlined,
+                          size: 58,
+                          color: colors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      Text(
+                        'No appointments yet',
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Spacing.verticalMedium,
+                      Text(
+                        'Waiting for student bookings',
+                        style: TextStyle(color: colors.textPrimary),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
-            textAlign: TextAlign.center,
-          ),
-          Spacing.verticalMedium,
-          Text(
-            'Waiting for student bookings',
-            style: TextStyle(color: colors.textPrimary),
-          ),
-        ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
