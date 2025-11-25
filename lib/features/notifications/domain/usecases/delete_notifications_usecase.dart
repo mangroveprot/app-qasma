@@ -5,9 +5,10 @@ import '../../../../infrastructure/injection/service_locator.dart';
 import '../../data/models/params/notifcations_params.dart';
 import '../repository/notificaiton_repository.dart';
 
-class MarkAsReadUsecase implements Usecase<Either, NotificationsParams> {
+class DeleteNotificationsUsecase
+    implements Usecase<Either, NotificationsParams> {
   @override
   Future<Either> call({NotificationsParams? param}) {
-    return sl<NotificationRepository>().markAsRead(param!);
+    return sl<NotificationRepository>().deleteNotifications(param!);
   }
 }

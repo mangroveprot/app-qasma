@@ -258,7 +258,7 @@ case "$action" in
         fi
         
         print_status "Building APK for '$FLAVOR'..."
-        flutter build apk --flavor "$FLAVOR" -t "lib/main_${FLAVOR}.dart"
+        flutter build apk --flavor "$FLAVOR" -t "lib/main_${FLAVOR}.dart" --target-platform android-arm,android-arm64
         
         if [ $? -eq 0 ]; then
             print_success "APK built successfully!"

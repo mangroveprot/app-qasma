@@ -58,6 +58,7 @@ class LoginPageState extends State<LoginPage> {
   }
 
   void handleSubmit(BuildContext context) {
+    FocusScope.of(context).unfocus();
     final isValid = formCubit.validateAll(_buildValidationFields());
 
     if (!isValid) return;
@@ -66,7 +67,6 @@ class LoginPageState extends State<LoginPage> {
   }
 
   void _performLogin(BuildContext context) {
-    FocusScope.of(context).unfocus();
     final password = _getTextValue(field_password);
     final isValid = isPasswordValid(password);
 

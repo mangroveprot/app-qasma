@@ -1,8 +1,8 @@
-name: qasma
+name: gcare
 description: A new Flutter project.
 publish_to: none
 
-version: 1.1.0+3
+version: 1.1.2+5
 
 environment:
   sdk: ">=2.19.0 <3.0.0"

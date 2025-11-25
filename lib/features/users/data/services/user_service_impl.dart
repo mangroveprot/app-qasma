@@ -131,7 +131,7 @@ class UserServiceImpl extends BaseService<UserModel> implements UserService {
       final response = await _apiClient.patch(
         url,
         data: param.toJson(),
-        requiresAuth: false,
+        requiresAuth: true,
       );
 
       final apiResponse = ApiResponse.fromJson(response.data, (json) => json);

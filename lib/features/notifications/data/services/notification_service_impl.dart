@@ -3,6 +3,7 @@ import 'package:logger/logger.dart';
 import '../../../../common/error/app_error.dart';
 import '../../../../common/networks/api_client.dart';
 import '../../../../common/networks/response/api_response.dart';
+import '../../../../common/widgets/toast/app_toast.dart';
 import '../../../../core/_base/_repository/base_repository/abstract_repositories.dart';
 import '../../../../core/_base/_repository/local_repository/local_repositories.dart';
 import '../../../../core/_base/_services/base_service/base_service.dart';
@@ -11,6 +12,7 @@ import '../../../../infrastructure/injection/service_locator.dart';
 import '../../domain/entities/notification.dart';
 import '../../domain/services/notification_service.dart';
 import '../models/notificaiton_model.dart';
+import '../models/params/notifcations_params.dart';
 
 class NotificationServiceImpl extends BaseService<NotificationModel>
     implements NotificationService {
@@ -83,36 +85,69 @@ class NotificationServiceImpl extends BaseService<NotificationModel>
   }
 
   @override
-  Future<Either<AppError, bool>> markAsRead(String notificationId) async {
-    NotificationModel? originalNotification;
-
-    originalNotification = await localRepo.getItemById(notificationId);
-
-    if (originalNotification == null) {
-      return Left(AppError.create(
-        message: 'Notification not found',
-        type: ErrorType.notFound,
-      ));
-    }
+  Future<Either<AppError, bool>> markAsRead(
+      NotificationsParams notificationParams) async {
+    final notificationIds = notificationParams.notificationIds;
+    List<NotificationModel> originalNotifications = [];
 
     try {
+      final notifications = await Future.wait(
+        notificationIds.map((id) => localRepo.getItemById(id)),
+      );
+
+      originalNotifications =
+          notifications.whereType<NotificationModel>().toList();
+
+      if (originalNotifications.isEmpty) {
+        return Left(AppError.create(
+          message: 'No notifications found',
+          type: ErrorType.notFound,
+        ));
+      }
+
       final url = _urlProviderConfig.addPathSegments(
         _urlProviderConfig.notificationEndPoint,
-        [notificationId, 'read'],
+        ['read'],
       );
 
-      final response = await _apiClient.patch(url, requiresAuth: true);
+      final response = await _apiClient.patch(
+        url,
+        data: notificationParams.toJson(),
+        requiresAuth: true,
+      );
+
       final apiResponse = ApiResponse.fromJson(
         response.data,
-        (json) => NotificationModel.fromJson(json),
+        (json) => {'modifiedCount': json['modifiedCount']},
       );
 
-      if (apiResponse.isSuccess && apiResponse.document != null) {
-        await localRepo.saveItem(apiResponse.document);
+      if (apiResponse.isSuccess) {
+        final now = DateTime.now();
+        final modifiedCount = apiResponse.document?['modifiedCount'] ?? 0;
+
+        _logger.i(
+            'Marked $modifiedCount of ${notificationIds.length} notifications as read');
+
+        if (modifiedCount < notificationIds.length) {
+          _logger.w(
+              'Some notifications were not updated: expected ${notificationIds.length}, got $modifiedCount');
+        }
+        await Future.wait(
+          originalNotifications.map((notification) {
+            final updatedNotification = notification.copyWith(
+              status: 'read',
+              readAt: now,
+            );
+            return localRepo.saveItem(updatedNotification);
+          }),
+        );
         return const Right(true);
       }
 
-      await repository.saveItem(originalNotification);
+      await Future.wait(
+        originalNotifications
+            .map((notification) => localRepo.saveItem(notification)),
+      );
 
       return Left(apiResponse.error ??
           AppError.create(
@@ -122,10 +157,87 @@ class NotificationServiceImpl extends BaseService<NotificationModel>
     } catch (e, stackTrace) {
       _logger.e('API failed, rolling back', e, stackTrace);
 
-      await repository.saveItem(originalNotification);
+      await Future.wait(
+        originalNotifications
+            .map((notification) => localRepo.saveItem(notification)),
+      );
 
       return Left(AppError.create(
-        message: 'Failed to mark notification as read',
+        message: 'Failed to mark notifications as read',
+        type: ErrorType.network,
+        originalError: e,
+        stackTrace: stackTrace,
+      ));
+    }
+  }
+
+  @override
+  Future<Either<AppError, bool>> deleteNotifications(
+      NotificationsParams notificationParams) async {
+    final notificationIds = notificationParams.notificationIds;
+    List<NotificationModel> originalNotifications = [];
+
+    try {
+      final notifications = await Future.wait(
+        notificationIds.map((id) => localRepo.getItemById(id)),
+      );
+
+      originalNotifications =
+          notifications.whereType<NotificationModel>().toList();
+
+      if (originalNotifications.isEmpty) {
+        return Left(AppError.create(
+          message: 'No notifications found',
+          type: ErrorType.notFound,
+        ));
+      }
+
+      final response = await _apiClient.delete(
+        _urlProviderConfig.notificationEndPoint,
+        data: notificationParams.toJson(),
+        requiresAuth: true,
+      );
+
+      final apiResponse = ApiResponse.fromJson(
+        response.data,
+        (json) => {'deletedCount': json['deletedCount']},
+      );
+
+      if (apiResponse.isSuccess) {
+        final deletedCount = apiResponse.document?['deletedCount'] ?? 0;
+
+        _logger.i(
+            'Deleted $deletedCount of ${notificationIds.length} notifications');
+
+        if (deletedCount < notificationIds.length) {
+          _logger.w(
+              'Some notifications were not deleted: expected ${notificationIds.length}, got $deletedCount');
+        }
+
+        await Future.wait(
+          originalNotifications.map((notification) =>
+              localRepo.deleteItemById(notification.notificationId)),
+        );
+
+        AppToast.show(
+          message:
+              'Successfully deleted $deletedCount notification${deletedCount > 1 ? 's' : ''}',
+          type: ToastType.success,
+        );
+
+        return const Right(true);
+      }
+
+      return Left(apiResponse.error ??
+          AppError.create(
+            message: 'Failed to delete notifications',
+            type: ErrorType.server,
+          ));
+    } catch (e, stackTrace) {
+      _logger.e('API failed, no rollback needed for delete', e, stackTrace);
+
+      return Left(AppError.create(
+        message: 'Failed to delete notifications',
         type: ErrorType.network,
         originalError: e,
         stackTrace: stackTrace,

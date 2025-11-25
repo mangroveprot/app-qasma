@@ -1,106 +1,26 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../common/helpers/helpers.dart';
+import '../../../../../common/utils/constant.dart';
 import '../../../../../theme/theme_extensions.dart';
-import '../../../../preferences/presentation/pages/privacy_policy_page.dart';
-import '../../../../preferences/presentation/pages/terms_and_conditions.dart';
 
 class CreateAccountTermsFooter extends StatelessWidget {
   const CreateAccountTermsFooter({Key? key}) : super(key: key);
 
-  void _openTermsAndConditions(BuildContext context) {
-    final colors = context.colors;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.9,
-          maxChildSize: 0.95,
-          minChildSize: 0.5,
-          builder: (context, scrollController) {
-            return Container(
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(top: 8),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: colors.textPrimary,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.all(16),
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      controller: scrollController,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: const TermsConditionsContent(),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _openPrivacyPolicy(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.9,
-          maxChildSize: 0.95,
-          minChildSize: 0.5,
-          builder: (context, scrollController) {
-            return Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(top: 8),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      controller: scrollController,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: const PrivacyPolicyContent(),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    Future<void> _redirectPrivacy() async {
+      final Uri mapsUri = Uri.parse(gcareapp_privacy);
+
+      launchExternalUrl(uri: mapsUri);
+    }
+
+    Future<void> _redirectTerms() async {
+      final Uri mapsUri = Uri.parse(gcareapp_terms);
+
+      launchExternalUrl(uri: mapsUri);
+    }
 
     return Wrap(
       alignment: WrapAlignment.center,
@@ -115,13 +35,7 @@ class CreateAccountTermsFooter extends StatelessWidget {
           ),
         ),
         GestureDetector(
-          onTap: () {
-            try {
-              _openTermsAndConditions(context);
-            } catch (e) {
-              debugPrint('Error opening terms: $e');
-            }
-          },
+          onTap: _redirectTerms,
           child: Text(
             'Terms and Conditions',
             style: TextStyle(
@@ -142,13 +56,7 @@ class CreateAccountTermsFooter extends StatelessWidget {
           ),
         ),
         GestureDetector(
-          onTap: () {
-            try {
-              _openPrivacyPolicy(context);
-            } catch (e) {
-              debugPrint('Error opening privacy policy: $e');
-            }
-          },
+          onTap: _redirectPrivacy,
           child: Text(
             'Privacy Policy',
             style: TextStyle(

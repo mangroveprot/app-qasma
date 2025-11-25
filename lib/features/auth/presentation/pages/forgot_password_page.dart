@@ -55,6 +55,7 @@ class ForgotPasswordPageState extends State<ForgotPasswordPage> {
   }
 
   void handleSubmit(BuildContext context) {
+    FocusScope.of(context).unfocus();
     final isValid = formCubit.validateAll(_buildValidationFields());
 
     if (!isValid) return;

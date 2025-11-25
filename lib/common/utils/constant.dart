@@ -28,7 +28,7 @@ class NotificationType {
       Property(field: 'APPOINTMENT_CONFIRMED');
   static Property appointmentCompleted =
       Property(field: 'APPOINTMENT_COMPLETED');
-  static Property checkInReminder = Property(field: 'CHECK_IN_REMINDER');
+  static Property general = Property(field: 'GENERAL');
 }
 
 class SharedPrefStrings {
@@ -39,6 +39,8 @@ String get guidance_email => 'katipunan.guidance@jrmsu.edu.ph';
 String get feedback_url => 'https://jrmsu.online/feedback/';
 String get guidance_fb_url => 'https://m.facebook.com/jrmsuk.guidanceoffice';
 String get jrmsu_guidance_map => 'https://maps.app.goo.gl/qywZG2wXxTS6eJov5';
+String get gcareapp_terms => 'https://terms.jrmsu-gcare.com';
+String get gcareapp_privacy => 'https://privacy.jrmsu-gcare.com';
 
 const Map<String, dynamic> name = {
   'name': 'First Name',

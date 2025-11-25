@@ -46,6 +46,7 @@ import '../../features/notifications/data/repository/notification_repository_imp
 import '../../features/notifications/data/services/notification_service_impl.dart';
 import '../../features/notifications/domain/repository/notificaiton_repository.dart';
 import '../../features/notifications/domain/services/notification_service.dart';
+import '../../features/notifications/domain/usecases/delete_notifications_usecase.dart';
 import '../../features/notifications/domain/usecases/get_notification_counts_usecase.dart';
 import '../../features/notifications/domain/usecases/get_notification_usecase.dart';
 import '../../features/notifications/domain/usecases/mark_as_read_usecase.dart';
@@ -336,6 +337,8 @@ void _registerUseCases() {
     ..registerLazySingleton<GetNotificationUsecase>(
         () => GetNotificationUsecase())
     ..registerLazySingleton<MarkAsReadUsecase>(() => MarkAsReadUsecase())
+    ..registerLazySingleton<DeleteNotificationsUsecase>(
+        () => DeleteNotificationsUsecase())
     ..registerLazySingleton<SyncNotificationsUsecase>(
         () => SyncNotificationsUsecase());
 }

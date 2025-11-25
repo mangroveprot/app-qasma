@@ -348,7 +348,7 @@ class BookAppointmentPageState extends State<BookAppointmentPage> {
 
       if (onSuccess != null) {
         try {
-          await onSuccess();
+          onSuccess();
         } catch (e) {
           debugPrint('Error calling success callback: $e');
         }

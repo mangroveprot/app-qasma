@@ -8,6 +8,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String leadingText;
   final Color? backgroundColor;
   final Future<void> Function(BuildContext context)? onBackPressed;
+  final List<Widget>? actions;
 
   const CustomAppBar({
     super.key,
@@ -15,6 +16,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.backgroundColor = Colors.transparent,
     this.leadingText = '',
     this.onBackPressed,
+    this.actions,
   });
 
   @override
@@ -32,7 +34,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: true,
       leadingWidth: 100,
       leading: _buildLeadingGesture(context),
-      // actions: [_buildActionGesture(context)],
+      actions: actions,
     );
   }
 
@@ -62,13 +64,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
         if (leadingText.isNotEmpty)
-          Text(
-            leadingText,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 12,
-              color: lowColor,
-              fontWeight: fontWeight.medium,
+          Flexible(
+            child: Text(
+              leadingText,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 12,
+                color: lowColor,
+                fontWeight: fontWeight.medium,
+              ),
             ),
           ),
       ],

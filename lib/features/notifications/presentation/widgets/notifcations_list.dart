@@ -10,10 +10,16 @@ import 'notification_empty_content.dart';
 
 class NotificationsListWidget extends StatefulWidget {
   final NotificationsPageState state;
+  final bool isSelectionMode;
+  final Set<String> selectedNotificationIds;
+  final Function(String) onNotificationSelect;
 
   const NotificationsListWidget({
     super.key,
     required this.state,
+    required this.isSelectionMode,
+    required this.selectedNotificationIds,
+    required this.onNotificationSelect,
   });
 
   @override
@@ -47,10 +53,18 @@ class _NotificationsListWidgetState extends State<NotificationsListWidget> {
   int getTotalPages(int totalCount) =>
       totalCount == 0 ? 0 : (totalCount / itemsPerPage).ceil();
 
-  void markAsRead(String id) {
+  void markAsRead(List<String> ids) {
+    if (widget.isSelectionMode) return;
     final cubit = context.read<NotificationsCubit>();
     cubit.markAsRead(
-      notificationId: id,
+      notificationIds: ids,
+      usecase: widget.state.controller.markAsReadUsecase,
+    );
+  }
+
+  void markAllAsRead() {
+    final cubit = context.read<NotificationsCubit>();
+    cubit.markAllAsRead(
       usecase: widget.state.controller.markAsReadUsecase,
     );
   }
@@ -75,7 +89,14 @@ class _NotificationsListWidgetState extends State<NotificationsListWidget> {
         DateTime.now().difference(_lastRefreshTime!) < _refreshCooldown;
   }
 
-  void _handlePageChange(int newPage) {
+  void _handlePageChange(int newPage, int totalPages) {
+    if (newPage >= totalPages) {
+      newPage = totalPages > 0 ? totalPages - 1 : 0;
+    }
+    if (newPage < 0) {
+      newPage = 0;
+    }
+
     setState(() => currentPage = newPage);
 
     if (_scrollController.hasClients) {
@@ -98,6 +119,15 @@ class _NotificationsListWidgetState extends State<NotificationsListWidget> {
 
         if (previous is NotificationsLoadedState &&
             current is NotificationsLoadedState) {
+          final newTotalPages = getTotalPages(current.notifications.length);
+          if (currentPage >= newTotalPages && newTotalPages > 0) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                setState(() => currentPage = newTotalPages - 1);
+              }
+            });
+          }
+
           return previous.notifications != current.notifications ||
               previous.allNotifications != current.allNotifications;
         }
@@ -114,10 +144,17 @@ class _NotificationsListWidgetState extends State<NotificationsListWidget> {
             notifications: state.notifications,
             onRefresh: _onRefresh,
             onMarkAsRead: markAsRead,
+            onMarkAllAsRead: markAllAsRead,
             currentPage: currentPage,
             itemsPerPage: itemsPerPage,
-            onPageChanged: _handlePageChange,
+            onPageChanged: (newPage) => _handlePageChange(
+              newPage,
+              getTotalPages(state.notifications.length),
+            ),
             scrollController: _scrollController,
+            isSelectionMode: widget.isSelectionMode,
+            selectedNotificationIds: widget.selectedNotificationIds,
+            onNotificationSelect: widget.onNotificationSelect,
           );
         }
 

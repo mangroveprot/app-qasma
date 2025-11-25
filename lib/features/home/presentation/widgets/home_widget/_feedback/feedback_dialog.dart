@@ -64,30 +64,36 @@ class FeedbackDialog {
       child: Column(
         children: [
           _buildInfoRow(
-            Icons.info_outline,
             redirectMsg ?? 'You\'ll be redirected to JRMSU Feedback Form',
             colors,
             15,
           ),
           if (time != null) ...[
             const SizedBox(height: 6),
-            _buildInfoRow(Icons.schedule, time, colors, 14, isSubdued: true),
+            _buildInfoRow(
+              time,
+              colors,
+              14,
+              icon: Icons.schedule,
+              isSubdued: true,
+            ),
           ],
         ],
       ),
     );
   }
 
-  static Widget _buildInfoRow(
-      IconData icon, String text, dynamic colors, double iconSize,
-      {bool isSubdued = false}) {
+  static Widget _buildInfoRow(String text, dynamic colors, double iconSize,
+      {IconData? icon, bool isSubdued = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(icon,
-            size: iconSize,
-            color: colors.textPrimary.withOpacity(isSubdued ? 0.4 : 0.5)),
-        SizedBox(width: isSubdued ? 4 : 6),
+        if (icon != null) ...[
+          Icon(icon,
+              size: iconSize,
+              color: colors.textPrimary.withOpacity(isSubdued ? 0.4 : 0.5)),
+          SizedBox(width: isSubdued ? 4 : 6),
+        ],
         Flexible(
           child: Text(
             text,

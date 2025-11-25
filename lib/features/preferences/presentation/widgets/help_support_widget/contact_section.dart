@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../../common/helpers/helpers.dart';
 import '../../../../../common/utils/constant.dart';
 import '../../../../../theme/theme_extensions.dart';
 import 'about_section_container.dart';
@@ -100,8 +101,6 @@ class _LocationContactButton extends StatelessWidget {
   Future<void> _openMaps() async {
     final Uri mapsUri = Uri.parse(jrmsu_guidance_map);
 
-    if (await canLaunchUrl(mapsUri)) {
-      await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
-    }
+    launchExternalUrl(uri: mapsUri);
   }
 }

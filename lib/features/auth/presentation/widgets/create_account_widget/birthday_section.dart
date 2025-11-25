@@ -49,7 +49,7 @@ class BirthdateSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Birthdate:',
+          'Date of Birth:',
           style: TextStyle(
             color: context.colors.textPrimary,
             fontSize: 14,
