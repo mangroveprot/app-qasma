@@ -1,20 +1,33 @@
 import 'package:flutter/material.dart';
+import '../../../../../common/helpers/helpers.dart';
+import '../../../../../common/utils/constant.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
-import '../../pages/privacy_policy_page.dart';
 
 class FooterLinks extends StatelessWidget {
   const FooterLinks({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    Future<void> _redirectPrivacy() async {
+      final Uri mapsUri = Uri.parse(gcareapp_privacy);
+
+      launchExternalUrl(uri: mapsUri);
+    }
+
+    Future<void> _redirectTerms() async {
+      final Uri mapsUri = Uri.parse(gcareapp_terms);
+
+      launchExternalUrl(uri: mapsUri);
+    }
+
     final colors = context.colors;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         InkWell(
-          onTap: () {},
+          onTap: _redirectTerms,
           child: Text(
-            'Policies & Guidelines',
+            'Terms and Conditions',
             style: TextStyle(
               fontSize: 10,
               color: colors.secondary,
@@ -23,7 +36,7 @@ class FooterLinks extends StatelessWidget {
         ),
         Text('  |  ', style: TextStyle(color: colors.textPrimary)),
         InkWell(
-          onTap: () => _openPrivacyPolicy(context),
+          onTap: _redirectPrivacy,
           child: Text(
             'Privacy Policy',
             style: TextStyle(
@@ -44,51 +57,6 @@ class FooterLinks extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  void _openPrivacyPolicy(BuildContext context) {
-    final colors = context.colors;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.9,
-          maxChildSize: 0.95,
-          minChildSize: 0.5,
-          builder: (context, scrollController) {
-            return Container(
-              decoration: BoxDecoration(
-                color: colors.white,
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(top: 8),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: colors.white.withOpacity(0.6),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      controller: scrollController,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: const PrivacyPolicyContent(),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
     );
   }
 }

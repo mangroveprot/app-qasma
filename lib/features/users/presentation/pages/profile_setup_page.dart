@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../common/helpers/helpers.dart';
 import '../../../../common/utils/form_field_config.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 
@@ -50,7 +51,17 @@ class ProfileSetupPageState extends State<ProfileSetupPage> {
   Future<void> nextStep(BuildContext context) async {
     final email = controller.getTextValue(field_email);
     final cubit = context.read<ButtonCubit>();
+    final formCubit = context.read<FormCubit>();
+    final fbURL = controller.getTextValue(field_facebook);
     FocusScope.of(context).unfocus();
+
+    final isValidFbURL = isFacebookValid(fbURL);
+
+    if (fbURL.isNotEmpty && !isValidFbURL)
+      return formCubit.setFieldError(
+        field_facebook.field_key,
+        'We couldn\'t recognize that Facebook link. Example: facebook.com/username or facebook.com/profile.php?id=123456789.',
+      );
 
     if (email.isNotEmpty) {
       cubit.emitLoading();
@@ -146,7 +157,6 @@ class ProfileSetupPageState extends State<ProfileSetupPage> {
             message: message,
             type: ToastType.error,
           );
-          await Future.delayed(const Duration(milliseconds: 1500));
         }
       });
 
@@ -155,13 +165,16 @@ class ProfileSetupPageState extends State<ProfileSetupPage> {
           message: suggestion,
           type: ToastType.original,
         );
-        await Future.delayed(const Duration(milliseconds: 2000));
+        await Future.delayed(const Duration(seconds: 4));
       }
     }
     if (state is ButtonSuccessState) {
       final hasFirstName =
           SharedPrefs().getString('currentUserFirstName') ?? '';
       if (hasFirstName.isNotEmpty) {
+        AppToast.show(
+            message: 'Profile setup completed successfully.',
+            type: ToastType.success);
         return context.go(Routes.root);
       }
     }

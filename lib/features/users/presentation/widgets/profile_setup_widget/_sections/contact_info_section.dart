@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../../../common/helpers/spacing.dart';
 import '../../../../../../common/utils/form_field_config.dart';
 import '../../../../../../common/widgets/custom_form_field.dart';
+import 'phone_number_field.dart';
 
 class ContactInfoSection extends StatelessWidget {
   final TextEditingController addressController;
@@ -48,16 +49,11 @@ class ContactInfoSection extends StatelessWidget {
           ],
         ),
         Spacing.verticalMedium,
-        Row(
-          children: [
-            CustomFormField(
-              field_key: field_contact_number.field_key,
-              name: field_contact_number.name,
-              hint: field_contact_number.hint,
-              controller: contactController,
-              required: true,
-            ),
-          ],
+        PhoneNumberField(
+          label: field_contact_number.name,
+          hint: field_contact_number.hint,
+          controller: contactController,
+          required: true,
         ),
         Spacing.verticalMedium,
         // Facebook

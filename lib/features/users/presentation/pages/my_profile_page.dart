@@ -94,7 +94,6 @@ class MyProfilePageState extends State<MyProfilePage> {
             message: message,
             type: ToastType.error,
           );
-          await Future.delayed(const Duration(milliseconds: 1500));
         }
       });
 
@@ -103,7 +102,7 @@ class MyProfilePageState extends State<MyProfilePage> {
           message: suggestion,
           type: ToastType.original,
         );
-        await Future.delayed(const Duration(milliseconds: 2000));
+        await Future.delayed(const Duration(seconds: 4));
       }
     }
     if (state is ButtonSuccessState) {}

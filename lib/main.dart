@@ -9,7 +9,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'common/error/global_error_handler.dart';
 import 'common/manager/auth_manager.dart';
 import 'common/manager/update_manager.dart';
-import 'common/presentation/pages/app_background.dart';
 import 'common/widgets/bloc/connections/connection_cubit.dart';
 import 'common/widgets/bloc/form/form_cubit.dart';
 import 'common/widgets/connection_banner.dart/connection_banner.dart';
@@ -92,24 +91,22 @@ class _MyAppState extends State<MyApp> {
         builder: (context, child) {
           child = BotToastInit()(context, child);
 
-          return AppBackground(
-            child: MultiBlocListener(
-              listeners: [
-                BlocListener<AuthCubit, AuthState>(
-                  listener: (context, state) {
-                    if (mounted && context.mounted) {
-                      AuthManager.handleAuthStateChanges(context, state);
-                    }
-                  },
-                ),
-                BlocListener<UpdateCubit, UpdateCubitState>(
-                  listener: (context, state) {
-                    UpdateManager.handleUpdateStateChanges(context, state);
-                  },
-                ),
-              ],
-              child: ConnectionBanner(child: child),
-            ),
+          return MultiBlocListener(
+            listeners: [
+              BlocListener<AuthCubit, AuthState>(
+                listener: (context, state) {
+                  if (mounted && context.mounted) {
+                    AuthManager.handleAuthStateChanges(context, state);
+                  }
+                },
+              ),
+              BlocListener<UpdateCubit, UpdateCubitState>(
+                listener: (context, state) {
+                  UpdateManager.handleUpdateStateChanges(context, state);
+                },
+              ),
+            ],
+            child: ConnectionBanner(child: child),
           );
         },
       ),

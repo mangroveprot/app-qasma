@@ -13,9 +13,7 @@ import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../../features/preferences/presentation/pages/about_page.dart';
 import '../../features/preferences/presentation/pages/dashboard_page.dart';
-import '../../features/preferences/presentation/pages/privacy_policy_page.dart';
 import '../../features/preferences/presentation/pages/settings_page.dart';
-import '../../features/preferences/presentation/pages/terms_and_conditions.dart';
 import '../../features/splash/splash_screen.dart';
 import '../../features/users/presentation/pages/create_user_page.dart';
 import '../../features/users/presentation/pages/my_profile_page.dart';
@@ -108,14 +106,6 @@ class AppRouter {
           GoRoute(
             path: Routes.settings,
             builder: (context, state) => const SettingsPage(),
-          ),
-          GoRoute(
-            path: Routes.privacy_policy,
-            builder: (context, state) => const PrivacyPolicyPage(),
-          ),
-          GoRoute(
-            path: Routes.terms_conditons,
-            builder: (context, state) => const TermsAndConditionPage(),
           ),
           GoRoute(
             path: Routes.about,

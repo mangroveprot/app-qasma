@@ -7,11 +7,15 @@ import '../utils/notifications_utils.dart';
 class NotificationCardWidget extends StatelessWidget {
   final NotificationModel notification;
   final VoidCallback onTap;
+  final bool isSelectionMode;
+  final bool isSelected;
 
   const NotificationCardWidget({
     super.key,
     required this.notification,
     required this.onTap,
+    this.isSelectionMode = false,
+    this.isSelected = false,
   });
 
   bool get isUnread => notification.readAt == null;
@@ -19,7 +23,6 @@ class NotificationCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final fontWeight = context.weight;
     final config = NotificationsUtils.getNotificationConfig(notification.type);
     final additionalInfo = NotificationsUtils.getAdditionalInfo(
       notification.type,
@@ -30,15 +33,23 @@ class NotificationCardWidget extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8, left: 12, right: 12),
       decoration: BoxDecoration(
-        color: isUnread ? const Color(0xFFF0F9FF) : colors.white,
+        color: isSelected
+            ? const Color(0xFFE3F2FD)
+            : isUnread
+                ? const Color(0xFFF0F9FF)
+                : colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isUnread ? const Color(0xFFE0F2FE) : const Color(0xFFF3F4F6),
-          width: 1,
+          color: isSelected
+              ? colors.secondary
+              : isUnread
+                  ? const Color(0xFFE0F2FE)
+                  : const Color(0xFFF3F4F6),
+          width: isSelected ? 2 : 1,
         ),
       ),
       child: InkWell(
-        onTap: isUnread ? onTap : null,
+        onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(14),
@@ -81,31 +92,56 @@ class NotificationCardWidget extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Row(
-                          children: [
-                            Text(
-                              timeAgo,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                                color: isUnread
+                        if (isSelectionMode)
+                          Container(
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isSelected
                                     ? colors.secondary
-                                    : colors.textPrimary,
+                                    : const Color(0xFFD1D5DB),
+                                width: 2,
                               ),
+                              color: isSelected
+                                  ? colors.secondary
+                                  : Colors.transparent,
                             ),
-                            if (isUnread) ...[
-                              const SizedBox(width: 6),
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: colors.secondary,
-                                  shape: BoxShape.circle,
+                            child: isSelected
+                                ? const Icon(
+                                    Icons.check,
+                                    size: 16,
+                                    color: Colors.white,
+                                  )
+                                : null,
+                          )
+                        else
+                          Row(
+                            children: [
+                              Text(
+                                timeAgo,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: isUnread
+                                      ? colors.secondary
+                                      : colors.textPrimary,
                                 ),
                               ),
+                              if (isUnread) ...[
+                                const SizedBox(width: 6),
+                                Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    color: colors.secondary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ],
                             ],
-                          ],
-                        ),
+                          ),
                       ],
                     ),
                     const SizedBox(height: 6),

@@ -109,8 +109,7 @@ class ProfileFormUtils {
   ) {
     return {
       'idNumber': user.idNumber,
-      if (user.role == RoleType.student.field) 'active': user.active,
-      if (user.role == RoleType.student.field) 'verified': user.verified,
+      'active': user.active,
       'first_name': controllers['first_name']?.text ?? '',
       'last_name': controllers['last_name']?.text ?? '',
       'middle_name': controllers['middle_name']?.text ?? '',

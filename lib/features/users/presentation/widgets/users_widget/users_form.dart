@@ -54,8 +54,10 @@ class _UsersFormState extends State<UsersForm> {
     }).toList();
   }
 
-  Future<void> _onRefresh() async {
-    if (_isRefreshing || _shouldThrottle) return;
+  Future<void> _onRefresh({bool bypassThrottle = false}) async {
+    if (_isRefreshing) return;
+
+    if (!bypassThrottle && _shouldThrottle) return;
 
     setState(() => _isRefreshing = true);
 
@@ -155,7 +157,7 @@ class _LoadingContent extends StatelessWidget {
 
 class _LoadedContent extends StatelessWidget {
   final List<UserModel> users;
-  final Future<void> Function() onRefresh;
+  final Future<void> Function({bool bypassThrottle}) onRefresh;
 
   const _LoadedContent({
     Key? key,
@@ -170,7 +172,7 @@ class _LoadedContent extends StatelessWidget {
     }
 
     return RefreshIndicator(
-      onRefresh: onRefresh,
+      onRefresh: () => onRefresh(bypassThrottle: false),
       child: ListView.builder(
         itemCount: users.length,
         itemBuilder: (context, index) {
@@ -178,7 +180,7 @@ class _LoadedContent extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(bottom: 12, left: 16, right: 16),
               child: UserItem(
-                onRefresh: onRefresh,
+                onRefresh: () => onRefresh(bypassThrottle: true),
                 model: users[index],
                 count: '${index + 1}',
               ),

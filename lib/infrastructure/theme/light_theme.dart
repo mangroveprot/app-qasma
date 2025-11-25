@@ -8,7 +8,7 @@ import 'app_radii.dart';
 
 final ThemeData lightTheme = ThemeData(
   useMaterial3: true,
-  scaffoldBackgroundColor: Colors.transparent,
+  scaffoldBackgroundColor: AppColors.lightColors.white,
   appBarTheme: const AppBarTheme(
     elevation: 1,
     backgroundColor: Colors.white,

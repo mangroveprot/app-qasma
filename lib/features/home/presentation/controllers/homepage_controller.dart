@@ -144,6 +144,9 @@ class HomePageController {
 
   Future<void> appoitnmentRefreshData() async {
     await _appointmentManager.refreshAppointments(_appointmentsCubit);
+    await _notificationsManager.refreshNotifications(_notificationCubit);
+    _unreadCount = await _notificationsManager.getUnreadCounts();
+    _onUnreadCountChanged?.call();
   }
 
   UserModel? getUserByIdNumber(String idNumber) {
