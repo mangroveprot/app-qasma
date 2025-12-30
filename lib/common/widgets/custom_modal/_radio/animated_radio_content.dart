@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../utils/form_field_config.dart';
-import '../../bloc/form/form_cubit.dart';
 import '../../bloc/button/button_cubit.dart';
-import '../../custom_form_field.dart';
 import '../../modal.dart';
 import '../../models/modal_option.dart';
+import '../../toast/app_toast.dart';
 import 'confirmation_button.dart';
 import 'enhanced_radio_card.dart';
+
+enum SelectedOptionType {
+  value,
+  title,
+  subtitle,
+}
 
 class AnimatedRadioContent<T> extends StatefulWidget {
   final List<ModalOption> options;
@@ -16,9 +20,10 @@ class AnimatedRadioContent<T> extends StatefulWidget {
   final String? subtitle;
   final String confirmButtonText;
   final String cancelButtonText;
-  final String? buttonId;
   final String othersPlaceholder;
   final Future<T> Function(String selectedReason)? onConfirm;
+  final SelectedOptionType selectedOptionType;
+  final String? buttonId;
 
   const AnimatedRadioContent({
     super.key,
@@ -29,6 +34,7 @@ class AnimatedRadioContent<T> extends StatefulWidget {
     this.cancelButtonText = 'Cancel',
     this.othersPlaceholder = 'Please specify...',
     this.onConfirm,
+    required this.selectedOptionType,
     this.buttonId,
   });
 
@@ -41,8 +47,8 @@ class _AnimatedRadioContentState<T> extends State<AnimatedRadioContent<T>> {
   String? _selectedValue;
   final TextEditingController _othersController = TextEditingController();
   final FocusNode _othersFocusNode = FocusNode();
+  bool _hasOthersError = false;
 
-  // Cache the selected option to avoid repeated firstWhere calls
   ModalOption? _cachedSelectedOption;
 
   @override
@@ -59,6 +65,7 @@ class _AnimatedRadioContentState<T> extends State<AnimatedRadioContent<T>> {
     setState(() {
       _selectedValue = option.value;
       _cachedSelectedOption = option; // Cache to avoid lookup
+      _hasOthersError = false; // Clear error when option changes
     });
 
     if (option.requiresInput) {
@@ -70,28 +77,65 @@ class _AnimatedRadioContentState<T> extends State<AnimatedRadioContent<T>> {
     }
   }
 
+  String _getSelectedOptionValue(ModalOption option) {
+    switch (widget.selectedOptionType) {
+      case SelectedOptionType.value:
+        return option.value;
+      case SelectedOptionType.title:
+        return option.title;
+      case SelectedOptionType.subtitle:
+        return option.subtitle ??
+            option.title; // Fallback to title if subtitle is null
+    }
+  }
+
   Future<void> _handleConfirm() async {
     if (_selectedValue == null) return;
 
-    // Use cached option instead of firstWhere lookup
     final selectedOption = _cachedSelectedOption ??
         widget.options.firstWhere((option) => option.value == _selectedValue);
 
     if (selectedOption.requiresInput) {
-      final formCubit = context.read<FormCubit>();
-      final isValid = formCubit.validateAll({
-        field_other_option.field_key: _othersController.text,
-      });
+      final othersText = _othersController.text.trim();
 
-      if (!isValid) return;
+      if (othersText.isEmpty) {
+        setState(() {
+          _hasOthersError = true;
+        });
+
+        _othersFocusNode.requestFocus();
+
+        AppToast.show(
+            message: 'Please specify the reason', type: ToastType.error);
+        return;
+      }
+
+      // Additional validation: minimum length
+      if (othersText.length < 3) {
+        setState(() {
+          _hasOthersError = true;
+        });
+
+        _othersFocusNode.requestFocus();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+                'Please provide more details (at least 3 characters)'),
+            backgroundColor: Colors.red[600],
+            duration: const Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
     }
 
     String result;
 
     if (selectedOption.requiresInput && _othersController.text.isNotEmpty) {
-      result = _othersController.text;
+      result = _othersController.text.trim();
     } else {
-      result = selectedOption.subtitle ?? selectedOption.title;
+      result = _getSelectedOptionValue(selectedOption);
     }
 
     if (widget.onConfirm != null) {
@@ -105,46 +149,42 @@ class _AnimatedRadioContentState<T> extends State<AnimatedRadioContent<T>> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => ButtonCubit(),
-      child: Scaffold(
-        resizeToAvoidBottomInset: true,
-        backgroundColor: Colors.transparent,
-        body: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              child: ModalUI.header(
-                widget.title,
-                subtitle: widget.subtitle,
-                onClose: () => Navigator.pop(context),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            child: ModalUI.header(
+              widget.title,
+              subtitle: widget.subtitle,
+              onClose: () => Navigator.pop(context),
+            ),
+          ),
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.only(
+                left: 20,
+                right: 20,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildAnimatedOptionsList(context),
+                  if (_selectedValue != null &&
+                      (_cachedSelectedOption?.requiresInput == true))
+                    _buildOthersTextField(context),
+                  const SizedBox(height: 30),
+                  ConfirmationButton(
+                    buttonId: widget.buttonId,
+                    onPressedAsync: _handleConfirm,
+                    labelText: widget.confirmButtonText,
+                  ),
+                  const SizedBox(height: 20),
+                ],
               ),
             ),
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(
-                  left: 20,
-                  right: 20,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildAnimatedOptionsList(context),
-                    if (_selectedValue != null &&
-                        (_cachedSelectedOption?.requiresInput == true))
-                      _buildOthersTextField(context),
-                    const SizedBox(height: 30),
-                    ConfirmationButton(
-                      onPressedAsync: _handleConfirm,
-                      labelText: widget.confirmButtonText,
-                      buttonId: widget.buttonId,
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -188,15 +228,34 @@ class _AnimatedRadioContentState<T> extends State<AnimatedRadioContent<T>> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       margin: const EdgeInsets.only(top: 16),
-      child: Row(
-        children: [
-          CustomFormField(
-            field_key: field_other_option.field_key,
-            name: field_other_option.name,
-            controller: _othersController,
-            hint: field_other_option.hint,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: _hasOthersError ? Colors.red : Colors.grey.withOpacity(0.3),
           ),
-        ],
+          color: Colors.white,
+        ),
+        child: TextField(
+          controller: _othersController,
+          focusNode: _othersFocusNode,
+          maxLines: 4,
+          minLines: 3,
+          decoration: InputDecoration(
+            hintText: widget.othersPlaceholder,
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.all(16),
+            hintStyle: TextStyle(color: Colors.grey[500]),
+            errorText: _hasOthersError ? 'Please specify the reason' : null,
+          ),
+          onChanged: (value) {
+            if (_hasOthersError && value.trim().isNotEmpty) {
+              setState(() {
+                _hasOthersError = false;
+              });
+            }
+          },
+        ),
       ),
     );
   }

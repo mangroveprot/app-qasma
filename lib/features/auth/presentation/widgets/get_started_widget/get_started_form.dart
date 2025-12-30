@@ -57,7 +57,7 @@ class GetStartedForm extends StatelessWidget {
             RepaintBoundary(
               child: CallToAction(
                 actionText: 'Already have an account?',
-                actionLabel: ' Login',
+                actionLabel: ' Signin',
                 directionPath: Routes.buildPath(Routes.aut_path, Routes.login),
               ),
             ),

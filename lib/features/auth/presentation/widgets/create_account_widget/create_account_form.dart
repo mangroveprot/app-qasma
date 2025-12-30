@@ -46,11 +46,13 @@ class CreateAccountForm extends StatelessWidget {
             Spacing.verticalMedium,
             RepaintBoundary(
               child: BirthdateSection(
+                fieldKey: field_day.field_key,
                 monthController:
                     state.dropdownControllers[field_month.field_key]!,
                 dayController: state.dropdownControllers[field_day.field_key]!,
                 yearController:
                     state.dropdownControllers[field_year.field_key]!,
+                required: true,
               ),
             ),
             Spacing.verticalMedium,

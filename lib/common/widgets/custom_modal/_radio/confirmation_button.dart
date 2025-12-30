@@ -33,6 +33,7 @@ class ConfirmationButton extends StatelessWidget {
         Container(
           width: double.infinity,
           child: CustomAppButton(
+            buttonId: buttonId,
             onPressedCallback: !enabled
                 ? null
                 : () async {

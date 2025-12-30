@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
 import '../../../../common/error/app_error.dart';
@@ -7,7 +8,6 @@ import '../../../../common/networks/response/api_response.dart';
 import '../../../../core/_base/_repository/base_repository/abstract_repositories.dart';
 import '../../../../core/_base/_repository/local_repository/local_repositories.dart';
 import '../../../../core/_base/_services/base_service/base_service.dart';
-import '../../../../core/_base/_services/storage/shared_preference.dart';
 import '../../../../core/_config/url_provider.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
 import '../../../users/data/models/params/dynamic_param.dart';
@@ -21,36 +21,28 @@ class AppointmentServiceImpl extends BaseService<AppointmentModel>
       : super(repository);
   final ApiClient _apiClient = sl<ApiClient>();
   final URLProviderConfig _urlProviderConfig = sl<URLProviderConfig>();
+  final localRepo = sl<LocalRepository<AppointmentModel>>();
   final _logger = Logger();
 
   @override
   Future<Either<AppError, List<AppointmentModel>>>
       getAllAppointmentByUser() async {
-    final currentUserId = SharedPrefs().getString('currentUserId');
-
-    if (currentUserId == null || currentUserId.isEmpty) {
-      return Left(AppError.create(
-        message: 'User ID not found',
-        type: ErrorType.validation,
-      ));
-    }
-
     try {
-      final response = await _apiClient
-          .get('${_urlProviderConfig.getAllAppointmentByUser}/$currentUserId');
+      final response = await _apiClient.get(
+        _urlProviderConfig.getAllAppointmentByUser,
+        requiresAuth: true,
+      );
 
-      if (response.data['success'] == true &&
-          response.data['documents'] != null) {
-        final List<dynamic> documentsJson =
-            response.data['documents'] as List<dynamic>;
+      final apiResponse = ApiResponse.fromJson(
+        response.data,
+        (json) => AppointmentModel.fromJson(json),
+      );
 
-        final List<AppointmentModel> appointments = documentsJson
-            .map((json) =>
-                AppointmentModel.fromJson(json as Map<String, dynamic>))
-            .toList();
+      debugPrint(apiResponse.documents.toString());
 
+      if (apiResponse.isSuccess && apiResponse.documents != null) {
         try {
-          await repository.saveAllItems(appointments);
+          await localRepo.saveAllItems(apiResponse.documents!.toList());
         } catch (e, stackTrace) {
           _logger.e('Failed to save user data locally', e, stackTrace);
 
@@ -63,13 +55,9 @@ class AppointmentServiceImpl extends BaseService<AppointmentModel>
           ));
         }
 
-        return Right(appointments);
+        return Right(apiResponse.documents!);
       } else {
-        return Left(AppError.create(
-          message:
-              'Failed to get appointments: ${response.data['message'] ?? 'Unknown error'}',
-          type: ErrorType.server,
-        ));
+        return Left(apiResponse.error!);
       }
     } catch (e, stack) {
       final error = e is AppError
@@ -88,7 +76,7 @@ class AppointmentServiceImpl extends BaseService<AppointmentModel>
   Future<Either<AppError, List<AppointmentModel>>> syncAppointments() async {
     try {
       await sync();
-      final response = await getAll();
+      final response = await localRepo.getAllItems();
       return Right(response);
     } catch (e, stack) {
       final error = e is AppError
@@ -271,7 +259,18 @@ class AppointmentServiceImpl extends BaseService<AppointmentModel>
   @override
   Future<Either<AppError, bool>> cancelAppointment(
       CancelParams cancelReq) async {
+    final appointmentID = cancelReq.appointmentId;
+
     try {
+      final appointment = await localRepo.getItemById(appointmentID);
+
+      if (appointment == null) {
+        return Left(AppError.create(
+          message: 'Appointment not found',
+          type: ErrorType.notFound,
+        ));
+      }
+
       final response = await _apiClient.patch(
         _urlProviderConfig.cancelAppointment,
         data: cancelReq.toJson(),
@@ -284,37 +283,18 @@ class AppointmentServiceImpl extends BaseService<AppointmentModel>
           (json) => AppointmentModel.fromJson(json),
         );
 
-        try {
-          if (apiResponse.document != null) {
-            final localRepo = sl<LocalRepository<AppointmentModel>>();
-            await localRepo.saveItem(apiResponse.document);
-          } else {
-            _logger.w('Document is null, skipping update operation');
-          }
-        } catch (e, stackTrace) {
-          _logger.e('Failed to update appointment data locally', e, stackTrace);
-
-          return Left(AppError.create(
-            message:
-                'Something went wrong while updating your data. Please contact the administrator.',
-            type: ErrorType.database,
-            originalError: e,
-            stackTrace: stackTrace,
-          ));
-        }
-
-        if (apiResponse.isSuccess) {
-          return const Right(true);
-        } else {
+        if (!apiResponse.isSuccess) {
           return Left(apiResponse.error ??
               AppError.create(
-                message: 'Failed to update appointment',
+                message: 'Failed to cancel appointment',
                 type: ErrorType.server,
               ));
         }
+
+        return const Right(true);
       } else {
         return Left(AppError.create(
-          message: response.data?['message'] ?? 'Failed to update appointment',
+          message: response.data?['message'] ?? 'Failed to cancel appointment',
           type: ErrorType.server,
         ));
       }

@@ -55,11 +55,23 @@ class LocalRepository<T> extends BaseRepository {
   Future<void> saveItem(model) async {
     await handleDatabaseOperation(() async {
       final db = await databaseService.database;
-      await db.insert(
-        tableName,
-        toDb(model),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+
+      if (model.deletedAt != null) {
+        // Item is deleted, remove from local database
+        final itemMap = toDb(model);
+        await db.delete(
+          tableName,
+          where: '$keyField = ?',
+          whereArgs: [itemMap[keyField]],
+        );
+      } else {
+        // Item is active, insert or update
+        await db.insert(
+          tableName,
+          toDb(model),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
     });
   }
 
@@ -67,14 +79,39 @@ class LocalRepository<T> extends BaseRepository {
   Future<void> saveAllItems(items) async {
     await handleDatabaseOperation(() async {
       final db = await databaseService.database;
-      final batch = db.batch();
+
+      final deletedIds = [];
+      final activeItems = [];
+
       for (var item in items) {
+        if (item.deletedAt != null) {
+          final itemMap = toDb(item);
+          deletedIds.add(itemMap[keyField]);
+        } else {
+          activeItems.add(item);
+        }
+      }
+
+      if (deletedIds.isEmpty && activeItems.isEmpty) return;
+
+      final batch = db.batch();
+
+      for (var id in deletedIds) {
+        batch.delete(
+          tableName,
+          where: '$keyField = ?',
+          whereArgs: [id],
+        );
+      }
+
+      for (var item in activeItems) {
         batch.insert(
           tableName,
           toDb(item),
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
       }
+
       await batch.commit(noResult: true);
     });
   }

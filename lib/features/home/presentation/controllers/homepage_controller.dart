@@ -210,7 +210,9 @@ class HomePageController {
   }
 
   Future<void> handleCancelAppointment(
-      String appointmentId, BuildContext context) async {
+    String appointmentId,
+    BuildContext context,
+  ) async {
     final currentUserId = SharedPrefs().getString('currentUserId');
     final shouldCancel =
         await _showCancellationConfirmation(context, appointmentId);
@@ -221,6 +223,7 @@ class HomePageController {
       buttonId: 'selection_canceled_${appointmentId}',
       options: reasonOptionList,
       title: 'Select Cancellation Reason',
+      isBottomSheet: true,
       onConfirm: (String reason) async {
         final _cancellationData = CancelParams(
             appointmentId: appointmentId,

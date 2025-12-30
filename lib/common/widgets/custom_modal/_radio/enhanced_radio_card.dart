@@ -23,20 +23,18 @@ class _EnhancedRadioCardState extends State<EnhancedRadioCard>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _scaleAnimation;
-  late final Animation<Color?> _colorAnimation;
-  late final Animation<Color?> _textColorAnimation;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 150),
       vsync: this,
     );
 
     _scaleAnimation = Tween<double>(
       begin: 1.0,
-      end: 1.02,
+      end: 0.98,
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.easeInOut,
@@ -44,33 +42,10 @@ class _EnhancedRadioCardState extends State<EnhancedRadioCard>
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final colors = context.colors;
-
-    _colorAnimation = ColorTween(
-      begin:
-          widget.isSelected ? colors.primary.withOpacity(0.1) : Colors.grey[50],
-      end: widget.isSelected
-          ? colors.primary.withOpacity(0.15)
-          : Colors.grey[100],
-    ).animate(_controller);
-
-    _textColorAnimation = ColorTween(
-      begin: widget.isSelected ? colors.primary : colors.textPrimary,
-      end: widget.isSelected ? colors.primary : colors.textPrimary,
-    ).animate(_controller);
-  }
-
-  @override
   void didUpdateWidget(EnhancedRadioCard oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isSelected != oldWidget.isSelected) {
-      if (widget.isSelected) {
-        _controller.forward();
-      } else {
-        _controller.reverse();
-      }
+      // No need for complex animations on selection change
     }
   }
 
@@ -80,65 +55,109 @@ class _EnhancedRadioCardState extends State<EnhancedRadioCard>
     super.dispose();
   }
 
+  void _onTapDown(TapDownDetails details) {
+    _controller.forward();
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    _controller.reverse();
+  }
+
+  void _onTapCancel() {
+    _controller.reverse();
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final fontWeight = context.weight;
     final radius = context.radii;
 
-    return InkWell(
+    return GestureDetector(
       onTap: widget.onTap,
-      borderRadius: radius.medium,
-      splashColor: Colors.transparent,
-      highlightColor: Colors.transparent,
-      focusColor: Colors.transparent,
-      hoverColor: Colors.transparent,
+      onTapDown: _onTapDown,
+      onTapUp: _onTapUp,
+      onTapCancel: _onTapCancel,
       child: AnimatedBuilder(
-        animation: _controller,
+        animation: _scaleAnimation,
         builder: (context, child) {
           return Transform.scale(
             scale: _scaleAnimation.value,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              // margin: const EdgeInsets.only(bottom: 8),
               decoration: BoxDecoration(
                 color: widget.isSelected
-                    ? colors.primary.withOpacity(0.1)
-                    : Colors.grey[50],
+                    ? colors.primary.withOpacity(0.08)
+                    : Colors.white,
                 borderRadius: radius.medium,
                 border: Border.all(
                   color: widget.isSelected
                       ? colors.primary
-                      : Colors.grey.withOpacity(0.3),
-                  width: widget.isSelected ? 2 : 1,
+                      : Colors.grey.withOpacity(0.25),
+                  width: widget.isSelected ? 1.5 : 1,
                 ),
-                boxShadow: widget.isSelected
-                    ? [
-                        BoxShadow(
-                          color: colors.primary.withOpacity(0.1),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : null,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
+                  // Icon (if available)
+                  if (widget.option.icon != null) ...[
+                    Container(
+                      padding: const EdgeInsets.all(2),
+                      child: widget.option.icon,
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+
+                  // Content
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Title
+
+                        if (widget.option.title.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            widget.option.title,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: widget.isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                              color: widget.isSelected
+                                  ? colors.primary
+                                  : Colors.grey[800],
+                            ),
+                          ),
+                        ],
+
+                        // Subtitle (if available)
                         if (widget.option.subtitle != null) ...[
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 2),
                           Text(
                             widget.option.subtitle!,
-                            style: TextStyle(fontSize: 14, color: colors.black),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: context.colors.black,
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
                         ],
                       ],
                     ),
                   ),
+
+                  const SizedBox(width: 12),
+
                   // Radio button
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
@@ -147,7 +166,9 @@ class _EnhancedRadioCardState extends State<EnhancedRadioCard>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: widget.isSelected ? colors.primary : Colors.grey,
+                        color: widget.isSelected
+                            ? colors.primary
+                            : Colors.grey[400]!,
                         width: 2,
                       ),
                       color: widget.isSelected

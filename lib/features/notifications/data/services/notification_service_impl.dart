@@ -37,7 +37,7 @@ class NotificationServiceImpl extends BaseService<NotificationModel>
 
       if (apiResponse.isSuccess && apiResponse.documents != null) {
         try {
-          await repository.saveAllItems(apiResponse.documents!.toList());
+          await localRepo.saveAllItems(apiResponse.documents!.toList());
         } catch (e, stackTrace) {
           _logger.e('Failed to save notification data locally', e, stackTrace);
           return Left(AppError.create(

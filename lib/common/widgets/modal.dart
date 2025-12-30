@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'models/modal_option.dart';
 
 class Modal {
@@ -17,8 +16,6 @@ class Modal {
     // Behavior
     bool barrierDismissible = true,
     bool useSafeArea = true,
-
-    // Constraints
     double? maxWidth,
     double? maxHeight,
   }) {
@@ -58,26 +55,54 @@ class Modal {
     double? maxWidth,
     double? maxHeight,
   }) {
-    return showDialog<T>(
+    return showGeneralDialog<T>(
       context: context,
       barrierDismissible: barrierDismissible,
-      barrierColor: barrierColor,
-      builder: (context) => Dialog(
-        backgroundColor: backgroundColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: borderRadius ?? BorderRadius.circular(16),
-        ),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: maxWidth ?? 400,
-            maxHeight: maxHeight ?? double.infinity,
+      barrierColor: barrierColor ?? Colors.black.withOpacity(0.5),
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Center(
+          child: Material(
+            type: MaterialType.transparency,
+            child: Container(
+              width: maxWidth ?? MediaQuery.of(context).size.width * 0.9,
+              constraints: BoxConstraints(
+                maxHeight:
+                    maxHeight ?? MediaQuery.of(context).size.height * 0.8,
+              ),
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: backgroundColor ?? Colors.white,
+                borderRadius: borderRadius ?? BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: borderRadius ?? BorderRadius.circular(20),
+                child: Padding(
+                  padding: padding ?? const EdgeInsets.all(20),
+                  child: child,
+                ),
+              ),
+            ),
           ),
-          child: Padding(
-            padding: padding ?? const EdgeInsets.all(20),
-            child: child,
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 200),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return ScaleTransition(
+          scale: CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
           ),
-        ),
-      ),
+          child: child,
+        );
+      },
     );
   }
 

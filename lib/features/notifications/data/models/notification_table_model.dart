@@ -15,7 +15,9 @@ class NotificationTableModel extends TableModel {
       readAt TEXT,
       fcmResponse TEXT,
       createdAt TEXT NOT NULL,
-      updatedAt TEXT NOT NULL
+      updatedAt TEXT NOT NULL,
+      deletedAt TEXT,
+      deletedBy TEXT
     )
   ''';
 

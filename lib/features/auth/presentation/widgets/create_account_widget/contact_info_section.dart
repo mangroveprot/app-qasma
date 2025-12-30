@@ -37,6 +37,7 @@ class ContactInfoSection extends StatelessWidget {
         Spacing.verticalMedium,
 
         PhoneNumberField(
+          fieldKey: field_contact_number.field_key,
           label: field_contact_number.name,
           hint: field_contact_number.hint,
           controller: contactController,

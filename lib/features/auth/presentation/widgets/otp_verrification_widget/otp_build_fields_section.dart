@@ -66,7 +66,11 @@ class _OtpBuildFieldsSectionState extends State<OtpBuildFieldsSection> {
   }
 
   void _handleBoxTap(int index) {
-    _hiddenFocusNode.requestFocus();
+    _hiddenFocusNode.unfocus();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _hiddenFocusNode.requestFocus();
+    });
 
     setState(() {
       _currentBoxIndex = index;
@@ -74,7 +78,6 @@ class _OtpBuildFieldsSectionState extends State<OtpBuildFieldsSection> {
 
     final currentLength = _hiddenController.text.length;
     final cursorPos = index.clamp(0, currentLength);
-
     _hiddenController.selection = TextSelection.collapsed(offset: cursorPos);
   }
 

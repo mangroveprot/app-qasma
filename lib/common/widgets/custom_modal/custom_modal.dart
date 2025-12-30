@@ -327,6 +327,8 @@ class CustomModal {
   static Future<T?> showRadioSelectionModal<T>(
     BuildContext context, {
     required List<ModalOption> options,
+    String? buttonId,
+    SelectedOptionType selectedOptionType = SelectedOptionType.subtitle,
     String title = 'Select an Option',
     String? subtitle,
     bool isBottomSheet = true,
@@ -337,20 +339,23 @@ class CustomModal {
     String confirmButtonText = 'Confirm',
     String cancelButtonText = 'Cancel',
     String othersPlaceholder = 'Please specify...',
-    String? buttonId,
     Future<T> Function(String selectedReason)? onConfirm,
   }) {
     return Modal.show<T>(
       context: context,
       isBottomSheet: isBottomSheet,
       backgroundColor: backgroundColor ?? context.colors.white,
-      borderRadius:
-          borderRadius ?? const BorderRadius.vertical(top: Radius.circular(20)),
+      borderRadius: borderRadius ??
+          (isBottomSheet
+              ? const BorderRadius.vertical(top: Radius.circular(20))
+              : BorderRadius.circular(20)),
       padding: padding ?? EdgeInsets.zero,
       maxHeight: maxHeight ?? MediaQuery.of(context).size.height * 0.8,
       child: BlocProvider(
         create: (context) => ButtonCubit(),
         child: AnimatedRadioContent<T>(
+          buttonId: buttonId,
+          selectedOptionType: selectedOptionType,
           options: options,
           title: title,
           subtitle: subtitle,
@@ -358,7 +363,6 @@ class CustomModal {
           cancelButtonText: cancelButtonText,
           othersPlaceholder: othersPlaceholder,
           onConfirm: onConfirm,
-          buttonId: buttonId,
         ),
       ),
     );

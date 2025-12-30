@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,7 +20,7 @@ class UpdateCubit extends Cubit<UpdateCubitState> with WidgetsBindingObserver {
   final _logger = Logger();
 
   static const String _lastCheckKey = 'last_update_check_time';
-  static const Duration _minCheckInterval = Duration(hours: 6);
+  static const Duration _minCheckInterval = Duration(hours: 1);
 
   String? _cachedCurrentVersion;
   String? _cachedCurrentBuild;
@@ -55,11 +56,11 @@ class UpdateCubit extends Cubit<UpdateCubitState> with WidgetsBindingObserver {
   }
 
   Future<void> _checkIfNeeded() async {
-    // if (kDebugMode) {
-    //   _logger.d('Debug mode: Checking for updates immediately');
-    //   await checkForUpdates();
-    //   return;
-    // }
+    if (kDebugMode) {
+      _logger.d('Debug mode: Checking for updates immediately');
+      await checkForUpdates();
+      return;
+    }
 
     final now = DateTime.now();
     final lastCheckStr = SharedPrefs().getString(_lastCheckKey);

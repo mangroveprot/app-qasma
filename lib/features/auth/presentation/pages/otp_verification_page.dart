@@ -322,8 +322,7 @@ class OtpVerificationPageState extends State<OtpVerificationPage> {
         }
 
         AppToast.show(
-          message:
-              'Account is verified successfully. You will be redirected to login.',
+          message: 'Account verified! Please log in.',
           type: ToastType.success,
         );
         context.go(Routes.buildPath(Routes.aut_path, Routes.login));

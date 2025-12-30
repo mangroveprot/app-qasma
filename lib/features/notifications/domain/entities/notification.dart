@@ -11,6 +11,8 @@ class Notification extends Equatable {
   final DateTime? sentAt;
   final DateTime? readAt;
   final Map<String, dynamic>? fcmResponse;
+  final DateTime? deletedAt;
+  final String? deletedBy;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -25,6 +27,8 @@ class Notification extends Equatable {
     this.sentAt,
     this.readAt,
     this.fcmResponse,
+    this.deletedAt,
+    this.deletedBy,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -41,6 +45,8 @@ class Notification extends Equatable {
         sentAt,
         readAt,
         fcmResponse,
+        deletedAt,
+        deletedBy,
         createdAt,
         updatedAt,
       ];

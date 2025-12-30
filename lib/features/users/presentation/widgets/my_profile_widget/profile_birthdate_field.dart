@@ -1,6 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../common/utils/constant.dart';
+import '../../../../../../common/utils/constant.dart';
 import '../../../../../theme/theme_extensions.dart';
 
 class ProfileBirthdateField extends StatelessWidget {
@@ -24,29 +25,74 @@ class ProfileBirthdateField extends StatelessWidget {
 
     final now = DateTime.now();
 
-    DateTime? initialDate;
+    // Parse current date from controllers
+    DateTime tempDate = DateTime(now.year - 18, now.month, now.day);
     try {
       final y = int.tryParse(yearController.value ?? '');
       final m = monthsList.indexOf(monthController.value ?? '') + 1;
       final d = int.tryParse(dayController.value ?? '');
       if (y != null && m > 0 && d != null) {
-        initialDate = DateTime(y, m, d);
+        tempDate = DateTime(y, m, d);
       }
     } catch (_) {}
 
-    final DateTime? picked = await showDatePicker(
+    await showCupertinoModalPopup<void>(
       context: context,
-      initialDate: initialDate ?? DateTime(now.year - 18, now.month, now.day),
-      firstDate: DateTime(now.year - 120),
-      lastDate: now,
-    );
+      builder: (BuildContext context) {
+        DateTime selectedDate = tempDate;
 
-    if (picked != null) {
-      monthController.value = monthsList[picked.month - 1];
-      dayController.value = picked.day.toString();
-      yearController.value = picked.year.toString();
-      if (onDateChanged != null) onDateChanged!(picked);
-    }
+        return Container(
+          height: 300,
+          padding: const EdgeInsets.only(top: 6.0),
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          color: CupertinoColors.systemBackground.resolveFrom(context),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    CupertinoButton(
+                      child: const Text('Cancel'),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                    CupertinoButton(
+                      child: const Text('Done'),
+                      onPressed: () {
+                        // Update controllers
+                        monthController.value =
+                            monthsList[selectedDate.month - 1];
+                        dayController.value = selectedDate.day.toString();
+                        yearController.value = selectedDate.year.toString();
+
+                        // Notify parent with the selected date
+                        onDateChanged?.call(selectedDate);
+
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child: CupertinoDatePicker(
+                    mode: CupertinoDatePickerMode.date,
+                    initialDateTime: tempDate,
+                    minimumDate: DateTime(1900),
+                    maximumDate: now,
+                    onDateTimeChanged: (DateTime newDate) {
+                      selectedDate = newDate;
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -79,7 +125,7 @@ class ProfileBirthdateField extends StatelessWidget {
                     hasDate ? '$month $day, $year' : 'Not provided';
 
                 return GestureDetector(
-                  onTap: () => _pickDate(context),
+                  onTap: isEnabled ? () => _pickDate(context) : null,
                   child: Row(
                     children: [
                       Expanded(
@@ -117,7 +163,9 @@ class ProfileBirthdateField extends StatelessWidget {
                       Icon(
                         Icons.calendar_today,
                         size: 20,
-                        color: colors.textPrimary.withOpacity(0.6),
+                        color: isEnabled
+                            ? colors.textPrimary.withOpacity(0.6)
+                            : colors.textPrimary.withOpacity(0.3),
                       ),
                     ],
                   ),

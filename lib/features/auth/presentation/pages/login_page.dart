@@ -73,7 +73,7 @@ class LoginPageState extends State<LoginPage> {
     if (!isValid) {
       formCubit.setFieldError(
         field_password.field_key,
-        'Password must be at least 8 characters long',
+        'Password must be at least 6 characters long',
       );
       return;
     }
