@@ -191,6 +191,7 @@ class UserModel extends User {
       'last_name': last_name,
       'middle_name': middle_name,
       'suffix': suffix,
+      'active': false,
       'gender': gender.toLowerCase(),
       'date_of_birth': date_of_birth.toIso8601String(),
       'address': address,

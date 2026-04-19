@@ -18,11 +18,13 @@ import 'core/_base/_services/storage/shared_preference.dart';
 import 'core/_config/app_config.dart';
 import 'core/_config/bloc_dispatcher.dart';
 import 'core/_config/flavor_config.dart';
+import 'features/appointment_config/presentation/bloc/appointment_config_cubit.dart';
 import 'features/update/presentation/bloc/update_cubit.dart';
 import 'infrastructure/injection/service_locator.dart';
 import 'infrastructure/routes/app_router.dart';
 import 'theme/light_theme.dart';
 import 'features/auth/presentation/bloc/auth/auth_cubit.dart';
+import 'features/notifications/presentation/bloc/notification_count_cubit.dart';
 
 Future<void> mainCommon(Flavor flavor) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +42,8 @@ Future<void> mainCommon(Flavor flavor) async {
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   setupServiceLocator();
+
+  sl<NotificationCountCubit>().refresh();
 
   await Future.wait([
     SharedPrefs().init(),
@@ -69,6 +73,11 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider<AppointmentConfigCubit>(
+            create: (_) => AppointmentConfigCubit()..loadConfig()),
+        BlocProvider<NotificationCountCubit>.value(
+          value: sl<NotificationCountCubit>(),
+        ),
         BlocProvider(create: (_) => FormCubit()),
         BlocProvider.value(value: AuthCubit.instance),
         BlocProvider(create: (_) => ConnectionCubit()),

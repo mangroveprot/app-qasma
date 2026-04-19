@@ -4,6 +4,7 @@ import '../../data/models/params/dynamic_param.dart';
 
 abstract class UserService {
   Future<Either> isRegister(String identifier);
+  Future<Either> isActive();
   Future<Either> getUser(String idNumber);
   Future<Either> getAllUser();
   Future<Either> update(DynamicParam param);

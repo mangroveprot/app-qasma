@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../theme/theme_extensions.dart';
-import 'menu_close_button.dart';
 
 class MenuHeader extends StatelessWidget {
   final String user_name;
   final String idNumber;
+  final bool showCloseButton;
 
   const MenuHeader({
     super.key,
     required this.user_name,
     required this.idNumber,
+    this.showCloseButton = true,
   });
 
   @override
@@ -34,7 +35,6 @@ class MenuHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
       child: Column(
         children: [
-          // Top row with avatar, username, and close button
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -100,8 +100,6 @@ class MenuHeader extends StatelessWidget {
                   ],
                 ),
               ),
-              // Close Button
-              const MenuCloseButton(),
             ],
           ),
         ],

@@ -24,7 +24,7 @@ class ToolTip {
     tips: 'Select your preferred date and time for the appointment.',
   );
   static const appointmentType = ToolTipsModel(
-    key: 'Appoinmment Type',
+    key: 'Appointment Type',
     tips: 'Choose the appointment type that best suits your needs',
   );
 }

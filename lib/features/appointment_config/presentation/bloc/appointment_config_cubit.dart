@@ -2,8 +2,10 @@ import 'package:dartz/dartz.dart';
 import 'package:logger/logger.dart';
 
 import '../../../../common/error/app_error.dart';
+import '../../../../common/manager/appointment_config_manager.dart';
 import '../../../../core/_base/_bloc_cubit/base_cubit.dart';
 import '../../../../core/_usecase/usecase.dart';
+import '../../../../infrastructure/injection/service_locator.dart';
 import '../../data/models/appointment_config_model.dart';
 import '../../domain/entites/category.dart';
 import '../../domain/entites/category_type.dart';
@@ -12,8 +14,13 @@ part 'appointment_config_cubit_state.dart';
 
 class AppointmentConfigCubit extends BaseCubit<AppointmentConfigCubitState> {
   final Logger _logger = Logger();
+  final AppointmentConfigManager _manager = sl<AppointmentConfigManager>();
 
   AppointmentConfigCubit() : super(AppointmentConfigInitialState());
+
+  void loadConfig() {
+    _manager.loadAllAppointmentsConfig(this);
+  }
 
   @override
   void emitLoading({bool isRefreshing = false}) {
@@ -117,6 +124,8 @@ class AppointmentConfigCubit extends BaseCubit<AppointmentConfigCubitState> {
     final state = this.state;
     return state is AppointmentConfigLoadedState ? state.config : null;
   }
+
+  AppointmentConfigManager get manager => _manager;
 
   // Get Category object for a specific category key
   Category? getCategory(String category) {

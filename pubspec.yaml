@@ -2,7 +2,7 @@ name: gcare
 description: A new Flutter project.
 publish_to: none
 
-version: 1.1.6+10
+version: 2.8.3+22
 
 environment:
   sdk: ">=2.19.0 <3.0.0"
@@ -18,7 +18,7 @@ dependencies:
   dartz: ^0.10.1
   logger: ^1.4.0
   shared_preferences: ^2.2.0
-  go_router: ^6.5.0
+  go_router: ^7.0.0
   flutter_dotenv: ^5.1.0
   equatable: ^2.0.5
   sqflite: ^2.2.8+4

@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../../../../../common/helpers/helpers.dart';
@@ -11,9 +10,9 @@ import 'appointment_date_time_status.dart';
 import 'appointment_details_section.dart';
 import 'appointment_more_details.dart';
 import 'appointment_stat_indicator.dart';
-import 'card_cancel_button.dart';
 import 'card_qrcode_section.dart';
 import 'card_reschedule_button.dart';
+import 'status_chip.dart';
 
 class AppointmentCard extends StatefulWidget {
   final AppointmentModel appointment;
@@ -43,7 +42,7 @@ class AppointmentCard extends StatefulWidget {
 class _AppointmentCardState extends State<AppointmentCard> {
   DateTime _now = DateTime.now();
   Timer? _timer;
-  final bool _isDetailsExpanded = false;
+  bool _isDetailsExpanded = false;
 
   @override
   void initState() {
@@ -115,16 +114,69 @@ class _AppointmentCardState extends State<AppointmentCard> {
                 isOnSession: _isOnSession,
                 isOverdue: _isOverdue,
               ),
-              if (widget.student != null)
-                AppointmentDateTimeStatus(
-                  appointment: widget.appointment,
-                  isOverdue: _isOverdue,
-                  isOnSession: _isOnSession,
-                  user: widget.student,
-                  rescheduledByUser: widget.rescheduledByUser,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: widget.student != null
+                        ? AppointmentDateTimeStatus(
+                            appointment: widget.appointment,
+                            isOverdue: _isOverdue,
+                            isOnSession: _isOnSession,
+                            user: widget.student,
+                            rescheduledByUser: widget.rescheduledByUser,
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: widget.onCancel,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: colors.error.withOpacity(0.3),
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: weight.medium,
+                            color: colors.error,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               Spacing.verticalMedium,
-              _buildDivider(colors),
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  StatusChip(status: widget.appointment.status),
+                  if (widget.appointment.status.toLowerCase() == 'approved')
+                    Text(
+                      '— Please bring you student ID.',
+                      style: TextStyle(fontSize: 12, color: colors.primary),
+                    ),
+                  if (widget.appointment.status.toLowerCase() == 'pending')
+                    Text(
+                      '— Awaiting staff approval',
+                      style: TextStyle(fontSize: 12, color: colors.warning),
+                    ),
+                ],
+              ),
               Spacing.verticalMedium,
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -146,52 +198,57 @@ class _AppointmentCardState extends State<AppointmentCard> {
                 ],
               ),
               Spacing.verticalMedium,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // More Info Button
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        _isDetailsExpanded = !_isDetailsExpanded;
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _isDetailsExpanded
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                            size: 20,
+                            color: colors.textPrimary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'More Info',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: weight.medium,
+                              color: colors.textPrimary,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
 
-              //
-              //
-              //
-              // ADD LETTER
-              //
-              //
-              //
-              // InkWell(
-              //   onTap: () {
-              //     setState(() {
-              //       _isDetailsExpanded = !_isDetailsExpanded;
-              //     });
-              //   },
-              //   borderRadius: BorderRadius.circular(8),
-              //   child: Container(
-              //     padding:
-              //         const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              //     decoration: BoxDecoration(
-              //       borderRadius: BorderRadius.circular(8),
-              //     ),
-              //     child: Row(
-              //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //       children: [
-              //         Text(
-              //           _isDetailsExpanded
-              //               ? 'Hide Details'
-              //               : 'Appointment Details',
-              //           style: TextStyle(
-              //             fontSize: 13,
-              //             fontWeight: weight.medium,
-              //             color: colors.textPrimary,
-              //           ),
-              //         ),
-              //         Icon(
-              //           _isDetailsExpanded
-              //               ? Icons.keyboard_arrow_up
-              //               : Icons.keyboard_arrow_down,
-              //           size: 20,
-              //           color: colors.textPrimary,
-              //         ),
-              //       ],
-              //     ),
-              //   ),
-              // ),
+                  const Spacer(),
 
+                  // Reschedule Button with controlled width
+                  SizedBox(
+                    width: 160, // Adjust this width as needed
+                    child: CardRescheduleButton(
+                      buttonId:
+                          'reschedule_${widget.appointment.appointmentId}',
+                      onPressed: widget.onReschedule,
+                    ),
+                  ),
+                ],
+              ),
               if (widget.student != null)
                 AnimatedCrossFade(
                   firstChild: const SizedBox.shrink(),
@@ -209,40 +266,10 @@ class _AppointmentCardState extends State<AppointmentCard> {
                       : CrossFadeState.showFirst,
                   duration: const Duration(milliseconds: 300),
                 ),
-
-              Spacing.verticalMedium,
-              _buildActionButtons(),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildDivider(dynamic colors) {
-    return Container(
-      height: 1,
-      color: colors.textPrimary.withOpacity(0.1),
-    );
-  }
-
-  Widget _buildActionButtons() {
-    return Row(
-      children: [
-        Expanded(
-          child: CardRescheduleButton(
-            buttonId: 'reschedule_${widget.appointment.appointmentId}',
-            onPressed: widget.onReschedule,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: CardCancelButton(
-            buttonId: 'cancel${widget.appointment.appointmentId}',
-            onPressed: widget.onCancel,
-          ),
-        ),
-      ],
     );
   }
 }

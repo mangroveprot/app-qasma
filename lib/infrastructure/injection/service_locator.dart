@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
 
+import '../../common/manager/appointment_config_manager.dart';
+import '../../common/manager/user_manager.dart';
 import '../../common/networks/api_client.dart';
 import '../../core/_base/_models/sync_model.dart';
 import '../../core/_base/_repository/base_repository/abstract_repositories.dart';
@@ -48,6 +50,7 @@ import '../../features/notifications/domain/repository/notificaiton_repository.d
 import '../../features/notifications/domain/services/notification_service.dart';
 import '../../features/notifications/domain/usecases/delete_notifications_usecase.dart';
 import '../../features/notifications/domain/usecases/get_notification_counts_usecase.dart';
+import '../../features/notifications/presentation/bloc/notification_count_cubit.dart';
 import '../../features/notifications/domain/usecases/get_notification_usecase.dart';
 import '../../features/notifications/domain/usecases/mark_as_read_usecase.dart';
 import '../../features/notifications/domain/usecases/sync_notification_usecase.dart';
@@ -69,10 +72,19 @@ import '../../features/users/domain/repository/user_repositories.dart';
 import '../../features/users/domain/services/user_service.dart';
 import '../../features/users/domain/usecases/get_all_user_usecase.dart';
 import '../../features/users/domain/usecases/get_user_usecase.dart';
+import '../../features/users/domain/usecases/is_active.dart';
 import '../../features/users/domain/usecases/is_register_usecase.dart';
 import '../../features/users/domain/usecases/save_fcm_token_usecase.dart';
 import '../../features/users/domain/usecases/sync_user_usecase.dart';
 import '../../features/users/domain/usecases/update_user_usecase.dart';
+import '../../features/activity_logs/data/models/activity_log_model.dart';
+import '../../features/activity_logs/data/models/activity_log_table_model.dart';
+import '../../features/activity_logs/data/repository/activity_log_repository_impl.dart';
+import '../../features/activity_logs/data/services/activity_log_service_impl.dart';
+import '../../features/activity_logs/domain/repository/activity_log_repository.dart';
+import '../../features/activity_logs/domain/services/activity_log_service.dart';
+import '../../features/activity_logs/domain/usecases/get_activity_logs_by_user_usecase.dart';
+import '../../features/activity_logs/domain/usecases/sync_activity_logs_usecase.dart';
 
 final sl = GetIt.instance;
 
@@ -82,8 +94,7 @@ void setupServiceLocator() {
   _registerRepositories();
   _registerServices();
   _registerUseCases();
-  _registerAppointmentConfigRepositories();
-  _registerNotificationRepositories();
+  _registerManager();
 }
 
 void _registerCore() {
@@ -104,6 +115,7 @@ void _registerInfrastructure() {
         AppointmentTableModel(),
         AppointmentConfigTableModel(),
         NotificationTableModel(),
+        ActivityLogTableModel(),
       ]),
     );
 }
@@ -114,6 +126,12 @@ void _registerRepositories() {
 
   // Appointment repositories
   _registerAppointmentRepositories();
+
+  _registerAppointmentConfigRepositories();
+
+  _registerNotificationRepositories();
+
+  _registerActivityLogRepositories();
 
   // Auth repositories
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl());
@@ -140,6 +158,20 @@ void _registerRepositories() {
   sl.registerLazySingleton<NotificationRepository>(
     () => NotificationRepositoryImpl(),
   );
+
+  // Activity Log repository
+  sl.registerLazySingleton<ActivityLogRepository>(
+    () => ActivityLogRepositoryImpl(),
+  );
+}
+
+void _registerManager() {
+  sl
+    ..registerLazySingleton<AppointmentConfigManager>(
+        () => AppointmentConfigManager())
+    ..registerLazySingleton<UserManager>(() => UserManager())
+    ..registerLazySingleton<NotificationCountCubit>(
+        () => NotificationCountCubit());
 }
 
 void _registerUserRepositories() {
@@ -260,6 +292,35 @@ void _registerNotificationRepositories() {
   );
 }
 
+void _registerActivityLogRepositories() {
+  sl.registerLazySingleton<LocalRepository<ActivityLogModel>>(
+    () => LocalRepository<ActivityLogModel>(
+      tableName: 'activity_logs',
+      keyField: 'activityId',
+      fromDb: ActivityLogModel.fromDb,
+      toDb: (activityLog) => activityLog.toDb(),
+      databaseService: sl<DatabaseService>(),
+    ),
+  );
+
+  sl.registerLazySingleton<AbstractRepository<ActivityLogModel>>(
+    () => RemoteRepository<ActivityLogModel>(
+      localRepository: sl<LocalRepository<ActivityLogModel>>(),
+      endpoint: '/api/activity-logs',
+      fromJson: ActivityLogModel.fromJson,
+      toJson: (activityLog) => activityLog.toJson(),
+      getId: (model) => model.activityId,
+      getItemPath: (id) => '/$id',
+      deletePath: (id) => '/$id',
+      includeId: true,
+      syncField: SyncField<ActivityLogModel>(
+        name: 'updatedAt',
+        accessor: (activityLog) => activityLog.updatedAt,
+      ),
+    ),
+  );
+}
+
 void _registerServices() {
   sl
     ..registerLazySingleton<AuthService>(
@@ -277,7 +338,9 @@ void _registerServices() {
     )
     ..registerLazySingleton<UpdateService>(() => UpdateServiceImpl())
     ..registerLazySingleton<NotificationService>(() =>
-        NotificationServiceImpl(sl<AbstractRepository<NotificationModel>>()));
+        NotificationServiceImpl(sl<AbstractRepository<NotificationModel>>()))
+    ..registerLazySingleton<ActivityLogService>(() =>
+        ActivityLogServiceImpl(sl<AbstractRepository<ActivityLogModel>>()));
 }
 
 void _registerUseCases() {
@@ -300,6 +363,7 @@ void _registerUseCases() {
     ..registerLazySingleton<SyncUserUsecase>(() => SyncUserUsecase())
     ..registerLazySingleton<GetAllUserUsecase>(() => GetAllUserUsecase())
     ..registerLazySingleton<UpdateUserUsecase>(() => UpdateUserUsecase())
+    ..registerLazySingleton<IsActiveUsecase>(() => IsActiveUsecase())
     ..registerLazySingleton<IsRegisterUsecase>(() => IsRegisterUsecase())
     ..registerLazySingleton<GetUserUsecase>(() => GetUserUsecase());
 
@@ -341,4 +405,11 @@ void _registerUseCases() {
         () => DeleteNotificationsUsecase())
     ..registerLazySingleton<SyncNotificationsUsecase>(
         () => SyncNotificationsUsecase());
+
+  // Activity Log use cases
+  sl
+    ..registerLazySingleton<GetActivityLogsByUserUsecase>(
+        () => GetActivityLogsByUserUsecase())
+    ..registerLazySingleton<SyncActivityLogsUsecase>(
+        () => SyncActivityLogsUsecase());
 }

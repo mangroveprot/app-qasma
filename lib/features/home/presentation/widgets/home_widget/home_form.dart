@@ -115,7 +115,7 @@ class _HomeFormState extends State<HomeForm> {
     try {
       await Future.wait([
         widget.state.controller.appoitnmentRefreshData(),
-        widget.state.controller.appointConfigRefreshData(),
+        widget.state.controller.appointConfigRefreshData(context),
         widget.state.controller.userRefreshData(),
         widget.state.controller.notificationsRefreshData(),
       ]);
@@ -205,7 +205,7 @@ class _HomeFormState extends State<HomeForm> {
                 );
               }
 
-              // Show appointment error only after retry attempts exhausted
+              // show appointment error only after retry attempts exhausted
               if (appointmentState is AppointmentsFailureState &&
                   _appointmentRetryCount >= _maxRetryAttempts) {
                 return ErrorContent(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../../../common/utils/button_ids.dart';
 import '../../../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../../../common/widgets/custom_modal/info_modal_dialog.dart';
@@ -43,11 +44,14 @@ class FeedbackDialog {
       ),
       secondaryButtonText: secondaryBtnText ?? 'Cancel',
       onSecondaryPressed: () {
-        Navigator.of(context).pop();
+        context.pop();
         onSecondary();
       },
       primaryButtonText: 'Share My Feedback',
-      onPrimaryPressed: onPrimary,
+      onPrimaryPressed: () {
+        context.pop();
+        onPrimary();
+      },
       buttonCubit: buttonCubit,
       buttonId: ButtonsUniqeKeys.feedback.id,
     );

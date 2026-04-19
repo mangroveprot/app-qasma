@@ -4,11 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../common/manager/appointment_config_manager.dart';
 import '../../../../common/manager/appointment_manager.dart';
-import '../../../../common/manager/auth_manager.dart';
 import '../../../../common/manager/notificaitons_manager.dart';
 import '../../../../common/manager/user_manager.dart';
 import '../../../../common/utils/constant.dart';
-import '../../../../common/utils/menu_items_config.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/button_text/custom_text_button.dart';
 import '../../../../common/widgets/custom_modal/custom_modal.dart';
@@ -33,17 +31,16 @@ import '../widgets/home_widget/_feedback/feedback_section.dart';
 
 class HomePageController {
   // Cubits
-  late final AppointmentsCubit _appointmentsCubit;
-  late final UserCubit _userCubit;
-  late final AppointmentConfigCubit _appointmentConfigCubit;
-  late final ButtonCubit _buttonCubit;
-  late final NotificationsCubit _notificationCubit;
+  final AppointmentsCubit _appointmentsCubit;
+  final UserCubit _userCubit;
+  final ButtonCubit _buttonCubit;
+  final NotificationsCubit _notificationCubit;
 
   // Managers
-  late final AppointmentManager _appointmentManager;
-  late final UserManager _userManager;
-  late final AppointmentConfigManager _appointmentConfigManager;
-  late final NotificationsManager _notificationsManager;
+  final AppointmentManager _appointmentManager;
+  final UserManager _userManager;
+  final AppointmentConfigManager _appointmentConfigManager;
+  final NotificationsManager _notificationsManager;
 
   Function(String route, {Object? extra})? _navigationCallback;
   int _unreadCount = 0;
@@ -60,15 +57,22 @@ class HomePageController {
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
 
+  HomePageController()
+      : _appointmentManager = AppointmentManager(),
+        _userManager = UserManager(),
+        _appointmentConfigManager = sl<AppointmentConfigManager>(),
+        _notificationsManager = NotificationsManager(),
+        _appointmentsCubit = AppointmentsCubit(),
+        _userCubit = UserCubit(),
+        _buttonCubit = ButtonCubit(),
+        _notificationCubit = NotificationsCubit();
+
   List<BlocProvider> get blocProviders => [
         BlocProvider<AppointmentsCubit>(
           create: (context) => _appointmentsCubit,
         ),
         BlocProvider<UserCubit>(
           create: (context) => _userCubit,
-        ),
-        BlocProvider<AppointmentConfigCubit>(
-          create: (context) => _appointmentConfigCubit,
         ),
         BlocProvider<ButtonCubit>(
           create: (context) => _buttonCubit,
@@ -78,33 +82,21 @@ class HomePageController {
         ),
       ];
 
-  void initialize({Function(String route, {Object? extra})? onNavigate}) {
+  void initialize({
+    Function(String route, {Object? extra})? onNavigate,
+    required BuildContext context,
+  }) {
+    if (_isInitialized) return;
+
     _navigationCallback = onNavigate;
-    _initializeManagers();
-    _initializeCubits();
-    _loadInitialData();
+    _loadInitialData(context);
     _isInitialized = true;
   }
 
-  void _initializeManagers() {
-    _appointmentManager = AppointmentManager();
-    _userManager = UserManager();
-    _appointmentConfigManager = AppointmentConfigManager();
-    _notificationsManager = NotificationsManager();
-  }
-
-  void _initializeCubits() {
-    _appointmentsCubit = AppointmentsCubit();
-    _userCubit = UserCubit();
-    _appointmentConfigCubit = AppointmentConfigCubit();
-    _buttonCubit = ButtonCubit();
-    _notificationCubit = NotificationsCubit();
-  }
-
-  void _loadInitialData() {
+  void _loadInitialData(BuildContext context) {
     _loadUserData();
     appoitnmentRefreshData();
-    _loadAppointmentConfig();
+    _loadAppointmentConfig(context);
     _loadNotificationsData();
   }
 
@@ -120,9 +112,9 @@ class HomePageController {
     });
   }
 
-  void _loadAppointmentConfig() {
-    _appointmentConfigManager
-        .loadAllAppointmentsConfig(_appointmentConfigCubit);
+  void _loadAppointmentConfig(BuildContext context) {
+    final globalCubit = context.read<AppointmentConfigCubit>();
+    _appointmentConfigManager.refreshAppointmentsConfig(globalCubit);
   }
 
   // PUBLIC METHODS
@@ -171,9 +163,9 @@ class HomePageController {
     await _userManager.refreshUser(_userCubit);
   }
 
-  Future<void> appointConfigRefreshData() async {
-    await _appointmentConfigManager
-        .refreshAppointmentsConfig(_appointmentConfigCubit);
+  Future<void> appointConfigRefreshData(BuildContext context) async {
+    final cubit = context.read<AppointmentConfigCubit>();
+    await _appointmentConfigManager.refreshAppointmentsConfig(cubit);
   }
 
   Future<void> notificationsRefreshData() async {
@@ -277,37 +269,7 @@ class HomePageController {
     debugPrint('Show appointment history');
   }
 
-  void handleMenuItemTap(String menuItem, BuildContext context) {
-    final handler = _getMenuHandlers(context)[menuItem];
-    if (handler != null) {
-      handler();
-    } else {
-      debugPrint('Unknown menu item: $menuItem');
-    }
-  }
-
   // PRIVATE METHODS
-
-  Map<String, VoidCallback> _getMenuHandlers(BuildContext context) {
-    return {
-      MenuKeys.myProfile: () => handleMyProfile(),
-      MenuKeys.history: () => _navigationCallback?.call(
-            Routes.buildPath(Routes.appointment, Routes.appointment_history),
-          ),
-      MenuKeys.settings: () =>
-          _navigationCallback?.call(Routes.preference_path),
-      MenuKeys.about: () => _navigationCallback?.call(Routes.buildPath(
-            Routes.preference_path,
-            Routes.about,
-          )),
-      MenuKeys.helpAndSupport: () => _navigationCallback?.call(Routes.buildPath(
-            Routes.preference_path,
-            Routes.helpAndSupport,
-          )),
-      MenuKeys.feedback: () => _handleMenuFeedback(context),
-      MenuKeys.logout: () => _handleLogout(context),
-    };
-  }
 
   // Modals
 
@@ -346,59 +308,6 @@ class HomePageController {
         false;
   }
 
-  Future<bool> _showLogoutConfirmation(BuildContext context) async {
-    final colors = context.colors;
-    final radii = context.radii;
-    final fontWeight = context.weight;
-
-    return await CustomModal.showCenteredModal<bool>(
-          context,
-          title: 'Are you sure to logout?',
-          icon: CustomModal.warningIcon(
-              iconColor: colors.error,
-              backgroundColor: colors.error.withOpacity(0.1),
-              size: 58,
-              iconSize: 28),
-          actions: [
-            CustomTextButton(
-              onPressed: () async {
-                context.pop(true);
-              },
-              text: 'Yes',
-              textColor: colors.white,
-              fontSize: 14,
-              fontWeight: fontWeight.medium,
-              backgroundColor: colors.error,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              borderRadius: radii.large,
-              width: 100,
-              height: 44,
-            ),
-            ModalUI.secondaryButton(
-                text: 'No',
-                onPressed: () {
-                  context.pop(false);
-                }),
-          ],
-        ) ??
-        false;
-  }
-
-  Future<void> _handleLogout(BuildContext context) async {
-    final shouldLogout = await _showLogoutConfirmation(context);
-    if (!shouldLogout) return;
-    await _peformLogout(context);
-  }
-
-  Future<void> _peformLogout(BuildContext context) async {
-    try {
-      await AuthManager.logout(context);
-      context.go(Routes.root);
-    } catch (e) {
-      debugPrint('Logout failed: $e');
-    }
-  }
-
   void handleBookNewAppointment(String category) {
     _navigationCallback?.call(
       Routes.appointment,
@@ -417,22 +326,6 @@ class HomePageController {
       extra: {
         'onSuccess': () async {
           await userRefreshData();
-        },
-      },
-    );
-  }
-
-  void _handleMenuFeedback(BuildContext context) {
-    menuFeedback(context);
-  }
-
-  void handleNotificationTap() {
-    _navigationCallback?.call(
-      '/notifications',
-      extra: {
-        'onSuccess': () async {
-          _unreadCount = await _notificationsManager.getUnreadCounts();
-          _onUnreadCountChanged?.call();
         },
       },
     );

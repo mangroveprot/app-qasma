@@ -14,6 +14,7 @@ class URLProviderConfig {
   String get appointmentEndPoint => '${apiPath}/appointment';
   String get otpEndPoint => '${apiPath}/otp';
   String get notificationEndPoint => '${apiPath}/notifications';
+  String get activityLogEndPoint => '${apiPath}/activity-logs';
 
   // Auth URLS
   String get register => '${authEndPoint}/register';
@@ -33,6 +34,7 @@ class URLProviderConfig {
 
   // User URLS
   String get getProfile => '${userEndPoint}/getProfile';
+  String get isActive => '${userEndPoint}/isActive';
   String get isRegister => '${userEndPoint}/isRegister';
   String get saveFcmToken => '${userEndPoint}/fcm-token';
 

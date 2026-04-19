@@ -16,7 +16,6 @@ class MenuItemConfig {
 
 class MenuKeys {
   static const String myProfile = 'my_profile';
-  static const String history = 'history';
   static const String settings = 'settings';
   static const String logout = 'logout';
   static const String about = 'about';
@@ -29,11 +28,6 @@ const List<MenuItemConfig> menu_items = [
     menu_key: MenuKeys.myProfile,
     title: 'My profile',
     icon: Icons.person_outline,
-  ),
-  MenuItemConfig(
-    menu_key: MenuKeys.history,
-    title: 'History',
-    icon: Icons.history,
   ),
   MenuItemConfig(
     menu_key: MenuKeys.feedback,

@@ -1,13 +1,16 @@
 import 'package:dartz/dartz.dart';
 
 import '../../../../common/error/app_error.dart';
+import '../../../../common/manager/user_manager.dart';
 import '../../../../core/_base/_bloc_cubit/base_cubit.dart';
 import '../../../../core/_usecase/usecase.dart';
+import '../../../../infrastructure/injection/service_locator.dart';
 import '../../data/models/user_model.dart';
 
 part 'user_cubit_state.dart';
 
 class UserCubit extends BaseCubit<UserCubitState> {
+  final UserManager _manager = sl<UserManager>();
   UserCubit() : super(UserInitialState());
 
   @override
@@ -87,6 +90,8 @@ class UserCubit extends BaseCubit<UserCubitState> {
       );
     }
   }
+
+  UserManager get manager => _manager;
 
   // Refresh user data
   Future<void> refreshUser({

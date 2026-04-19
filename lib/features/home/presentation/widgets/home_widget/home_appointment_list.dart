@@ -4,7 +4,6 @@ import '../../../../appointment/data/models/appointment_model.dart';
 import '../../../../users/data/models/user_model.dart';
 import '../../pages/home_page.dart';
 import '../appointment_card_widget/appointment_card.dart';
-import 'home_history_button.dart';
 
 class HomeAppointmentList extends StatelessWidget {
   final List<AppointmentModel> appointments;
@@ -47,12 +46,8 @@ class HomeAppointmentList extends StatelessWidget {
             physics: const BouncingScrollPhysics(
               parent: AlwaysScrollableScrollPhysics(),
             ),
-            itemCount: appointments.length + 1,
+            itemCount: appointments.length,
             itemBuilder: (context, index) {
-              if (index == appointments.length) {
-                return const HomeHistoryButton();
-              }
-
               final appointment = appointments[index];
 
               final Map<String, UserModel> userMap = {

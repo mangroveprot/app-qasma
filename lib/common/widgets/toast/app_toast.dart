@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:bot_toast/bot_toast.dart';
 
+import '../../../theme/app_colors.dart';
+
 enum ToastType { success, error, warning, cancel, original }
 
 enum ToastPosition { top, center, bottom }
@@ -157,18 +159,18 @@ class AppToast {
       case ToastPosition.center:
         return Alignment.center;
       case ToastPosition.bottom:
-        return const Alignment(0, 0.8); // Like Google's position in image
+        return const Alignment(0, 0.8);
     }
   }
 
   static Color _getColor(ToastType type) {
     switch (type) {
       case ToastType.success:
-        return Colors.green;
+        return AppColors.lightColors.primary;
       case ToastType.error:
-        return Colors.red;
+        return AppColors.lightColors.error;
       case ToastType.warning:
-        return Colors.orange;
+        return AppColors.lightColors.warning;
       case ToastType.cancel:
         return Colors.grey;
       case ToastType.original:

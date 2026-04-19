@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 
 import '../../../../../common/utils/form_field_config.dart';
 import '../../pages/change_password.dart';
+import '../login_widget/login_forgot_password_btn.dart';
 import 'change_pass_confirm_button.dart';
 import 'change_password_field.dart';
 
@@ -31,6 +32,10 @@ class ChangePasswordForm extends StatelessWidget {
                       confirmPasswordController: state
                           .textControllers[field_confirm_password.field_key]!,
                     ),
+                  ),
+                  const Align(
+                    alignment: Alignment.centerRight,
+                    child: LoginForgotPasswordBtn(),
                   ),
                 ],
               ),

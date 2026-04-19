@@ -7,13 +7,15 @@ class Routes {
   static const String appointment = '/appointment';
   static const String preference_path = '/preference';
   static const String notifications = '/notifications';
+  static const String menu_path = '/menu';
+  static const String activation_path = '/inactive';
 
   // auth route names
   static const String create_account = 'create-account';
   static const String get_started = 'get-started';
-  static const String otp_verification = 'otp-verification';
+  static const String otp_verification = '/otp-verification';
   static const String login = 'login';
-  static const String forgot_password = 'forgot-password';
+  static const String forgot_password = '/forgot-password';
   static const String reset_password = 'reset-password';
   static const String change_password = 'change-password';
   static const String user_profile = 'user-profile';
@@ -21,18 +23,17 @@ class Routes {
   // home route names
 
   // appointment routes names
-  static const String appointment_history = 'appointment-history';
+  static const String appointment_history = '/appointment-history';
 
-  // preference routes name
   static const String about = 'about';
   static const String helpAndSupport = 'help-and-support';
+  static const String activityLogs = 'activity-logs';
 
   static String buildPath(String basePath, String routeName) {
     if (basePath.isEmpty || routeName.isEmpty) {
       throw ArgumentError('Base path and route name cannot be empty');
     }
 
-    // check basePath starts with '/' and doesn't end with '/'
     String normalizedBasePath =
         basePath.startsWith('/') ? basePath : '/$basePath';
     if (normalizedBasePath.endsWith('/') && normalizedBasePath.length > 1) {
@@ -42,7 +43,6 @@ class Routes {
       );
     }
 
-    // check if routeName doesn't start with '/'
     final String normalizedRouteName =
         routeName.startsWith('/') ? routeName.substring(1) : routeName;
 

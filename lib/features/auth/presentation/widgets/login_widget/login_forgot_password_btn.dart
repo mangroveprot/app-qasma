@@ -21,8 +21,7 @@ class LoginForgotPasswordBtn extends StatelessWidget {
               cubit.emitLoading();
               await Future.delayed(const Duration(milliseconds: 500));
               cubit.emitInitial();
-              context.push(
-                  Routes.buildPath(Routes.aut_path, Routes.forgot_password));
+              context.push(Routes.forgot_password);
             },
             text: 'Forgot Password?',
             textColor: context.colors.secondary,

@@ -276,6 +276,16 @@ class _CustomDropdown<T> extends StatelessWidget {
     final colors = context.colors;
     final radii = context.radii;
 
+    // Ensure items are unique to avoid DropdownButton assertion errors when
+    // multiple DropdownMenuItems share the same value.
+    final List<T> uniqueItems = items.toSet().toList();
+
+    // If the current value is not present in the list of items (or appears
+    // multiple times), clear it to satisfy DropdownButton's requirement that
+    // there is exactly one matching item for the given value.
+    final T? effectiveValue =
+        (value != null && uniqueItems.contains(value)) ? value : null;
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -286,15 +296,15 @@ class _CustomDropdown<T> extends StatelessWidget {
           width: 1.0,
         ),
       ),
-      child: items.isEmpty && emptyMessage != null
+      child: uniqueItems.isEmpty && emptyMessage != null
           ? _EmptyState(message: emptyMessage!)
           : DropdownButtonFormField<T>(
-              value: value,
+              value: effectiveValue,
               hint: Text(
                 hint,
                 style: const TextStyle(color: Colors.grey, fontSize: 14),
               ),
-              items: items
+              items: uniqueItems
                   .map((item) => DropdownMenuItem<T>(
                         value: item,
                         child: Text(

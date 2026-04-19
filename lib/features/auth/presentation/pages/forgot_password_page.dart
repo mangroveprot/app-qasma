@@ -60,10 +60,10 @@ class ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
     if (!isValid) return;
 
-    _performLogin(context);
+    _performForgotPassword(context);
   }
 
-  void _performLogin(BuildContext context) {
+  void _performForgotPassword(BuildContext context) {
     final emailorIdNumber = _getTextValue(field_idNumber_email);
     context.read<ButtonCubit>().execute(
           usecase: sl<ForgotPasswordUsecase>(),
@@ -135,7 +135,7 @@ class ForgotPasswordPageState extends State<ForgotPasswordPage> {
       if (rawData != null && rawData is Map<String, dynamic>) {
         final email = rawData['email'];
         context.push(
-          Routes.buildPath(Routes.aut_path, Routes.otp_verification),
+          Routes.otp_verification,
           extra: {
             field_email.field_key: email,
             accountVerification: accountVerification,

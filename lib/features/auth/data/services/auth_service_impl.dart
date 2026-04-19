@@ -55,9 +55,22 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
         if (document['user'] != null) {
           final userData = document['user'] as Map<String, dynamic>;
           final idNumber = userData['idNumber'] as String?;
+          final isActive = userData['active'] as bool?;
+          final role = userData['role'] as String?;
+
+          if (role?.toLowerCase() != 'student') {
+            return Left(AppError.create(
+              message: role == null
+                  ? 'User role information is missing.'
+                  : 'Access denied. Only student are allowed to sign in.',
+              type: ErrorType.validation,
+            ));
+          }
+
           if (idNumber != null) {
             await SharedPrefs().setString('currentUserId', idNumber);
-            await SharedPrefs().setBool('privacyPolicyAccepted', false);
+            await SharedPrefs().setBool('isActive', isActive ?? false);
+            // await SharedPrefs().setBool('privacyPolicyAccepted', false);
           }
           final userModel = UserModel.fromJson(userData);
 

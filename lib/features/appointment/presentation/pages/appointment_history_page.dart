@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../common/shell_refresh_scope.dart';
 import '../../../../common/widgets/custom_app_bar.dart';
+import '../../../../infrastructure/routes/app_routes.dart';
 import '../../../../common/widgets/toast/app_toast.dart';
 import '../bloc/appointments/appointments_cubit.dart';
 import '../controllers/appointment_history_controller.dart';
@@ -16,12 +18,29 @@ class AppointmentHistory extends StatefulWidget {
 
 class AppointmentHistoryState extends State<AppointmentHistory> {
   late final AppointmentHistoryController controller;
+  bool _refreshRegistered = false;
 
   @override
   void initState() {
     super.initState();
     controller = AppointmentHistoryController();
     controller.initialize();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_refreshRegistered) {
+      _refreshRegistered = true;
+      ShellRefreshScope.of(context)?.registerRefresh(
+        Routes.appointment_history,
+        () {
+          if (mounted && controller.isInitialized) {
+            controller.appointmentRefreshData();
+          }
+        },
+      );
+    }
   }
 
   @override
@@ -35,7 +54,10 @@ class AppointmentHistoryState extends State<AppointmentHistory> {
           ),
         ],
         child: Scaffold(
-          appBar: const CustomAppBar(title: 'History'),
+          appBar: const CustomAppBar(
+            title: 'History',
+            enableBackBtn: false,
+          ),
           body: !controller.isInitialized
               ? const Center(
                   child: CircularProgressIndicator(),
@@ -66,13 +88,7 @@ class AppointmentHistoryState extends State<AppointmentHistory> {
         break;
 
       case AppointmentsLoadedState:
-        final loadedState = state as AppointmentsLoadedState;
-        if (loadedState.appointments.isEmpty) {
-          AppToast.show(
-            message: 'You dont have appointment yet!',
-            type: ToastType.original,
-          );
-        }
+        // final loadedState = state as AppointmentsLoadedState;
         break;
     }
   }

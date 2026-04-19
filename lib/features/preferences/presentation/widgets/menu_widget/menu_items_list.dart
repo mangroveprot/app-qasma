@@ -25,3 +25,4 @@ class MenuItemsList extends StatelessWidget {
     );
   }
 }
+

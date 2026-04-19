@@ -59,11 +59,9 @@ class AuthCubit extends BaseCubit<AuthState> {
 
       final token = await sl<FCMService>().getToken();
 
-      if (token != null && token.isNotEmpty) {
-        await _saveFCMToken(token);
-      } else {
-        logger.w('FCM token is null, scheduling retry...');
+      if (token == null || token.isEmpty) {
         _scheduleTokenRetry();
+        return;
       }
     } catch (e) {
       logger.e('Error initializing FCM: $e');
@@ -108,7 +106,7 @@ class AuthCubit extends BaseCubit<AuthState> {
     }
   }
 
-  /// schedule FCM token retry with exponential backoff
+  // schedule FCM token retry with exponential backoff
   void _scheduleTokenRetry({String? token}) {
     _fcmRetryAttempts++;
     final delaySeconds = _fcmRetryAttempts * 10; // 10s, 20s, 30s
@@ -128,7 +126,7 @@ class AuthCubit extends BaseCubit<AuthState> {
         } else {
           final newToken = await sl<FCMService>().getToken();
           if (newToken != null) {
-            await _saveFCMToken(newToken);
+            await sl<FCMService>().getToken();
           }
         }
       },

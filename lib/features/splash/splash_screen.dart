@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/_base/_services/storage/shared_preference.dart';
 import '../../infrastructure/routes/app_routes.dart';
 import '../../theme/theme_extensions.dart';
 import '../auth/presentation/bloc/auth/auth_cubit.dart';
@@ -43,8 +44,10 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void _navigateBasedOnCurrentAuthState() {
     final currentState = AuthCubit.instance.state;
+    final isActive = SharedPrefs().getBool('isActive') ?? false;
 
     if (currentState is AuthSuccessState) {
+      if (!isActive) return context.go(Routes.activation_path);
       context.go(Routes.home_path);
     } else if (currentState is AuthFailureState) {
       context.go(Routes.buildPath(Routes.aut_path, Routes.login));

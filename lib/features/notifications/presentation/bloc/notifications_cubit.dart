@@ -4,8 +4,10 @@ import 'package:logger/logger.dart';
 import '../../../../../common/error/app_error.dart';
 import '../../../../../core/_base/_bloc_cubit/base_cubit.dart';
 import '../../../../../core/_usecase/usecase.dart';
+import '../../../../../infrastructure/injection/service_locator.dart';
 import '../../data/models/notificaiton_model.dart';
 import '../../data/models/params/notifcations_params.dart';
+import 'notification_count_cubit.dart';
 
 part 'notifications_cubit_state.dart';
 
@@ -97,6 +99,7 @@ class NotificationsCubit extends BaseCubit<NotificationCubitState> {
           _logger
               .i('Successfully loaded ${notifications.length} notifications');
           emit(NotificationsLoadedState(notifications));
+          sl<NotificationCountCubit>().refresh();
         },
       );
     } catch (e, stackTrace) {
@@ -282,6 +285,7 @@ class NotificationsCubit extends BaseCubit<NotificationCubitState> {
         (success) {
           _logger.i(
               '${notificationIds.length} notifications marked as read successfully');
+          sl<NotificationCountCubit>().refresh();
         },
       );
     } catch (e, stackTrace) {
@@ -332,6 +336,7 @@ class NotificationsCubit extends BaseCubit<NotificationCubitState> {
         (success) {
           _logger.i(
               '${notificationIds.length} notifications deleted successfully');
+          sl<NotificationCountCubit>().refresh();
         },
       );
     } catch (e, stackTrace) {

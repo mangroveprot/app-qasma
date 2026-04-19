@@ -2,20 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../common/shell_refresh_scope.dart';
 import '../../../../common/utils/button_ids.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
-import '../../../../common/widgets/models/modal_option.dart';
 import '../../../../common/widgets/toast/app_toast.dart';
 import '../../../../infrastructure/routes/app_routes.dart';
 import '../../../appointment/presentation/bloc/appointments/appointments_cubit.dart';
 import '../../../appointment_config/presentation/bloc/appointment_config_cubit.dart';
+import '../../../notifications/presentation/bloc/notification_count_cubit.dart';
 import '../../../users/presentation/bloc/user_cubit.dart';
 import '../controllers/homepage_controller.dart';
 import '../widgets/home_widget/_feedback/feedback_section.dart';
-import '../widgets/home_widget/home_fab.dart';
 import '../widgets/home_widget/home_form.dart';
-import '../widgets/main_appbar.dart';
-import '../widgets/sidbar_widget/custom_sidebar.dart';
+import '../widgets/home_widget/home_header.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -26,6 +25,8 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
   late final HomePageController controller;
+  bool _navCountRefreshed = false;
+  bool _refreshRegistered = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -53,13 +54,33 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
     controller.setUnreadCountCallback(() {
       setState(() {});
     });
-    controller.initialize(onNavigate: _handleNavigation);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_refreshRegistered) {
+      _refreshRegistered = true;
+      ShellRefreshScope.of(context)?.registerRefresh(
+        Routes.home_path,
+        () {
+          if (mounted && controller.isInitialized) {
+            controller.appoitnmentRefreshData();
+            context.read<NotificationCountCubit>().refresh();
+          }
+        },
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-
+    controller.initialize(onNavigate: _handleNavigation, context: context);
+    if (controller.isInitialized && !_navCountRefreshed) {
+      _navCountRefreshed = true;
+      context.read<NotificationCountCubit>().refresh();
+    }
     if (!controller.isInitialized) {
       return const Scaffold(
         body: Center(
@@ -90,46 +111,17 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
             final userProfile = controller.currentUserProfile();
 
             return Scaffold(
-              drawerEnableOpenDragGesture: true,
-              drawerScrimColor: Colors.black54,
-              drawerEdgeDragWidth: 60,
-              appBar: MainAppBar(
-                onNotificationTap: controller.handleNotificationTap,
-                unreadCount: controller.unreadCount,
-              ),
-              drawer: CustomSidebar(
-                userName: userProfile?.fullName ?? '',
-                idNumber: userProfile?.idNumber ?? '',
-                onMenuItemTap: (menuItem) =>
-                    controller.handleMenuItemTap(menuItem, context),
-              ),
               body: SafeArea(
-                child: HomeForm(
-                  state: this,
-                  firstName: userProfile?.first_name ?? '',
-                ),
-              ),
-              floatingActionButton: RepaintBoundary(
-                child: BlocBuilder<AppointmentConfigCubit,
-                    AppointmentConfigCubitState>(
-                  builder: (context, state) {
-                    List<ModalOption> options = [];
-
-                    if (state is AppointmentConfigLoadedState) {
-                      final configCubit =
-                          context.read<AppointmentConfigCubit>();
-                      final categories = configCubit.allCategories;
-                      options =
-                          controller.generateAppointmentOptions(categories);
-                    }
-
-                    return HomeFab(
-                      options: options,
-                      onAppointmentSuccess: () async {
-                        await controller.appoitnmentRefreshData();
-                      },
-                    );
-                  },
+                child: Column(
+                  children: [
+                    const HomeHeader(),
+                    Expanded(
+                      child: HomeForm(
+                        state: this,
+                        firstName: userProfile?.first_name ?? '',
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -151,13 +143,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
         break;
 
       case AppointmentsLoadedState:
-        final loadedState = state as AppointmentsLoadedState;
-        if (loadedState.appointments.isEmpty) {
-          AppToast.show(
-            message: 'You dont have appointment yet!',
-            type: ToastType.original,
-          );
-        }
+        // final loadedState = state as AppointmentsLoadedState;
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {

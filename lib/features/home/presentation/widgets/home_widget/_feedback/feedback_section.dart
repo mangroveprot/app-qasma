@@ -17,6 +17,11 @@ class FeedBackSection {
   final BuildContext context;
   final ButtonCubit buttonCubit;
   static bool _isFeedbackModalOpen = false;
+  static bool _hasPendingFeedback = false;
+  static bool _hasUnfinishedAppointment = false;
+
+  static bool get hasPendingFeedback => _hasPendingFeedback;
+  static bool get hasUnfinishedAppointment => _hasUnfinishedAppointment;
 
   FeedBackSection({
     required this.context,
@@ -40,13 +45,25 @@ class FeedBackSection {
             feedbackSubmitted != true;
       }).toList();
 
+      _hasPendingFeedback = completedWithoutFeedback.isNotEmpty;
+
+      final unfinishedAppointments = state.appointments.where((appointment) {
+        final status = appointment.status.toLowerCase();
+        return status == StatusType.pending.field ||
+            status == StatusType.approved.field;
+      }).toList();
+
+      _hasUnfinishedAppointment = unfinishedAppointments.isNotEmpty;
+
       if (completedWithoutFeedback.isNotEmpty) {
         _showAppointmentFeedback(completedWithoutFeedback.first);
       }
+    } else {
+      _hasPendingFeedback = false;
+      _hasUnfinishedAppointment = false;
     }
   }
 
-  // Show feedback for completed appointment
   void _showAppointmentFeedback(AppointmentModel appointment) {
     _isFeedbackModalOpen = true;
 
@@ -63,7 +80,6 @@ class FeedBackSection {
     ).then((_) => _isFeedbackModalOpen = false);
   }
 
-  // Show general feedback (from menu)
   void showGeneralFeedback() {
     _isFeedbackModalOpen = true;
 

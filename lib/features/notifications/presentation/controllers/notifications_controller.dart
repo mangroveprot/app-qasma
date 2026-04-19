@@ -52,6 +52,11 @@ class NotificationsController {
     await _notificationsManager.refreshNotifications(cubit);
   }
 
+  /// Call when returning to this tab (e.g. after booking) to reload data.
+  Future<void> refresh() async {
+    await loadNotificationsData(_notificationCubit);
+  }
+
   MarkAsReadUsecase get markAsReadUsecase => _markAsReadUsecase;
   DeleteNotificationsUsecase get deleteNotificationsUsecase =>
       _deleteNotificationsUsecase;

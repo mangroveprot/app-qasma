@@ -45,7 +45,7 @@ class UpdateDialog {
       title: 'You\'re Up to Date',
       subtitle: 'Version $currentVersion-build$currentBuild',
       content: _buildNoUpdateContent(context),
-      primaryButtonText: 'Okay',
+      primaryButtonText: 'OK',
       onPrimaryPressed: () => Navigator.of(context).pop(),
       isDismissible: true,
     );

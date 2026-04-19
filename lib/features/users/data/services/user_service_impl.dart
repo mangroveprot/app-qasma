@@ -49,6 +49,34 @@ class UserServiceImpl extends BaseService<UserModel> implements UserService {
   }
 
   @override
+  Future<Either<AppError, bool>> isActive() async {
+    try {
+      final response = await _apiClient.get(
+        _urlProviderConfig.isActive,
+        requiresAuth: true,
+      );
+
+      final apiResponse = ApiResponse.fromJson(response.data, (json) => json);
+
+      if (apiResponse.isSuccess) {
+        return Right(apiResponse.document?['active'] ?? false);
+      } else {
+        return Left(apiResponse.error!);
+      }
+    } catch (e, stack) {
+      final error = e is AppError
+          ? e
+          : AppError.create(
+              message: 'Unexpected error during request.',
+              type: ErrorType.unknown,
+              originalError: e,
+              stackTrace: stack,
+            );
+      return Left(error);
+    }
+  }
+
+  @override
   Future<Either<AppError, List<UserModel>>> getAllUser() async {
     try {
       final url = Uri.parse(_urlProviderConfig.userEndPoint).replace(

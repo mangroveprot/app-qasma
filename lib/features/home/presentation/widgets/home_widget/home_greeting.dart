@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../common/helpers/helpers.dart';
 import '../../../../../common/helpers/spacing.dart';
 import '../../../../../common/utils/constant.dart';
+import '../../../../../common/widgets/custom_modal/info_modal_dialog.dart';
 import '../../../../../theme/theme_extensions.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
+import '../../../../appointment_config/presentation/bloc/appointment_config_cubit.dart';
 
 class HomeGreetingCard extends StatefulWidget {
   final String userName;
@@ -24,6 +27,7 @@ class HomeGreetingCard extends StatefulWidget {
 class _HomeGreetingCardState extends State<HomeGreetingCard> {
   late DateTime _now;
   late Timer _timer;
+  bool _hasShownReminder = false;
 
   @override
   void initState() {
@@ -59,6 +63,19 @@ class _HomeGreetingCardState extends State<HomeGreetingCard> {
     return upcomingAppointments.first;
   }
 
+  bool get _shouldShowReminder {
+    final nextAppointment = _nextAppointment;
+    if (nextAppointment == null) return false;
+
+    final utcTime = nextAppointment.scheduledStartAt;
+    final difference = stripMicroseconds(utcTime).difference(_now);
+
+    if (difference.isNegative) return false;
+
+    // Show reminder when the appointment is within the next hour
+    return difference.inMinutes <= 60;
+  }
+
   String get _countdownText {
     final nextAppointment = _nextAppointment;
     if (nextAppointment == null) return 'No upcoming appointments';
@@ -91,6 +108,41 @@ class _HomeGreetingCardState extends State<HomeGreetingCard> {
     final weight = context.weight;
     final radius = context.radii;
     final color_white = colors.white;
+
+    if (!_hasShownReminder && _shouldShowReminder) {
+      _hasShownReminder = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+
+        String message =
+            'You have an upcoming counseling appointment. Please be prepared and arrive on time.';
+
+        final configState = context.read<AppointmentConfigCubit>().state;
+        if (configState is AppointmentConfigLoadedState &&
+            configState.config.hasReminders &&
+            configState.config.reminders!.isNotEmpty) {
+          message =
+              'Bring your student ID'; //configState.config.reminders!.first.message
+        }
+
+        InfoModalDialog.show(
+          context: context,
+          icon: Icons.schedule_rounded,
+          title: 'Upcoming Appointment',
+          subtitle: _countdownText,
+          content: Text(
+            message,
+            style: TextStyle(
+              fontSize: 13,
+              color: colors.textPrimary,
+              height: 1.4,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          primaryButtonText: 'OK',
+        );
+      });
+    }
 
     return SizedBox(
       width: double.infinity,

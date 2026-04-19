@@ -57,9 +57,11 @@ class FCMService {
       final token = await _firebaseMessaging.getToken();
       if (token != null) {
         _logger.i('FCM Token retrieved: $token');
+        final isNewOrChanged = token != _fcmToken;
         _fcmToken = token;
-        // Emit to stream when token is retrieved
-        _tokenController.add(token);
+        if (isNewOrChanged) {
+          _tokenController.add(token);
+        }
         return token;
       }
       _logger.w('FCM Token is null');

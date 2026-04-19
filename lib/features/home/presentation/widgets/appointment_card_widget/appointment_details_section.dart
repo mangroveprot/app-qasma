@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../../common/helpers/helpers.dart';
 import '../../../../../common/helpers/spacing.dart';
-import '../../../../../common/utils/constant.dart';
 import '../../../../../theme/theme_extensions.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
 import '../../../../users/data/models/user_model.dart';
@@ -100,38 +99,38 @@ class AppointmentDetailsSection extends StatelessWidget {
             ),
           ],
         ),
-        Spacing.verticalSmall,
-        if (appointment.status.toString().toLowerCase() ==
-            StatusType.approved.field.toLowerCase()) ...[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                Icons.location_on_outlined,
-                size: 16,
-                color: colors.textPrimary,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: RichText(
-                  text: TextSpan(
-                    style: DefaultTextStyle.of(context).style,
-                    children: [
-                      TextSpan(
-                        text: 'Location: ',
-                        style: labelTextStyle,
-                      ),
-                      TextSpan(
-                        text: 'Guidance Office',
-                        style: subtitleTextStyle,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ]
+        // Spacing.verticalSmall,
+        // if (appointment.status.toString().toLowerCase() ==
+        //     StatusType.approved.field.toLowerCase()) ...[
+        //   Row(
+        //     crossAxisAlignment: CrossAxisAlignment.start,
+        //     children: [
+        //       Icon(
+        //         Icons.location_on_outlined,
+        //         size: 16,
+        //         color: colors.textPrimary,
+        //       ),
+        //       const SizedBox(width: 8),
+        //       Expanded(
+        //         child: RichText(
+        //           text: TextSpan(
+        //             style: DefaultTextStyle.of(context).style,
+        //             children: [
+        //               TextSpan(
+        //                 text: 'Location: ',
+        //                 style: labelTextStyle,
+        //               ),
+        //               TextSpan(
+        //                 text: 'Guidance Office',
+        //                 style: subtitleTextStyle,
+        //               ),
+        //             ],
+        //           ),
+        //         ),
+        //       ),
+        //     ],
+        //   ),
+        // ]
       ],
     );
   }

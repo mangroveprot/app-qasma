@@ -118,7 +118,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   String _getTextValue(FormFieldConfig field) {
-    return textControllers[field.field_key]?.text ?? '';
+    return textControllers[field.field_key]?.text.trim() ?? '';
   }
 
   String _getDropdownValue(FormFieldConfig field) {
@@ -126,24 +126,16 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   String _getRouteValue(FormFieldConfig field) {
-    return _routeData?[field.field_key] ?? '';
+    return (_routeData?[field.field_key] ?? '').trim();
   }
 
   void handleSubmit(BuildContext context) {
     FocusScope.of(context).unfocus();
-    final fbURL = _getTextValue(field_facebook);
+    //  final fbURL = _getTextValue(field_facebook);
     final isValid = formCubit.validateAll(
       _buildValidationFields(),
       optionalFields: _optionalFields.map((field) => field.field_key).toList(),
     );
-
-    final isValidFbURL = isFacebookValid(fbURL);
-
-    if (fbURL.isNotEmpty && !isValidFbURL)
-      return formCubit.setFieldError(
-        field_facebook.field_key,
-        'We couldn\'t recognize that Facebook link. Example: facebook.com/username or facebook.com/profile.php?id=123456789.',
-      );
 
     if (!isValid) return;
 
@@ -163,7 +155,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
       email: _getTextValue(field_email),
       password: _getRouteValue(field_password),
       verified: false,
-      active: true,
+      active: false,
       first_name: _getTextValue(field_firstName),
       last_name: _getTextValue(field_lastName),
       middle_name: _getTextValue(field_middle_name),
@@ -249,7 +241,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
 
       if (data is UserModel) {
         context.push(
-          Routes.buildPath(Routes.aut_path, Routes.otp_verification),
+          Routes.otp_verification,
           extra: {
             field_email.field_key: data.email,
             accountVerification: accountVerification

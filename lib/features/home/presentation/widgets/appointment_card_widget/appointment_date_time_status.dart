@@ -6,7 +6,6 @@ import '../../../../appointment/data/models/appointment_model.dart';
 import '../../../../appointment/data/models/reschedule_model.dart';
 import '../../../../users/data/models/user_model.dart';
 import 'appointment_reschedule_indicator.dart';
-import 'status_chip.dart';
 
 class AppointmentDateTimeStatus extends StatelessWidget {
   final AppointmentModel appointment;
@@ -116,7 +115,6 @@ class AppointmentDateTimeStatus extends StatelessWidget {
             ],
           ),
         ),
-        StatusChip(status: appointment.status),
       ],
     );
   }
