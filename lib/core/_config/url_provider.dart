@@ -14,6 +14,7 @@ class URLProviderConfig {
   String get appointmentEndPoint => '${apiPath}/appointment';
   String get otpEndPoint => '${apiPath}/otp';
   String get notificationEndPoint => '${apiPath}/notifications';
+  String get activityLogEndPoint => '${apiPath}/activity-logs';
 
   // Auth URLS
   String get login => '${authEndPoint}/login';

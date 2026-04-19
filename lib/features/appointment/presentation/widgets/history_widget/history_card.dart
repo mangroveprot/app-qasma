@@ -38,7 +38,10 @@ class HistoryCard extends StatelessWidget {
                 width: 1,
               ),
             ),
-            child: HistoryCardContent(appointment: appointment),
+            child: HistoryCardContent(
+              appointment: appointment,
+              users: users,
+            ),
           ),
         ),
       ),

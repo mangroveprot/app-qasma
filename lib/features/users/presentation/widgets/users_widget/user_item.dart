@@ -19,16 +19,41 @@ class UserItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final indicators = <String>[];
+    if (!model.active) indicators.add('unregistered');
+    if (!model.verified) indicators.add('uverified');
+
+    final baseName = capitalizeWords(
+        model.fullName.isEmpty ? 'Unknown User' : model.fullName);
+    final displayTitle = '$count. $baseName';
+    final isLongName = baseName.length > 22;
+    final double titleFontSize = isLongName ? 13 : 14;
+
+    final statusLabel = indicators.isEmpty
+        ? null
+        : indicators.map((e) => e.toLowerCase()).join('  ');
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
       child: CustomChevronButton(
-        title:
-            '$count. ${capitalizeWords(model.fullName.isEmpty ? 'Unnamed User' : model.fullName)}',
+        title: displayTitle,
         titleFontStyle:
             model.fullName.isEmpty ? FontStyle.italic : FontStyle.normal,
         onTap: () => _handleOnPressed(context, model.idNumber),
-        fontSize: 14,
+        fontSize: titleFontSize,
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+        trailing: statusLabel == null
+            ? null
+            : Text(
+                statusLabel,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: Colors.redAccent,
+                  fontStyle: FontStyle.italic,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
       ),
     );
   }

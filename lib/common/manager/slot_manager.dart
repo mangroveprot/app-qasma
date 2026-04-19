@@ -10,10 +10,13 @@ class SlotManager {
       if (timeSlots is List) {
         final List<String> slots = List<String>.from(timeSlots);
 
-        final groupedSlots = _groupConsecutiveSlots(slots);
-
-        for (final group in groupedSlots) {
-          formattedSlots.add('$date | $group');
+        for (final slot in slots) {
+          final parts = slot.split(' - ');
+          if (parts.length == 2) {
+            final startTime = convertToAmPm(parts[0]);
+            final endTime = convertToAmPm(parts[1]);
+            formattedSlots.add('$date | $startTime - $endTime');
+          }
         }
       }
     });
@@ -25,48 +28,6 @@ class SlotManager {
     });
 
     return formattedSlots;
-  }
-
-  static List<String> _groupConsecutiveSlots(List<String> slots) {
-    if (slots.isEmpty) return [];
-
-    final List<String> groupedSlots = [];
-    String? currentStart;
-    String? currentEnd;
-
-    for (int i = 0; i < slots.length; i++) {
-      final slot = slots[i];
-      final parts = slot.split(' - ');
-      if (parts.length != 2) continue;
-
-      final startTime = parts[0];
-      final endTime = parts[1];
-
-      if (currentStart == null) {
-        currentStart = startTime;
-        currentEnd = endTime;
-      } else {
-        if (_areConsecutiveSlots(currentEnd!, startTime)) {
-          currentEnd = endTime;
-        } else {
-          groupedSlots.add(
-              '${convertToAmPm(currentStart)} - ${convertToAmPm(currentEnd)}');
-          currentStart = startTime;
-          currentEnd = endTime;
-        }
-      }
-    }
-
-    if (currentStart != null && currentEnd != null) {
-      groupedSlots
-          .add('${convertToAmPm(currentStart)} - ${convertToAmPm(currentEnd)}');
-    }
-
-    return groupedSlots;
-  }
-
-  static bool _areConsecutiveSlots(String endTime, String startTime) {
-    return endTime == startTime;
   }
 
   static DateTime _extractDateTime(String formattedSlot) {
@@ -104,7 +65,7 @@ class SlotManager {
       hour = 0;
     }
 
-    return '${hour.toString().padLeft(2, '0')}:${minute}';
+    return '${hour.toString().padLeft(2, '0')}:$minute';
   }
 
   static Map<String, String> parseSelectedSlot(String formattedSlot) {

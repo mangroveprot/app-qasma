@@ -23,6 +23,7 @@ class AppointmentServiceImpl extends BaseService<AppointmentModel>
       : super(repository);
   final ApiClient _apiClient = sl<ApiClient>();
   final URLProviderConfig _urlProviderConfig = sl<URLProviderConfig>();
+  final localRepo = sl<LocalRepository<AppointmentModel>>();
   final _logger = Logger();
 
   @override
@@ -67,7 +68,7 @@ class AppointmentServiceImpl extends BaseService<AppointmentModel>
             .toList();
 
         try {
-          await repository.saveAllItems(appointments);
+          await localRepo.saveAllItems(appointments);
         } catch (e, stackTrace) {
           _logger.e('Failed to save user data locally', e, stackTrace);
 
@@ -226,7 +227,6 @@ class AppointmentServiceImpl extends BaseService<AppointmentModel>
 
         try {
           if (apiResponse.document != null) {
-            final localRepo = sl<LocalRepository<AppointmentModel>>();
             await localRepo.saveItem(apiResponse.document);
           } else {
             _logger.w('Document is null, skipping save operation');
@@ -290,7 +290,6 @@ class AppointmentServiceImpl extends BaseService<AppointmentModel>
 
         try {
           if (apiResponse.document != null) {
-            final localRepo = sl<LocalRepository<AppointmentModel>>();
             await localRepo.saveItem(apiResponse.document);
           } else {
             _logger.w('Document is null, skipping update operation');
@@ -338,7 +337,18 @@ class AppointmentServiceImpl extends BaseService<AppointmentModel>
   @override
   Future<Either<AppError, bool>> cancelAppointment(
       CancelParams cancelReq) async {
+    final appointmentID = cancelReq.appointmentId;
+
     try {
+      final appointment = await localRepo.getItemById(appointmentID);
+
+      if (appointment == null) {
+        return Left(AppError.create(
+          message: 'Appointment not found',
+          type: ErrorType.notFound,
+        ));
+      }
+
       final response = await _apiClient.patch(
         _urlProviderConfig.cancelAppointment,
         data: cancelReq.toJson(),
@@ -351,18 +361,18 @@ class AppointmentServiceImpl extends BaseService<AppointmentModel>
           (json) => AppointmentModel.fromJson(json),
         );
 
-        if (apiResponse.isSuccess) {
-          return const Right(true);
-        } else {
+        if (!apiResponse.isSuccess) {
           return Left(apiResponse.error ??
               AppError.create(
-                message: 'Failed to update appointment',
+                message: 'Failed to cancel appointment',
                 type: ErrorType.server,
               ));
         }
+
+        return const Right(true);
       } else {
         return Left(AppError.create(
-          message: response.data?['message'] ?? 'Failed to update appointment',
+          message: response.data?['message'] ?? 'Failed to cancel appointment',
           type: ErrorType.server,
         ));
       }

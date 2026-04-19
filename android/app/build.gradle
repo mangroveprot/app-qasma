@@ -31,7 +31,7 @@ apply plugin: 'com.google.gms.google-services'
 
 android {
     namespace 'com.jrmsu.qasma.staff'
-    compileSdkVersion 33
+    compileSdkVersion 34
     ndkVersion "25.1.8937393"
 
     compileOptions {
@@ -50,7 +50,7 @@ android {
     defaultConfig {
         applicationId "com.jrmsu.qasma.staff"
         minSdkVersion 21
-        targetSdkVersion 33
+        targetSdkVersion 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }

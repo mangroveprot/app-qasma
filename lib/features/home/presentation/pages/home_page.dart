@@ -128,7 +128,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
         final loadedState = state as AppointmentsLoadedState;
         if (loadedState.appointments.isEmpty) {
           AppToast.show(
-            message: 'You dont have appointment yet!',
+            message: 'No appointment yet!',
             type: ToastType.original,
           );
         }

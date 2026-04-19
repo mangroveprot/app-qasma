@@ -16,6 +16,14 @@ import '../../core/_base/_services/fcm/fcm_service.dart';
 import '../../core/_base/_services/package_info/package_info_service.dart';
 import '../../core/_config/app_config.dart';
 import '../../core/_config/url_provider.dart';
+import '../../features/activity_logs/data/models/activity_log_model.dart';
+import '../../features/activity_logs/data/models/activity_log_table_model.dart';
+import '../../features/activity_logs/data/repository/activity_log_repository_impl.dart';
+import '../../features/activity_logs/data/services/activity_log_service_impl.dart';
+import '../../features/activity_logs/domain/repository/activity_log_repository.dart';
+import '../../features/activity_logs/domain/services/activity_log_service.dart';
+import '../../features/activity_logs/domain/usecases/get_activity_logs_by_user_usecase.dart';
+import '../../features/activity_logs/domain/usecases/sync_activity_logs_usecase.dart';
 import '../../features/appointment/data/models/appointment_model.dart';
 import '../../features/appointment/data/models/appointment_table_model.dart';
 import '../../features/appointment/data/repository/appointment_repositories_impl.dart';
@@ -92,6 +100,7 @@ void setupServiceLocator() {
   _registerUseCases();
   _registerAppointmentConfigRepositories();
   _registerNotificationRepositories();
+  _registerActivityLogRepositories();
 }
 
 void _registerCore() {
@@ -112,6 +121,7 @@ void _registerInfrastructure() {
         AppointmentTableModel(),
         AppointmentConfigTableModel(),
         NotificationTableModel(),
+        ActivityLogTableModel(),
       ]),
     );
 }
@@ -150,6 +160,10 @@ void _registerRepositories() {
   // Notification repository
   sl.registerLazySingleton<NotificationRepository>(
     () => NotificationRepositoryImpl(),
+  );
+  // Activity Log repository
+  sl.registerLazySingleton<ActivityLogRepository>(
+    () => ActivityLogRepositoryImpl(),
   );
 }
 
@@ -271,6 +285,35 @@ void _registerNotificationRepositories() {
   );
 }
 
+void _registerActivityLogRepositories() {
+  sl.registerLazySingleton<LocalRepository<ActivityLogModel>>(
+    () => LocalRepository<ActivityLogModel>(
+      tableName: 'activity_logs',
+      keyField: 'activityId',
+      fromDb: ActivityLogModel.fromDb,
+      toDb: (activityLog) => activityLog.toDb(),
+      databaseService: sl<DatabaseService>(),
+    ),
+  );
+
+  sl.registerLazySingleton<AbstractRepository<ActivityLogModel>>(
+    () => RemoteRepository<ActivityLogModel>(
+      localRepository: sl<LocalRepository<ActivityLogModel>>(),
+      endpoint: '/api/activity-logs',
+      fromJson: ActivityLogModel.fromJson,
+      toJson: (activityLog) => activityLog.toJson(),
+      getId: (model) => model.activityId,
+      getItemPath: (id) => '/$id',
+      deletePath: (id) => '/$id',
+      includeId: true,
+      syncField: SyncField<ActivityLogModel>(
+        name: 'updatedAt',
+        accessor: (activityLog) => activityLog.updatedAt,
+      ),
+    ),
+  );
+}
+
 void _registerServices() {
   sl
     ..registerLazySingleton<MasterlistReportService>(
@@ -290,6 +333,8 @@ void _registerServices() {
           sl<AbstractRepository<AppointmentConfigModel>>()),
     )
     ..registerLazySingleton<UpdateService>(() => UpdateServiceImpl())
+    ..registerLazySingleton<ActivityLogService>(() =>
+        ActivityLogServiceImpl(sl<AbstractRepository<ActivityLogModel>>()))
     ..registerLazySingleton<NotificationService>(() =>
         NotificationServiceImpl(sl<AbstractRepository<NotificationModel>>()));
 }
@@ -366,4 +411,11 @@ void _registerUseCases() {
         () => DeleteNotificationsUsecase())
     ..registerLazySingleton<SyncNotificationsUsecase>(
         () => SyncNotificationsUsecase());
+
+  // Activity Log use cases
+  sl
+    ..registerLazySingleton<GetActivityLogsByUserUsecase>(
+        () => GetActivityLogsByUserUsecase())
+    ..registerLazySingleton<SyncActivityLogsUsecase>(
+        () => SyncActivityLogsUsecase());
 }

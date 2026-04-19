@@ -450,8 +450,13 @@ class _MyProfileFormState extends State<MyProfileForm> {
               ProfileSection(
                 title: 'Contact Information',
                 icon: Icons.contact_phone,
-                fields:
-                    _buildFieldsForSection(ProfileFieldConfig.contactFields),
+                fields: _buildFieldsForSection(
+                  user.role == RoleType.student.field.toString()
+                      ? ProfileFieldConfig.contactFields
+                      : ProfileFieldConfig.contactFields
+                          .where((fieldKey) => fieldKey != 'facebook')
+                          .toList(),
+                ),
               ),
               if (user.role == RoleType.student.field.toString()) ...[
                 const SizedBox(height: 24),

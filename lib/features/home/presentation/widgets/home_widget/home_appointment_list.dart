@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../common/utils/constant.dart';
+import '../../../../../common/widgets/custom_search_bar.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
 import '../../../../appointment/data/models/appointment_model.dart';
 import '../../../../users/data/models/user_model.dart';
@@ -12,6 +13,10 @@ class HomeAppointmentList extends StatefulWidget {
   final HomePageState state;
   final List<AppointmentModel> appointments;
   final List<UserModel> users;
+  final ValueChanged<String> onSearchChanged;
+  final TextEditingController? searchController;
+  final VoidCallback onOpenFilter;
+  final int activeFilterCount;
   final Function(String) onCancel;
   final Function(String) onReschedule;
   final Future<void> Function() onRefresh;
@@ -20,6 +25,10 @@ class HomeAppointmentList extends StatefulWidget {
     super.key,
     required this.appointments,
     required this.users,
+    required this.onSearchChanged,
+    this.searchController,
+    required this.onOpenFilter,
+    this.activeFilterCount = 0,
     required this.onCancel,
     required this.onReschedule,
     required this.state,
@@ -102,40 +111,43 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
           ),
         ),
 
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 8),
-          padding: const EdgeInsets.all(3),
-          decoration: BoxDecoration(
-            color: colors.textPrimary.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: TabBar(
-            controller: _tabController,
-            indicator: BoxDecoration(
-              color: colors.white,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            indicatorSize: TabBarIndicatorSize.tab,
-            indicatorPadding: EdgeInsets.zero,
-            dividerColor: Colors.transparent,
-            labelColor:
-                _tabController.index == 0 ? colors.warning : colors.primary,
-            unselectedLabelColor: colors.textPrimary,
-            labelStyle: TextStyle(
-              fontSize: 12,
-              fontWeight: weight.medium,
-            ),
-            unselectedLabelStyle: TextStyle(
-              fontSize: 12,
-              fontWeight: weight.regular,
-            ),
-            splashFactory: NoSplash.splashFactory,
-            overlayColor: MaterialStateProperty.all(Colors.transparent),
-            tabs: [
-              _buildTab('Pending', _pendingAppointments.length, 0),
-              _buildTab('Approved', _approvedAppointments.length, 1),
-            ],
-          ),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = constraints.maxWidth >= 520;
+
+            final tabBar = _buildTabBar();
+
+            final searchAndSort = _SearchAndSortRow(
+              onSearchChanged: widget.onSearchChanged,
+              controller: widget.searchController,
+              onOpenFilter: widget.onOpenFilter,
+              activeFilterCount: widget.activeFilterCount,
+            );
+
+            if (isWide) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  children: [
+                    Flexible(flex: 5, child: tabBar),
+                    const SizedBox(width: 8),
+                    Flexible(flex: 6, child: searchAndSort),
+                  ],
+                ),
+              );
+            }
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Column(
+                children: [
+                  tabBar,
+                  const SizedBox(height: 8),
+                  searchAndSort,
+                ],
+              ),
+            );
+          },
         ),
 
         const SizedBox(height: 8),
@@ -157,6 +169,45 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildTabBar() {
+    final colors = context.colors;
+    final weight = context.weight;
+
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: colors.textPrimary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        indicator: BoxDecoration(
+          color: colors.white,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        indicatorSize: TabBarIndicatorSize.tab,
+        indicatorPadding: EdgeInsets.zero,
+        dividerColor: Colors.transparent,
+        labelColor: _tabController.index == 0 ? colors.warning : colors.primary,
+        unselectedLabelColor: colors.textPrimary,
+        labelStyle: TextStyle(
+          fontSize: 12,
+          fontWeight: weight.medium,
+        ),
+        unselectedLabelStyle: TextStyle(
+          fontSize: 12,
+          fontWeight: weight.regular,
+        ),
+        splashFactory: NoSplash.splashFactory,
+        overlayColor: MaterialStateProperty.all(Colors.transparent),
+        tabs: [
+          _buildTab('Pending', _pendingAppointments.length, 0),
+          _buildTab('Approved', _approvedAppointments.length, 1),
+        ],
+      ),
     );
   }
 
@@ -300,6 +351,113 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
               textAlign: TextAlign.center,
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchAndSortRow extends StatelessWidget {
+  final ValueChanged<String> onSearchChanged;
+  final TextEditingController? controller;
+  final VoidCallback onOpenFilter;
+  final int activeFilterCount;
+
+  const _SearchAndSortRow({
+    required this.onSearchChanged,
+    this.controller,
+    required this.onOpenFilter,
+    this.activeFilterCount = 0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: CustomSearchBar(
+            onSearchChanged: onSearchChanged,
+            hintText: 'Search appointments...',
+            controller: controller,
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 0),
+            margin: EdgeInsets.zero,
+            iconConstraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+          ),
+        ),
+        const SizedBox(width: 8),
+        _FilterButton(
+          onTap: onOpenFilter,
+          activeFilterCount: activeFilterCount,
+        ),
+      ],
+    );
+  }
+}
+
+class _FilterButton extends StatelessWidget {
+  final VoidCallback onTap;
+  final int activeFilterCount;
+
+  const _FilterButton({
+    required this.onTap,
+    required this.activeFilterCount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final radius = context.radii;
+    final shadows = context.shadows;
+
+    return Material(
+      color: Colors.transparent,
+      borderRadius: radius.medium,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: radius.medium,
+        child: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: colors.white.withOpacity(0.8),
+            borderRadius: radius.medium,
+            border: Border.all(color: colors.textPrimary.withOpacity(0.1)),
+            boxShadow: [shadows.light],
+          ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Center(
+                child: Icon(
+                  Icons.tune_rounded,
+                  size: 20,
+                  color: colors.textPrimary,
+                ),
+              ),
+              if (activeFilterCount > 0)
+                Positioned(
+                  right: -2,
+                  top: -2,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: colors.primary,
+                      borderRadius: BorderRadius.circular(99),
+                      border: Border.all(color: colors.white, width: 2),
+                    ),
+                    child: Text(
+                      activeFilterCount.toString(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../common/presentation/pages/not_found_page.dart';
+import '../../features/activity_logs/presentation/pages/activity_logs_page.dart';
 import '../../features/appointment/presentation/pages/appointment_history_page.dart';
 import '../../features/appointment/presentation/pages/book_appointment_page.dart';
 import '../../features/auth/presentation/pages/change_password.dart';
@@ -18,6 +19,7 @@ import '../../features/splash/splash_screen.dart';
 import '../../features/users/presentation/pages/create_user_page.dart';
 import '../../features/users/presentation/pages/my_profile_page.dart';
 import '../../features/users/presentation/pages/profile_setup_page.dart';
+import '../../features/users/presentation/pages/student_qr_scanner_page.dart';
 import '../../features/users/presentation/pages/users_page.dart';
 import 'app_routes.dart';
 
@@ -97,6 +99,10 @@ class AppRouter {
             path: Routes.user_profile,
             builder: (context, state) => const MyProfilePage(),
           ),
+          GoRoute(
+            path: Routes.student_qr_scan,
+            builder: (context, state) => const StudentQRScannerPage(),
+          ),
         ],
       ),
       GoRoute(
@@ -110,6 +116,11 @@ class AppRouter {
           GoRoute(
             path: Routes.about,
             builder: (context, state) => const AboutPage(),
+          ),
+          GoRoute(
+            parentNavigatorKey: parentNavigatorKey,
+            path: Routes.activityLogs,
+            builder: (context, state) => const ActivityLogsPage(),
           ),
         ],
       ),

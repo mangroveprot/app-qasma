@@ -25,10 +25,12 @@ class Routes {
 
   // appointment routes names
   static const String appointment_history = 'appointment-history';
+  static const String student_qr_scan = 'student-qr-scan';
 
   // preference routes name
   static const String settings = 'settings';
   static const String about = 'about';
+  static const String activityLogs = 'activity-logs';
 
   static String buildPath(String basePath, String routeName) {
     if (basePath.isEmpty || routeName.isEmpty) {

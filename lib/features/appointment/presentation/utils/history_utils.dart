@@ -32,11 +32,21 @@ class HistoryUtils {
     AppointmentModel appointment,
     List<UserModel>? users,
   ) {
+    final Map<String, UserModel> userById = {
+      for (final user in users ?? const <UserModel>[]) user.idNumber: user,
+    };
+
     HistoryModalSection.show(
       context,
       title: 'Appointment Details',
       child: Column(
         children: [
+          InfoSection(
+            title: 'Student Information',
+            icon: Icons.person_outline,
+            items: _getStudentInfo(appointment, userById),
+          ),
+          Spacing.verticalMedium,
           InfoSection(
             title: 'Appointment Information',
             icon: Icons.event_note_outlined,
@@ -46,14 +56,14 @@ class HistoryUtils {
           InfoSection(
             title: 'Approval Information',
             icon: Icons.verified_outlined,
-            items: _getApprovalInfo(appointment, users),
+            items: _getApprovalInfo(appointment, userById),
           ),
           if (appointment.status == StatusType.completed.field) ...[
             Spacing.verticalMedium,
             InfoSection(
               title: 'Check-in Information',
               icon: Icons.check_circle_outline,
-              items: _getCheckInInfo(appointment, users),
+              items: _getCheckInInfo(appointment, userById),
             ),
           ],
           if (appointment.status == StatusType.cancelled.field) ...[
@@ -61,7 +71,7 @@ class HistoryUtils {
             InfoSection(
               title: 'Cancellation Information',
               icon: Icons.cancel_outlined,
-              items: _getCancellationInfo(appointment, users),
+              items: _getCancellationInfo(appointment, userById),
             )
           ],
           Spacing.verticalLarge,
@@ -93,18 +103,28 @@ class HistoryUtils {
     };
   }
 
+  static Map<String, String> _getStudentInfo(
+    AppointmentModel appointment,
+    Map<String, UserModel> userById,
+  ) {
+    final user = userById[appointment.studentId];
+    final block = user?.other_info.block;
+    final course = user?.other_info.course;
+
+    return {
+      'Student Name': _safe(user?.fullName),
+      'Block': _safe(block),
+      'Course': _safe(course),
+      'Student ID': _safe(user?.idNumber ?? appointment.studentId),
+    };
+  }
+
   static Map<String, String> _getApprovalInfo(
     AppointmentModel appointment,
-    List<UserModel>? users,
+    Map<String, UserModel> userById,
   ) {
-    final staff = _findUser(
-      users,
-      predicate: (u) => u.idNumber == appointment.staffId,
-    );
-    final counselor = _findUser(
-      users,
-      predicate: (u) => u.idNumber == appointment.counselorId,
-    );
+    final staff = userById[appointment.staffId];
+    final counselor = userById[appointment.counselorId];
 
     return {
       'Approved By Staff': capitalizeWords(_safe(staff?.fullName)),
@@ -114,12 +134,9 @@ class HistoryUtils {
 
   static Map<String, String> _getCheckInInfo(
     AppointmentModel appointment,
-    List<UserModel>? users,
+    Map<String, UserModel> userById,
   ) {
-    final counselor = _findUser(
-      users,
-      predicate: (u) => u.idNumber == appointment.qrCode.scannedById,
-    );
+    final counselor = userById[appointment.qrCode.scannedById];
 
     return {
       'Check-in-status': _safe(appointment.checkInStatus.toString()),
@@ -137,13 +154,10 @@ class HistoryUtils {
 
   static Map<String, String> _getCancellationInfo(
     AppointmentModel appointment,
-    List<UserModel>? users,
+    Map<String, UserModel> userById,
   ) {
     final isCurrentUser = appointment.cancellation.cancelledById == currId;
-    final user = _findUser(
-      users,
-      predicate: (u) => u.idNumber == appointment.cancellation.cancelledById,
-    );
+    final user = userById[appointment.cancellation.cancelledById];
 
     return {
       'Reason': _safe(appointment.cancellation.reason?.toString()),
@@ -168,21 +182,6 @@ class HistoryUtils {
       return formatUtcToLocal(utcTime: dateString!, style: style);
     } catch (e) {
       return 'N/A';
-    }
-  }
-
-  static UserModel? _findUser(
-    List<UserModel>? users, {
-    required bool Function(UserModel) predicate,
-  }) {
-    if (users == null || users.isEmpty) {
-      return null;
-    }
-
-    try {
-      return users.firstWhere(predicate);
-    } catch (e) {
-      return null;
     }
   }
 }

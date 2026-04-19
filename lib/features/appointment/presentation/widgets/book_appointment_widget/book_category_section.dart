@@ -14,34 +14,65 @@ class BookCategorySection extends StatelessWidget {
     final radius = context.radii;
     final fontWeight = context.weight;
 
-    final _sectionTitleStyle = TextStyle(
-      fontSize: 14,
-      fontWeight: fontWeight.bold,
-      color: colors.black,
-    );
-
-    final _categoryContainerDecoration = BoxDecoration(
-      color: colors.surface,
-      borderRadius: radius.large,
-    );
-
-    final _categoryTextStyle = TextStyle(
-      fontSize: 14,
-      color: colors.black,
-      fontWeight: fontWeight.medium,
-    );
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Appointment Category', style: _sectionTitleStyle),
-        Spacing.verticalMedium,
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-          decoration: _categoryContainerDecoration,
-          child: Center(
-            child: Text(capitalizeWords(category), style: _categoryTextStyle),
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            borderRadius: radius.large,
+            gradient: LinearGradient(
+              colors: [
+                colors.primary.withOpacity(0.12),
+                colors.primary.withOpacity(0.03),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: colors.primary,
+                  borderRadius: radius.medium,
+                ),
+                child: Icon(
+                  Icons.event_note_rounded,
+                  color: colors.white,
+                  size: 22,
+                ),
+              ),
+              Spacing.horizontalMedium,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Appointment category',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: colors.secondary,
+                        fontWeight: fontWeight.regular,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      capitalizeWords(category),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: colors.textPrimary,
+                        fontWeight: fontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ],

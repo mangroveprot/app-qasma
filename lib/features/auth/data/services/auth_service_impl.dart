@@ -59,16 +59,11 @@ class AuthServiceImpl extends BaseService<UserModel> implements AuthService {
           final role = userData['role'] as String?;
           final firstName = userData['first_name'] as String?;
 
-          if (role != null) {
-            if (role.toLowerCase() != RoleType.staff.field) {
-              return Left(AppError.create(
-                message: 'Access denied. Only staff are allowed to sign in.',
-                type: ErrorType.validation,
-              ));
-            }
-          } else {
+          if (role?.toLowerCase() != RoleType.staff.field) {
             return Left(AppError.create(
-              message: 'User role information is missing.',
+              message: role == null
+                  ? 'User role information is missing.'
+                  : 'Access denied. Only staff are allowed to sign in.',
               type: ErrorType.validation,
             ));
           }

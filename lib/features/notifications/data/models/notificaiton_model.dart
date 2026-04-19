@@ -14,6 +14,8 @@ class NotificationModel extends Notification {
     super.sentAt,
     super.readAt,
     super.fcmResponse,
+    super.deletedAt,
+    super.deletedBy,
     required super.createdAt,
     required super.updatedAt,
   });
@@ -31,6 +33,8 @@ class NotificationModel extends Notification {
       'sentAt': sentAt?.toIso8601String(),
       'readAt': readAt?.toIso8601String(),
       'fcmResponse': fcmResponse != null ? jsonEncode(fcmResponse) : null,
+      'deletedAt': deletedAt?.toIso8601String(),
+      'deletedBy': deletedBy,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
@@ -53,6 +57,8 @@ class NotificationModel extends Notification {
       fcmResponse: map['fcmResponse'] != null
           ? jsonDecode(map['fcmResponse']) as Map<String, dynamic>
           : null,
+      deletedAt: ModelUtils.getNullableDateTime(map, 'deletedAt'),
+      deletedBy: ModelUtils.getString(map, 'deletedBy'),
       createdAt: ModelUtils.getDateTime(map, 'createdAt'),
       updatedAt: ModelUtils.getDateTime(map, 'updatedAt'),
     );
@@ -94,6 +100,9 @@ class NotificationModel extends Notification {
       readAt: ModelUtils.getNullableDateTime(json, 'readAt', 'read_at'),
       fcmResponse: json['fcmResponse'] as Map<String, dynamic>? ??
           json['fcm_response'] as Map<String, dynamic>?,
+      deletedAt:
+          ModelUtils.getNullableDateTime(json, 'deletedAt', 'deleted_at'),
+      deletedBy: ModelUtils.getString(json, 'deletedBy', 'deleted_by'),
       createdAt: ModelUtils.getDateTime(json, 'createdAt', 'created_at'),
       updatedAt: ModelUtils.getDateTime(json, 'updatedAt', 'updated_at'),
     );
@@ -112,6 +121,8 @@ class NotificationModel extends Notification {
       sentAt: sentAt,
       readAt: readAt,
       fcmResponse: fcmResponse,
+      deletedAt: deletedAt,
+      deletedBy: deletedBy,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
@@ -130,6 +141,8 @@ class NotificationModel extends Notification {
       sentAt: entity.sentAt,
       readAt: entity.readAt,
       fcmResponse: entity.fcmResponse,
+      deletedAt: entity.deletedAt,
+      deletedBy: entity.deletedBy,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     );
@@ -147,6 +160,8 @@ class NotificationModel extends Notification {
     DateTime? sentAt,
     DateTime? readAt,
     Map<String, dynamic>? fcmResponse,
+    String? deletedBy,
+    DateTime? deletedAt,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -161,6 +176,8 @@ class NotificationModel extends Notification {
       sentAt: sentAt ?? this.sentAt,
       readAt: readAt ?? this.readAt,
       fcmResponse: fcmResponse ?? this.fcmResponse,
+      deletedAt: deletedAt ?? this.deletedAt,
+      deletedBy: deletedBy ?? this.deletedBy,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

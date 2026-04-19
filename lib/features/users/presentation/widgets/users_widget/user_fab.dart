@@ -18,11 +18,49 @@ class UserFab extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final weight = context.weight;
+    final isStudent = role.toLowerCase() == 'student';
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (isStudent) ...[
+          FloatingActionButton(
+            heroTag: 'scan-qr-$role',
+            onPressed: () {
+              context.push(
+                Routes.buildPath(
+                  Routes.user_path,
+                  Routes.student_qr_scan,
+                ),
+                extra: {
+                  'onSuccess': () async {
+                    await onRefresh();
+                  },
+                },
+              );
+            },
+            backgroundColor: colors.secondary,
+            foregroundColor: colors.white,
+            elevation: 4,
+            shape: const CircleBorder(),
+            child: const Icon(
+              Icons.qr_code_scanner,
+              size: 24,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Scan QR',
+            style: TextStyle(
+              fontSize: 12,
+              color: colors.textPrimary,
+              fontWeight: weight.medium,
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
         FloatingActionButton(
+          heroTag: 'add-user-$role',
           onPressed: () {
             context.push(
               Routes.buildPath(

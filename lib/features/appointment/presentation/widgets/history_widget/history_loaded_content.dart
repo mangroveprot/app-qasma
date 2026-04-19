@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../common/widgets/pagination_widget.dart';
+import '../../../../users/data/models/user_model.dart';
 import '../../../data/models/appointment_model.dart';
 import '../../pages/appointment_history_page.dart';
 import 'history_card.dart';
@@ -14,6 +15,7 @@ class HistoryLoadedContent extends StatelessWidget {
   final int itemsPerPage;
   final Function(int) onPageChanged;
   final ScrollController scrollController;
+  final List<UserModel> users;
 
   const HistoryLoadedContent({
     Key? key,
@@ -24,6 +26,7 @@ class HistoryLoadedContent extends StatelessWidget {
     required this.itemsPerPage,
     required this.onPageChanged,
     required this.scrollController,
+    required this.users,
   }) : super(key: key);
 
   List<AppointmentModel> get paginatedAppointments {
@@ -54,7 +57,7 @@ class HistoryLoadedContent extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: HistoryCard(
                   appointment: appointment,
-                  users: state.controller.getUsers(),
+                  users: users,
                 ),
               ),
             ),

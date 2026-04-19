@@ -41,7 +41,7 @@ class LoginField extends StatelessWidget {
               CustomPasswordField(
                 field_key: field_password.field_key,
                 name: 'Password',
-                hint: 'Enter your p assword',
+                hint: 'Enter your password',
                 controller: passwordController,
                 showErrorText: false,
                 showPasswordRule: false,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../common/helpers/spacing.dart';
 import '../../../../common/widgets/bloc/form/form_cubit.dart';
@@ -25,6 +26,7 @@ class CustomPasswordField extends StatefulWidget {
   final bool required;
   final bool showErrorText;
   final String? customErrorMessage;
+  final Iterable<String>? autofillHints;
 
   const CustomPasswordField({
     super.key,
@@ -36,6 +38,7 @@ class CustomPasswordField extends StatefulWidget {
     this.required = false,
     this.showErrorText = true,
     this.customErrorMessage,
+    this.autofillHints = const [AutofillHints.password],
   });
 
   @override
@@ -56,24 +59,14 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
   void _initializeValidationRules() {
     _validationRules = [
       PasswordValidationRule(
-        rule: '8-20 characters',
+        rule: '6-20 characters',
         isValid: false,
-        regex: RegExp(r'^.{8,20}$'),
+        regex: RegExp(r'^.{6,20}$'),
       ),
       PasswordValidationRule(
-        rule: 'At least one capital letter (A to Z)',
+        rule: 'At least one letter',
         isValid: false,
-        regex: RegExp(r'[A-Z]'),
-      ),
-      PasswordValidationRule(
-        rule: 'At least one lowercase letter (a to z)',
-        isValid: false,
-        regex: RegExp(r'[a-z]'),
-      ),
-      PasswordValidationRule(
-        rule: 'At least one number (0 to 9)',
-        isValid: false,
-        regex: RegExp(r'[0-9]'),
+        regex: RegExp(r'[a-zA-Z]'),
       ),
       PasswordValidationRule(
         rule: "Don't use : , \" / \\",
@@ -167,7 +160,6 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
             ),
           ),
 
-          // Password Input Field
           Container(
             decoration: BoxDecoration(
               color: Colors.grey.shade50,
@@ -180,6 +172,10 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
             child: TextField(
               controller: widget.controller,
               obscureText: !_isPasswordVisible,
+              autofillHints: widget.autofillHints,
+              inputFormatters: [
+                FilteringTextInputFormatter.deny(RegExp(r'^\s|\s$')),
+              ],
               decoration: InputDecoration(
                 filled: true,
                 fillColor: Colors.grey.shade50,
@@ -193,26 +189,19 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
                   fontSize: 14,
                   fontWeight: weightRegular,
                 ),
-                suffixIcon: GestureDetector(
-                  onTap: () {
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordVisible
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                    color: textColor.withOpacity(0.6),
+                    size: 20,
+                  ),
+                  onPressed: () {
                     setState(() {
                       _isPasswordVisible = !_isPasswordVisible;
                     });
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 16),
-                    child: Center(
-                      widthFactor: 0,
-                      child: Text(
-                        _isPasswordVisible ? 'HIDE' : 'SHOW',
-                        style: TextStyle(
-                          color: textColor,
-                          fontWeight: weightRegular,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ),
                 ),
                 border: OutlineInputBorder(
                   borderRadius: radiusMedium,
@@ -299,10 +288,8 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
 extension CustomPasswordFieldValidation on CustomPasswordField {
   static bool isValid(String password) {
     final rules = [
-      RegExp(r'^.{8,20}$'), // 8-20 characters
-      RegExp(r'[A-Z]'), // At least one capital letter
-      RegExp(r'[a-z]'), // At least one lowercase letter
-      RegExp(r'[0-9]'), // At least one number
+      RegExp(r'^.{6,20}$'), // 6-20 characters
+      RegExp(r'[a-zA-Z]'), // At least one letter
       RegExp(r'^[^:,"\/\\]*$'), // No forbidden characters
       RegExp(r'^\S*$'), // No spaces
     ];

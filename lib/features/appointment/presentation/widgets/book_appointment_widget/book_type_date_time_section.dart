@@ -15,12 +15,14 @@ class BookTypeDataTimeSection extends StatelessWidget {
   final Map<String, TextEditingController> textControllers;
   final Map<String, ValueNotifier<String?>> dropdownControllers;
   final String? category;
+  final bool isRescheduling;
 
   const BookTypeDataTimeSection({
     super.key,
     required this.textControllers,
     required this.dropdownControllers,
     this.category,
+    this.isRescheduling = false,
   });
 
   @override
@@ -38,6 +40,7 @@ class BookTypeDataTimeSection extends StatelessWidget {
                   category: category,
                   onTypeSelected: (type) =>
                       _onAppointmentTypeSelected(context, type),
+                  isEnabled: !isRescheduling,
                 ),
                 const SizedBox(height: 20),
                 _DateTimeDropdown(
@@ -78,15 +81,61 @@ class _AppointmentTypeDropdown extends StatelessWidget {
   final ValueNotifier<String?> controller;
   final String? category;
   final Function(String) onTypeSelected;
+  final bool isEnabled;
 
   const _AppointmentTypeDropdown({
     required this.controller,
     this.category,
     required this.onTypeSelected,
+    this.isEnabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    // When disabled (staff rescheduling), show a plain read‑only value
+    // with no dropdown affordance at all.
+    if (!isEnabled) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          BookTypeLabel(
+            text: ToolTip.appointmentType.key,
+            tooltip: ToolTip.appointmentType.tips,
+          ),
+          const SizedBox(height: 8),
+          ValueListenableBuilder<String?>(
+            valueListenable: controller,
+            builder: (context, value, _) {
+              final colors = context.colors;
+              final radii = context.radii;
+              final weight = context.weight;
+
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: radii.small,
+                  border: Border.all(
+                    color: colors.accent.withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  value ?? '-',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: colors.textPrimary,
+                    fontWeight: weight.medium,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -98,6 +147,7 @@ class _AppointmentTypeDropdown extends StatelessWidget {
         BlocSelector<FormCubit, FormValidationState, bool>(
           selector: (state) => state.hasError(field_appointmentType.field_key),
           builder: (context, hasError) {
+            final effectiveHasError = hasError && isEnabled;
             return ValueListenableBuilder<String?>(
               valueListenable: controller,
               builder: (context, value, _) {
@@ -110,8 +160,10 @@ class _AppointmentTypeDropdown extends StatelessWidget {
                       value: value,
                       hint: 'Select appointment type',
                       items: appointmentTypes,
-                      hasError: hasError,
+                      hasError: effectiveHasError,
+                      enabled: isEnabled,
                       onChanged: (newValue) {
+                        if (!isEnabled) return;
                         if (newValue != null) {
                           controller.value = newValue;
                           onTypeSelected(newValue);
@@ -119,7 +171,7 @@ class _AppointmentTypeDropdown extends StatelessWidget {
                       },
                       emptyMessage: 'No types available for this category',
                     ),
-                    if (hasError)
+                    if (effectiveHasError)
                       const _ErrorText(text: 'This field is required'),
                   ],
                 );
@@ -255,6 +307,7 @@ class _CustomDropdown<T> extends StatelessWidget {
   final String hint;
   final List<T> items;
   final bool hasError;
+  final bool enabled;
   final Function(T?) onChanged;
   final String? emptyMessage;
   final double? menuMaxHeight;
@@ -265,6 +318,7 @@ class _CustomDropdown<T> extends StatelessWidget {
     required this.hint,
     required this.items,
     this.hasError = false,
+    this.enabled = true,
     required this.onChanged,
     this.emptyMessage,
     this.menuMaxHeight,
@@ -290,6 +344,15 @@ class _CustomDropdown<T> extends StatelessWidget {
           ? _EmptyState(message: emptyMessage!)
           : DropdownButtonFormField<T>(
               value: value,
+              disabledHint: value != null
+                  ? Text(
+                      value.toString(),
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 14,
+                      ),
+                    )
+                  : null,
               hint: Text(
                 hint,
                 style: const TextStyle(color: Colors.grey, fontSize: 14),
@@ -307,7 +370,7 @@ class _CustomDropdown<T> extends StatelessWidget {
                       ))
                   .toList(),
               onTap: onTap,
-              onChanged: onChanged,
+              onChanged: enabled ? onChanged : null,
               menuMaxHeight: menuMaxHeight,
               decoration: const InputDecoration(
                 contentPadding: EdgeInsets.all(12.0),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../common/widgets/custom_filter_bar.dart';
+import '../../../../users/data/models/user_model.dart';
+import '../../../../users/presentation/bloc/user_cubit.dart';
 import '../../../data/models/appointment_model.dart';
 import '../../bloc/appointments/appointments_cubit.dart';
 import '../../pages/appointment_history_page.dart';
@@ -147,14 +149,28 @@ class _HistoryFormState extends State<HistoryForm> {
               }
 
               if (state is AppointmentsLoadedState) {
-                return HistoryLoadedContent(
-                  appointments: _getFilteredAppointments(state),
-                  onRefresh: _onRefresh,
-                  state: widget.state,
-                  currentPage: currentPage,
-                  itemsPerPage: itemsPerPage,
-                  onPageChanged: _handlePageChange,
-                  scrollController: _scrollController,
+                return BlocBuilder<UserCubit, UserCubitState>(
+                  buildWhen: (prev, next) =>
+                      prev.runtimeType != next.runtimeType ||
+                      (prev is UserLoadedState &&
+                          next is UserLoadedState &&
+                          prev.users != next.users),
+                  builder: (context, userState) {
+                    final users = userState is UserLoadedState
+                        ? userState.users
+                        : <UserModel>[];
+
+                    return HistoryLoadedContent(
+                      appointments: _getFilteredAppointments(state),
+                      onRefresh: _onRefresh,
+                      state: widget.state,
+                      currentPage: currentPage,
+                      itemsPerPage: itemsPerPage,
+                      onPageChanged: _handlePageChange,
+                      scrollController: _scrollController,
+                      users: users,
+                    );
+                  },
                 );
               }
 

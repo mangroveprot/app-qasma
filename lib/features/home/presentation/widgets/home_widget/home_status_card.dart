@@ -34,14 +34,14 @@ class HomeStatusCard extends StatelessWidget {
     final weight = context.weight;
 
     return Card(
-      elevation: 6,
+      elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
         decoration: BoxDecoration(
           color: colors.white,
           borderRadius: radii.medium,
         ),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -58,12 +58,16 @@ class HomeStatusCard extends StatelessWidget {
                           utcTime: nowUtc.toString(),
                           style: DateTimeFormatStyle.dateOnly,
                         ),
-                        style: const TextStyle(fontSize: 14)),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: weight.medium,
+                          color: colors.black,
+                        )),
                   ],
                 ),
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
                     color: colors.primary.withOpacity(0.1),
                     borderRadius: radii.medium,
@@ -73,6 +77,7 @@ class HomeStatusCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 10,
                       color: colors.primary,
+                      fontWeight: weight.medium,
                     ),
                   ),
                 ),
@@ -80,11 +85,11 @@ class HomeStatusCard extends StatelessWidget {
             ),
 
             if (_pendingAppointmentsCount > 0) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Container(
                 width: double.infinity,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
                   color: colors.primary.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(8),
@@ -97,7 +102,7 @@ class HomeStatusCard extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.pending_actions,
-                      size: 14,
+                      size: 13,
                       color: colors.primary,
                     ),
                     const SizedBox(width: 8),
@@ -105,7 +110,7 @@ class HomeStatusCard extends StatelessWidget {
                       child: Text(
                         _pendingAppointmentsText,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11.5,
                           color: colors.primary,
                           fontWeight: weight.medium,
                         ),

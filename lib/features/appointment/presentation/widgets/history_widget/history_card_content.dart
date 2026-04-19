@@ -5,14 +5,17 @@ import '../../../../../common/helpers/spacing.dart';
 import '../../../../../common/utils/constant.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
 import '../../../../home/presentation/widgets/appointment_card_widget/status_chip.dart';
+import '../../../../users/data/models/user_model.dart';
 import '../../../data/models/appointment_model.dart';
 
 class HistoryCardContent extends StatelessWidget {
   final AppointmentModel appointment;
+  final List<UserModel>? users;
 
   const HistoryCardContent({
     super.key,
     required this.appointment,
+    this.users,
   });
 
   @override
@@ -21,6 +24,10 @@ class HistoryCardContent extends StatelessWidget {
     final weight = context.weight;
     final radius = context.radii;
     final status = appointment.status;
+
+    final Map<String, UserModel> userById = {
+      for (final user in users ?? const <UserModel>[]) user.idNumber: user,
+    };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,6 +63,35 @@ class HistoryCardContent extends StatelessWidget {
           ),
         ),
         Spacing.verticalSmall,
+
+        // Student info
+        Builder(
+          builder: (context) {
+            final user = userById[appointment.studentId];
+            if (user == null) return const SizedBox.shrink();
+            final displayName = user.fullName.trim().isNotEmpty
+                ? user.fullName.trim()
+                : 'Unknown';
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  displayName,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: weight.bold,
+                    color: colors.black.withOpacity(0.9),
+                    letterSpacing: -0.2,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+                Spacing.verticalSmall,
+              ],
+            );
+          },
+        ),
 
         // Category and status row
         Row(

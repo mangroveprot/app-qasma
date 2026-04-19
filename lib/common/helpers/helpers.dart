@@ -9,7 +9,7 @@ class Field {
 }
 
 bool isPasswordValid(String password) {
-  final regex = RegExp(r'^.{8,}$');
+  final regex = RegExp(r'^.{6,}$');
   return regex.hasMatch(password);
 }
 

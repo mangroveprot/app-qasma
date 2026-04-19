@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../../core/_config/app_config.dart';
@@ -17,63 +15,53 @@ class UpdateManager {
     UpdateCubitState state, {
     bool isManualCheck = false,
   }) {
-    if (_isShowingDialog || !context.mounted) return;
+    if (_isShowingDialog) return;
 
     if (state is UpdateAvailable) {
-      _showUpdateDialog(context, state);
+      _showUpdateDialog(state);
     } else if (state is UpdateNotAvailable && isManualCheck) {
-      _showNoUpdateDialog(context, state);
+      _showNoUpdateDialog(state);
     }
   }
 
-  static void _showUpdateDialog(
-    BuildContext context,
-    UpdateAvailable state,
-  ) {
+  static void _showUpdateDialog(UpdateAvailable state) {
     _isShowingDialog = true;
 
-    Future.delayed(const Duration(milliseconds: 500), () {
-      final navContext =
-          AppRouter.router.routerDelegate.navigatorKey.currentContext;
+    final navContext =
+        AppRouter.router.routerDelegate.navigatorKey.currentContext;
 
-      if (navContext != null && navContext.mounted) {
-        UpdateDialog.show(
-          context: navContext,
-          currentVersion: state.currentVersion ?? '1.0.0',
-          currentBuild: state.currentBuild ?? '1',
-          latestRelease: state.latestRelease,
-          officialWebsiteUrl: _officialWebsiteUrl,
-        ).then((_) {
-          _isShowingDialog = false;
-        });
-      } else {
+    if (navContext != null && navContext.mounted) {
+      UpdateDialog.show(
+        context: navContext,
+        currentVersion: state.currentVersion ?? '1.0.0',
+        currentBuild: state.currentBuild ?? '1',
+        latestRelease: state.latestRelease,
+        officialWebsiteUrl: _officialWebsiteUrl,
+      ).then((_) {
         _isShowingDialog = false;
-      }
-    });
+      });
+    } else {
+      _isShowingDialog = false;
+    }
   }
 
-  static void _showNoUpdateDialog(
-    BuildContext context,
-    UpdateNotAvailable state,
-  ) {
+  static void _showNoUpdateDialog(UpdateNotAvailable state) {
     _isShowingDialog = true;
 
-    Future.delayed(const Duration(milliseconds: 500), () {
-      final navContext =
-          AppRouter.router.routerDelegate.navigatorKey.currentContext;
+    final navContext =
+        AppRouter.router.routerDelegate.navigatorKey.currentContext;
 
-      if (navContext != null && navContext.mounted) {
-        UpdateDialog.showNoUpdateAvailable(
-          context: navContext,
-          currentVersion: state.currentVersion ?? '1.0.0',
-          currentBuild: state.currentBuild ?? '1',
-        ).then((_) {
-          _isShowingDialog = false;
-        });
-      } else {
+    if (navContext != null && navContext.mounted) {
+      UpdateDialog.showNoUpdateAvailable(
+        context: navContext,
+        currentVersion: state.currentVersion ?? '1.0.0',
+        currentBuild: state.currentBuild ?? '1',
+      ).then((_) {
         _isShowingDialog = false;
-      }
-    });
+      });
+    } else {
+      _isShowingDialog = false;
+    }
   }
 
   void reset() {

@@ -6,9 +6,12 @@ import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../common/widgets/custom_app_bar.dart';
 import '../../../../common/widgets/toast/app_toast.dart';
 import '../../../../infrastructure/theme/theme_extensions.dart';
+import '../../../activity_logs/presentation/bloc/activity_logs_cubit.dart';
 import '../../../appointment/presentation/bloc/appointments/appointments_cubit.dart';
 import '../../../users/presentation/bloc/user_cubit.dart';
 import '../controllers/dashboard_controller.dart';
+import '../models/appointment_filter_model.dart';
+import '../widgets/dashboard_widget/dashboard_filter_bottom_sheet.dart';
 import '../widgets/dashboard_widget/dashboard_form.dart';
 import '../widgets/skeletal/dashboard_skeleton_loader.dart';
 
@@ -22,6 +25,7 @@ class DashboardPage extends StatefulWidget {
 class DashboardPageState extends State<DashboardPage> {
   late final DashboardController controller;
   bool _isLoading = true;
+  AppointmentFilterModel _currentFilter = const AppointmentFilterModel();
 
   @override
   void initState() {
@@ -42,6 +46,27 @@ class DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  void showFilterBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: DashboardFilterBottomSheet(
+          initialFilter: _currentFilter,
+          onApply: (filter) {
+            setState(() {
+              _currentFilter = filter;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -57,6 +82,9 @@ class DashboardPageState extends State<DashboardPage> {
           BlocListener<ButtonCubit, ButtonState>(
             listener: _handleButtonState,
           ),
+          BlocListener<ActivityLogsCubit, ActivityLogsCubitState>(
+            listener: _handleActivityLogsState,
+          ),
         ],
         child: Scaffold(
           appBar: CustomAppBar(
@@ -71,6 +99,7 @@ class DashboardPageState extends State<DashboardPage> {
                     height: constraints.maxHeight,
                     child: DashboardForm(
                       state: this,
+                      filter: _currentFilter.hasActiveFilters ? _currentFilter : null,
                     ),
                   );
                 }),
@@ -94,7 +123,7 @@ class DashboardPageState extends State<DashboardPage> {
         final loadedState = state as AppointmentsLoadedState;
         if (loadedState.appointments.isEmpty) {
           AppToast.show(
-            message: 'You dont have appointment yet!',
+            message: 'No appointment yet!',
             type: ToastType.original,
           );
         }
@@ -106,6 +135,18 @@ class DashboardPageState extends State<DashboardPage> {
     if (state is UserFailureState) {
       AppToast.show(message: 'Failed to load user data', type: ToastType.error);
       debugPrint('Failed to load user: ${state.errorMessages}');
+    }
+  }
+
+  void _handleActivityLogsState(
+    BuildContext context,
+    ActivityLogsCubitState state,
+  ) {
+    if (state is ActivityLogsFailureState) {
+      AppToast.show(
+        message: state.primaryError,
+        type: ToastType.error,
+      );
     }
   }
 
