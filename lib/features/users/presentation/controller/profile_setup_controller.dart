@@ -30,7 +30,6 @@ class ProfileSetupController {
     field_address,
     field_contact_number,
     field_email,
-    field_facebook,
   ];
 
   static const _dropdownFields = [
@@ -217,7 +216,6 @@ class ProfileSetupController {
       'gender': getDropdownValue(field_gender),
       'address': getTextValue(field_address),
       'contact_number': getTextValue(field_contact_number),
-      'facebook': getTextValue(field_facebook),
       'date_of_birth': dateOfBirth.toIso8601String()
     };
 

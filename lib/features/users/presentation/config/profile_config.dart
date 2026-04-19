@@ -13,7 +13,7 @@ class ProfileFieldConfig {
   };
 
   static const Map<String, String> fieldLabels = {
-    'active': 'Active',
+    'active': 'Registration Status',
     'verified': 'Verified',
     'first_name': 'First Name',
     'middle_name': 'Middle Name',

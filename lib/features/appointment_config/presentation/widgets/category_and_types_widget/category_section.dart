@@ -47,14 +47,15 @@ class CategorySection extends StatelessWidget {
             const SizedBox(height: 8),
             _buildDescriptionField(context),
             const SizedBox(height: 12),
-            ...types.asMap().entries.map((entry) => CategoryTypeItem(
-                  key: ValueKey('${category}_${entry.key}_${entry.value.type}'),
-                  category: category,
-                  index: entry.key,
-                  model: entry.value,
-                  onUpdate: onUpdateType,
-                  onRemove: onRemoveType,
-                )),
+            ...types.asMap().entries.map(
+              (entry) => CategoryTypeItem(
+                category: category,
+                index: entry.key,
+                model: entry.value,
+                onUpdate: onUpdateType,
+                onRemove: onRemoveType,
+              ),
+            ),
           ],
         ),
       ),

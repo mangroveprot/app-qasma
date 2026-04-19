@@ -315,7 +315,7 @@ class HomePageController {
     await CustomModal.showRadioSelectionModal<String>(
       context,
       buttonId: 'counselor_selection_canceled_${appointmentId}',
-      isBottomSheet: false,
+      isBottomSheet: true,
       options: reasonOptionList,
       title: 'Select Cancellation Reason',
       onConfirm: (String reason) async {

@@ -23,7 +23,7 @@ class OtpResendButton extends StatelessWidget {
           child: CustomTextButton(
             text: 'Resend Code',
             textColor: colors.textPrimary,
-            textDecoration: TextDecoration.underline,
+            textDecoration: TextDecoration.none,
             onPressed: onPressedResend,
             borderRadius: radius.large,
             buttonId: ButtonsUniqeKeys.resend.id,

@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../../../../../common/helpers/helpers.dart';
+import '../../../../../common/widgets/custom_search_bar.dart';
 import '../../../../../common/utils/constant.dart';
 import '../../../../../core/_base/_services/storage/shared_preference.dart';
 import '../../../../../infrastructure/theme/theme_extensions.dart';
@@ -10,6 +12,7 @@ import '../../pages/home_page.dart';
 import '../appointment_card_widget/appointment_card.dart';
 import '../home_skeletonloader.dart';
 import 'home_history_button.dart';
+import 'home_appointments_filter_bottom_sheet.dart';
 
 class HomeAppointmentList extends StatefulWidget {
   final HomePageState state;
@@ -38,11 +41,16 @@ class HomeAppointmentList extends StatefulWidget {
 class _HomeAppointmentListState extends State<HomeAppointmentList>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  List<AppointmentModel> _baseCurrentSessionAppointments = [];
+  List<AppointmentModel> _baseUpcomingAppointments = [];
   List<AppointmentModel> _currentSessionAppointments = [];
   List<AppointmentModel> _upcomingAppointments = [];
   Map<String, UserModel> _userMap = {};
   static const bool _enableTimeFiltering = true;
   Timer? _refreshTimer;
+
+  String _searchQuery = '';
+  HomeAppointmentsFilter _filter = const HomeAppointmentsFilter();
 
   @override
   void initState() {
@@ -92,8 +100,8 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
 
     if (_enableTimeFiltering) {
       final now = DateTime.now();
-      _currentSessionAppointments = [];
-      _upcomingAppointments = [];
+      _baseCurrentSessionAppointments = [];
+      _baseUpcomingAppointments = [];
 
       for (final appointment in approvedAppointments) {
         final appointmentLocal = DateTime(
@@ -105,27 +113,17 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
         );
 
         if (!appointmentLocal.isAfter(now)) {
-          _currentSessionAppointments.add(appointment);
+          _baseCurrentSessionAppointments.add(appointment);
         } else {
-          _upcomingAppointments.add(appointment);
+          _baseUpcomingAppointments.add(appointment);
         }
       }
-
-      _currentSessionAppointments.sort((a, b) {
-        return b.scheduledStartAt.compareTo(a.scheduledStartAt);
-      });
-
-      _upcomingAppointments.sort((a, b) {
-        return a.scheduledStartAt.compareTo(b.scheduledStartAt);
-      });
     } else {
-      _currentSessionAppointments = List.from(approvedAppointments);
-      _upcomingAppointments = [];
-
-      _currentSessionAppointments.sort((a, b) {
-        return b.scheduledStartAt.compareTo(a.scheduledStartAt);
-      });
+      _baseCurrentSessionAppointments = List.from(approvedAppointments);
+      _baseUpcomingAppointments = [];
     }
+
+    _applySearchAndFilters();
   }
 
   UserModel? _getUserById(String? userId) {
@@ -133,25 +131,111 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
     return _userMap[userId];
   }
 
-  @override
-  Widget build(BuildContext context) {
+  void _showFilterBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: HomeAppointmentsFilterBottomSheet(
+          initialFilter: _filter,
+          onApply: (filter) {
+            setState(() {
+              _filter = filter;
+              _applySearchAndFilters();
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+
+  bool _matchesSearch(AppointmentModel a, UserModel? user) {
+    final q = _searchQuery.trim().toLowerCase();
+    if (q.isEmpty) return true;
+
+    final haystack = [
+      a.appointmentId,
+      a.studentId,
+      a.appointmentCategory,
+      a.appointmentType,
+      a.description,
+      user?.fullName ?? '',
+      user?.idNumber ?? '',
+    ].join(' ').toLowerCase();
+
+    final terms = q.split(RegExp(r'\s+')).where((t) => t.isNotEmpty);
+    for (final t in terms) {
+      if (!haystack.contains(t)) return false;
+    }
+    return true;
+  }
+
+  bool _passesFilter(AppointmentModel a) {
+    final now = DateTime.now();
+
+    if (_filter.overdue == AppointmentOverdueFilter.overdue) {
+      if (!stripMicroseconds(a.scheduledEndAt).isBefore(now)) return false;
+    } else if (_filter.overdue == AppointmentOverdueFilter.notOverdue) {
+      if (stripMicroseconds(a.scheduledEndAt).isBefore(now)) return false;
+    }
+
+    final from = _filter.dateFrom == null ? null : _dateOnly(_filter.dateFrom!);
+    final to = _filter.dateTo == null ? null : _dateOnly(_filter.dateTo!);
+    if (from != null || to != null) {
+      final localStart = a.scheduledStartAt.toLocal();
+      final day = _dateOnly(localStart);
+      if (from != null && day.isBefore(from)) return false;
+      if (to != null && day.isAfter(to)) return false;
+    }
+
+    return true;
+  }
+
+  void _sortAppointments(List<AppointmentModel> list) {
+    list.sort((a, b) {
+      final cmp = a.scheduledStartAt.compareTo(b.scheduledStartAt);
+      return _filter.sortOrder == AppointmentSortOrder.ascending ? cmp : -cmp;
+    });
+  }
+
+  void _applySearchAndFilters() {
+    final filteredCurrent = <AppointmentModel>[];
+    for (final a in _baseCurrentSessionAppointments) {
+      if (!_passesFilter(a)) continue;
+      if (!_matchesSearch(a, _getUserById(a.studentId))) continue;
+      filteredCurrent.add(a);
+    }
+
+    final filteredUpcoming = <AppointmentModel>[];
+    for (final a in _baseUpcomingAppointments) {
+      if (!_passesFilter(a)) continue;
+      if (!_matchesSearch(a, _getUserById(a.studentId))) continue;
+      filteredUpcoming.add(a);
+    }
+
+    _sortAppointments(filteredCurrent);
+    _sortAppointments(filteredUpcoming);
+
+    _currentSessionAppointments = filteredCurrent;
+    _upcomingAppointments = filteredUpcoming;
+  }
+
+  Widget _buildTabAndControls() {
     final colors = context.colors;
-    final weight = context.weight;
+    final radius = context.radii;
+    final shadows = context.shadows;
+
+    final filterActive = _filter.hasActiveFilters;
 
     return Column(
       children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(8, 12, 8, 8),
-          child: Text(
-            'Appointments',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: weight.medium,
-              color: colors.textPrimary,
-            ),
-          ),
-        ),
+        // Tabs (keep same look as before)
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 8),
           padding: const EdgeInsets.all(3),
@@ -173,11 +257,11 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
             unselectedLabelColor: colors.textPrimary,
             labelStyle: TextStyle(
               fontSize: 12,
-              fontWeight: weight.medium,
+              fontWeight: context.weight.medium,
             ),
             unselectedLabelStyle: TextStyle(
               fontSize: 12,
-              fontWeight: weight.regular,
+              fontWeight: context.weight.regular,
             ),
             splashFactory: NoSplash.splashFactory,
             overlayColor: MaterialStateProperty.all(Colors.transparent),
@@ -188,6 +272,102 @@ class _HomeAppointmentListState extends State<HomeAppointmentList>
             ],
           ),
         ),
+        const SizedBox(height: 10),
+
+        // Search + Filter (under tabs)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: CustomSearchBar(
+                  hintText: 'Search appointments...',
+                  onSearchChanged: (v) {
+                    setState(() {
+                      _searchQuery = v;
+                      _applySearchAndFilters();
+                    });
+                  },
+                  margin: EdgeInsets.zero,
+                  fontSize: 13,
+                  iconSize: 20,
+                  iconConstraints: const BoxConstraints(
+                    minWidth: 48,
+                    minHeight: 48,
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 14,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  InkWell(
+                    onTap: _showFilterBottomSheet,
+                    borderRadius: radius.medium,
+                    child: Container(
+                      height: 48,
+                      width: 48,
+                      decoration: BoxDecoration(
+                        color: colors.white.withOpacity(0.8),
+                        borderRadius: radius.medium,
+                        border: Border.all(
+                            color: colors.textPrimary.withOpacity(0.1)),
+                        boxShadow: [shadows.light],
+                      ),
+                      child: Icon(
+                        Icons.tune_rounded,
+                        size: 22,
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                  ),
+                  if (filterActive)
+                    Positioned(
+                      right: -2,
+                      top: -2,
+                      child: Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: colors.primary,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: colors.white, width: 2),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final weight = context.weight;
+
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(8, 12, 8, 8),
+          child: Text(
+            'Appointments',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: weight.medium,
+              color: colors.textPrimary,
+            ),
+          ),
+        ),
+        _buildTabAndControls(),
         const SizedBox(height: 8),
         Flexible(
           child: TabBarView(

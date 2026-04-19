@@ -19,36 +19,44 @@ class BookAppointmentButtons extends StatelessWidget {
     final colors = context.colors;
     final radius = context.radii;
 
+    // Single neutral label for staff action
+    const primaryLabel = 'Confirm';
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(4, 8, 4, 4),
       decoration: BoxDecoration(
         color: colors.white,
         border: Border(
           top: BorderSide(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withOpacity(0.12),
             width: 1,
           ),
         ),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          TextButton(
-            onPressed: () => context.pop(),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(
-                decoration: TextDecoration.none,
+          Expanded(
+            child: OutlinedButton(
+              onPressed: () => context.pop(),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: colors.accent.withOpacity(0.5)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: radius.medium,
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12),
               ),
+              child: const Text('Cancel'),
             ),
           ),
           Spacing.horizontalMedium,
-          CustomTextButton(
-            onPressed: onPressed,
-            text: isRescheduling ? 'Reschedule' : 'Appoint Now',
-            backgroundColor: colors.primary,
-            borderRadius: radius.medium,
-            textColor: colors.white,
+          Expanded(
+            child: CustomTextButton(
+              onPressed: onPressed,
+              text: primaryLabel,
+              backgroundColor: colors.primary,
+              borderRadius: radius.medium,
+              textColor: colors.white,
+            ),
           ),
         ],
       ),

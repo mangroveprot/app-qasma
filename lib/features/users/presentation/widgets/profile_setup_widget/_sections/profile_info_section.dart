@@ -87,9 +87,11 @@ class PersonalInfoSection extends StatelessWidget {
         ),
         Spacing.verticalMedium,
         BirthdateSection(
+          fieldKey: field_gender.field_key,
           dayController: dayController,
           monthController: monthController,
           yearController: yearController,
+          required: true,
         ),
       ],
     );

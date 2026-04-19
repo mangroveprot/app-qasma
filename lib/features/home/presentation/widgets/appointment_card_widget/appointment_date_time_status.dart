@@ -39,10 +39,18 @@ class AppointmentDateTimeStatus extends StatelessWidget {
       style: DateTimeFormatStyle.dateOnly,
     );
 
+    final metaColor = textPrimary.withOpacity(0.65);
     final subtitleTextStyle = TextStyle(
-      fontSize: 12,
-      color: textPrimary,
+      fontSize: 11.5,
+      color: metaColor,
+      height: 1.15,
     );
+
+    final Color accentColor = isOverdue
+        ? colors.error.withOpacity(0.8)
+        : isOnSession
+            ? colors.primary.withOpacity(0.9)
+            : metaColor;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -56,41 +64,34 @@ class AppointmentDateTimeStatus extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.calendar_today_outlined,
-                    size: 16,
-                    color: isOverdue
-                        ? colors.error.withOpacity(0.7)
-                        : isOnSession
-                            ? colors.primary
-                            : colors.black,
+                    size: 14,
+                    color: accentColor,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       appointmentDate,
                       style: TextStyle(
-                        fontSize: appointmentDate.length <= 15 ? 16 : 14,
-                        fontWeight: weight.bold,
+                        fontSize: appointmentDate.length <= 15 ? 13.5 : 12.5,
+                        fontWeight: weight.medium,
                         color: isOverdue
-                            ? colors.error.withOpacity(0.7)
+                            ? colors.error.withOpacity(0.85)
                             : isOnSession
-                                ? colors.primary
-                                : colors.black,
+                                ? colors.primary.withOpacity(0.95)
+                                : textPrimary.withOpacity(0.85),
+                        height: 1.15,
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 3),
               Row(
                 children: [
                   Icon(
                     Icons.access_time,
-                    size: 16,
-                    color: isOverdue
-                        ? colors.error
-                        : isOnSession
-                            ? colors.primary
-                            : colors.textPrimary,
+                    size: 14,
+                    color: accentColor,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -102,17 +103,17 @@ class AppointmentDateTimeStatus extends StatelessWidget {
                       )}',
                       style: subtitleTextStyle.copyWith(
                         color: isOverdue
-                            ? colors.error
+                            ? colors.error.withOpacity(0.8)
                             : isOnSession
-                                ? colors.primary
-                                : textPrimary,
+                                ? colors.primary.withOpacity(0.85)
+                                : metaColor,
                       ),
                     ),
                   ),
                 ],
               ),
               if (appointment.reschedule.rescheduledBy != null) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 AppointmentRescheduleIndicator(
                   reschedAppointment: appointment.reschedule as RescheduleModel,
                   user: rescheduledByUser,

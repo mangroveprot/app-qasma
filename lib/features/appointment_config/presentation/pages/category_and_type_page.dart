@@ -129,6 +129,12 @@ class _CategoryTypePageState extends State<CategoryTypePage> {
             _updateHasChanges();
           },
         );
+      } else {
+        final newTypes = List<CategoryTypeModel>.from(view.types)
+          ..removeAt(index);
+        updated[category] = view.copyWith(types: newTypes);
+        _categoryTypesNotifier.value = updated;
+        _updateHasChanges();
       }
     }
   }

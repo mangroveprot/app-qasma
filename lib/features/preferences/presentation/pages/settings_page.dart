@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../common/helpers/spacing.dart';
 import '../../../../common/widgets/custom_app_bar.dart';
 import '../../../../common/widgets/custom_chevron_button.dart';
 import '../../../../infrastructure/routes/app_routes.dart';
@@ -35,7 +36,18 @@ class SettingsPage extends StatelessWidget {
                           Routes.change_password,
                         ));
                       },
-                    )
+                    ),
+                    Spacing.verticalMedium,
+                    CustomChevronButton(
+                      title: 'Activity Logs',
+                      icon: Icons.history_rounded,
+                      onTap: () {
+                        context.push(Routes.buildPath(
+                          Routes.preference_path,
+                          Routes.activityLogs,
+                        ));
+                      },
+                    ),
                   ],
                 ),
               ),

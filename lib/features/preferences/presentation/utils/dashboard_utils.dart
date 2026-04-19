@@ -7,6 +7,7 @@ import '../../../../infrastructure/theme/theme_extensions.dart';
 import '../../../appointment/data/models/appointment_model.dart';
 import '../../../users/data/models/user_model.dart';
 import '../config/appointment_stats_data.dart';
+import '../models/appointment_filter_model.dart';
 
 class DashboardUtils {
   static int countStatus({
@@ -45,6 +46,119 @@ class DashboardUtils {
       final appointmentDate = DateTime(start.year, start.month, start.day);
       return appointmentDate == today;
     }).toList();
+  }
+
+  /// Apply filters to appointments list
+  static List<AppointmentModel> applyFilters({
+    required List<AppointmentModel> appointments,
+    required AppointmentFilterModel filter,
+  }) {
+    List<AppointmentModel> filtered = List.from(appointments);
+
+    // Date range filter
+    if (filter.dateFrom != null || filter.dateTo != null) {
+      filtered = filtered.where((appointment) {
+        final appointmentDate = DateTime(
+          appointment.scheduledStartAt.year,
+          appointment.scheduledStartAt.month,
+          appointment.scheduledStartAt.day,
+        );
+
+        if (filter.dateFrom != null && filter.dateTo != null) {
+          final fromDate = DateTime(
+            filter.dateFrom!.year,
+            filter.dateFrom!.month,
+            filter.dateFrom!.day,
+          );
+          final toDate = DateTime(
+            filter.dateTo!.year,
+            filter.dateTo!.month,
+            filter.dateTo!.day,
+          );
+          return appointmentDate
+                  .isAfter(fromDate.subtract(const Duration(days: 1))) &&
+              appointmentDate.isBefore(toDate.add(const Duration(days: 1)));
+        } else if (filter.dateFrom != null) {
+          final fromDate = DateTime(
+            filter.dateFrom!.year,
+            filter.dateFrom!.month,
+            filter.dateFrom!.day,
+          );
+          return appointmentDate
+              .isAfter(fromDate.subtract(const Duration(days: 1)));
+        } else if (filter.dateTo != null) {
+          final toDate = DateTime(
+            filter.dateTo!.year,
+            filter.dateTo!.month,
+            filter.dateTo!.day,
+          );
+          return appointmentDate.isBefore(toDate.add(const Duration(days: 1)));
+        }
+        return true;
+      }).toList();
+    }
+
+    // Status filter
+    if (filter.status != 'all') {
+      filtered = filtered.where((appointment) {
+        return appointment.status.toLowerCase() == filter.status.toLowerCase();
+      }).toList();
+    }
+
+    // Purpose filter
+    if (filter.purpose != 'all') {
+      filtered = filtered.where((appointment) {
+        return appointment.appointmentCategory.toLowerCase() ==
+            filter.purpose.toLowerCase();
+      }).toList();
+    }
+
+    // Sort
+    if (filter.sortBy == 'oldest') {
+      filtered.sort((a, b) => a.scheduledStartAt.compareTo(b.scheduledStartAt));
+    } else {
+      filtered.sort((a, b) => b.scheduledStartAt.compareTo(a.scheduledStartAt));
+    }
+
+    return filtered;
+  }
+
+  /// Get monthly appointment data for line chart
+  static Map<String, Map<String, int>> getMonthlyAppointmentData({
+    required List<AppointmentModel> appointments,
+  }) {
+    final Map<String, Map<String, int>> monthlyData = {};
+
+    // Initialize all months
+    for (final month in shortMonth) {
+      monthlyData[month] = {
+        'pending': 0,
+        'approved': 0,
+        'completed': 0,
+        'cancelled': 0,
+      };
+    }
+
+    // Group appointments by month and status
+    for (final appointment in appointments) {
+      final monthIndex = appointment.scheduledStartAt.month - 1;
+      if (monthIndex >= 0 && monthIndex < shortMonth.length) {
+        final month = shortMonth[monthIndex];
+        final status = appointment.status.toLowerCase();
+
+        if (monthlyData[month] != null) {
+          if (status == 'pending' ||
+              status == 'approved' ||
+              status == 'completed' ||
+              status == 'cancelled') {
+            monthlyData[month]![status] =
+                (monthlyData[month]![status] ?? 0) + 1;
+          }
+        }
+      }
+    }
+
+    return monthlyData;
   }
 
   static List<AppointmentStatsData> apppointmentStatsData({

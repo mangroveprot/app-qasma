@@ -71,7 +71,7 @@ class AppColors extends ThemeExtension<AppColors> {
   }
 
   static const lightColors = AppColors(
-    primary: Color(0xFF32A616),
+    primary: Color(0xFF35A35C),
     secondary: Color(0xFF0F65B3),
     accent: Color(0xFF484848),
     error: Color(0xFFE8322B),

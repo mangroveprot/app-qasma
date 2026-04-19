@@ -85,18 +85,18 @@ class _AppointmentConfigPageState extends State<AppointmentConfigPage> {
                         );
                       },
                     ),
-                    Spacing.verticalMedium,
-                    ConfigChevron(
-                      type: 'Reminders',
-                      icons: Icons.chat_bubble_outline_sharp,
-                      subtitle: 'Configure appointment reminder messages',
-                      onPressed: () {
-                        context.push(Routes.buildPath(
-                          Routes.appointment_config,
-                          Routes.reminders_config,
-                        ));
-                      },
-                    ),
+                    // Spacing.verticalMedium,
+                    // ConfigChevron(
+                    //   type: 'Reminders',
+                    //   icons: Icons.chat_bubble_outline_sharp,
+                    //   subtitle: 'Configure appointment reminder messages',
+                    //   onPressed: () {
+                    //     context.push(Routes.buildPath(
+                    //       Routes.appointment_config,
+                    //       Routes.reminders_config,
+                    //     ));
+                    //   },
+                    // ),
                     Spacing.verticalMedium,
                     ConfigChevron(
                       type: 'Categories & Types',

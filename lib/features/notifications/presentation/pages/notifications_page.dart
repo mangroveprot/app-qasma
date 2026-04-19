@@ -37,6 +37,22 @@ class NotificationsPageState extends State<NotificationsPage> {
     });
   }
 
+  void toggleSelectAll(BuildContext context) {
+    final state = context.read<NotificationsCubit>().state;
+    if (state is! NotificationsLoadedState) return;
+
+    final allIds = state.notifications.map((n) => n.notificationId).toSet();
+
+    setState(() {
+      if (selectedNotificationIds.length == allIds.length &&
+          allIds.isNotEmpty) {
+        selectedNotificationIds.clear();
+      } else {
+        selectedNotificationIds = allIds;
+      }
+    });
+  }
+
   void toggleNotificationSelection(String notificationId) {
     setState(() {
       if (selectedNotificationIds.contains(notificationId)) {
@@ -44,21 +60,6 @@ class NotificationsPageState extends State<NotificationsPage> {
       } else {
         selectedNotificationIds.add(notificationId);
       }
-    });
-  }
-
-  void deleteSelectedNotifications() {
-    if (selectedNotificationIds.isEmpty) return;
-
-    final cubit = context.read<NotificationsCubit>();
-    cubit.deleteNotifications(
-      notificationIds: selectedNotificationIds.toList(),
-      usecase: controller.deleteNotificationsUsecase,
-    );
-
-    setState(() {
-      isSelectionMode = false;
-      selectedNotificationIds.clear();
     });
   }
 
@@ -74,6 +75,17 @@ class NotificationsPageState extends State<NotificationsPage> {
         ],
         child: Builder(
           builder: (context) {
+            final colors = context.colors;
+            final notificationState = context.watch<NotificationsCubit>().state;
+            final int totalNotifications =
+                notificationState is NotificationsLoadedState
+                    ? notificationState.notifications.length
+                    : 0;
+
+            final bool allSelected = selectedNotificationIds.isNotEmpty &&
+                totalNotifications > 0 &&
+                selectedNotificationIds.length == totalNotifications;
+
             return Scaffold(
               appBar: CustomAppBar(
                 title: isSelectionMode
@@ -103,19 +115,64 @@ class NotificationsPageState extends State<NotificationsPage> {
                     ),
                 ],
               ),
-              body: LayoutBuilder(
-                builder: (context, constraints) {
-                  return SizedBox(
-                    width: constraints.maxWidth,
-                    height: constraints.maxHeight,
+              body: Column(
+                children: [
+                  if (isSelectionMode)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.only(
+                          left: 16, right: 26, top: 10, bottom: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            allSelected ? 'Deselect All' : 'Select All',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          GestureDetector(
+                            onTap: totalNotifications == 0
+                                ? null
+                                : () => toggleSelectAll(context),
+                            child: Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: allSelected
+                                      ? colors.secondary
+                                      : const Color(0xFFD1D5DB),
+                                  width: 2,
+                                ),
+                                color: allSelected
+                                    ? colors.secondary
+                                    : Colors.transparent,
+                              ),
+                              child: allSelected
+                                  ? Icon(
+                                      Icons.check,
+                                      size: 16,
+                                      color: colors.white,
+                                    )
+                                  : null,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  Expanded(
                     child: NotificationsListWidget(
                       state: this,
                       isSelectionMode: isSelectionMode,
                       selectedNotificationIds: selectedNotificationIds,
                       onNotificationSelect: toggleNotificationSelection,
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
             );
           },

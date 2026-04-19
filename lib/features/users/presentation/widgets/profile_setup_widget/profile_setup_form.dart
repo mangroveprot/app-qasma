@@ -19,7 +19,6 @@ class PagesetupForm extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          // Fixed header section (non-scrollable)
           const ProfileHeaderSection(),
           Spacing.verticalMedium,
           CustomProgressIndicator(
@@ -27,7 +26,6 @@ class PagesetupForm extends StatelessWidget {
             totalSteps: state.totalSteps,
           ),
           Spacing.verticalLarge,
-          // Scrollable content area
           Expanded(
             child: _buildFormContent(context),
           ),
@@ -39,7 +37,6 @@ class PagesetupForm extends StatelessWidget {
   Widget _buildFormContent(BuildContext context) {
     return Column(
       children: [
-        // Main form content - takes available space
         Expanded(
           child: PageView(
             controller: state.controller.pageController,
@@ -47,8 +44,6 @@ class PagesetupForm extends StatelessWidget {
             children: _buildSteps(),
           ),
         ),
-
-        // Fixed bottom section (always visible)
         _buildBottomSection(context),
       ],
     );
@@ -102,8 +97,6 @@ class PagesetupForm extends StatelessWidget {
               state.controller.textControllers[field_contact_number.field_key]!,
           emailController:
               state.controller.textControllers[field_email.field_key]!,
-          facebookController:
-              state.controller.textControllers[field_facebook.field_key]!,
         ),
       ),
       SingleChildScrollView(

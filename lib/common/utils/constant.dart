@@ -103,7 +103,7 @@ const List<String> yearLevelList = ['1', '2', '3', '4'];
 
 const List<String> genderList = ['Male', 'Female', 'Other'];
 
-const List<String> activeOption = ['active', 'inactive'];
+const List<String> activeOption = ['registered', 'unregistered'];
 
 const List<String> verifyption = ['verified', 'unverified'];
 
@@ -131,6 +131,21 @@ const List<String> monthsList = [
   'October',
   'November',
   'December',
+];
+
+const shortMonth = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec'
 ];
 
 class AppointmentSelection {

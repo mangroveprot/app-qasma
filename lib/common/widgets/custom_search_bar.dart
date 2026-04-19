@@ -9,6 +9,8 @@ class CustomSearchBar extends StatefulWidget {
   final double iconSize;
   final TextEditingController? controller;
   final EdgeInsetsGeometry? padding;
+  final EdgeInsetsGeometry? margin;
+  final BoxConstraints? iconConstraints;
 
   const CustomSearchBar({
     Key? key,
@@ -16,6 +18,8 @@ class CustomSearchBar extends StatefulWidget {
     this.hintText = 'Search...',
     this.controller,
     this.padding,
+    this.margin,
+    this.iconConstraints,
     this.fontSize = 14,
     this.iconSize = 22,
   }) : super(key: key);
@@ -67,7 +71,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
     final radius = context.radii;
     final shadows = context.shadows;
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: widget.margin ?? const EdgeInsets.all(16),
       decoration: BoxDecoration(
           color: colors.white.withOpacity(0.8),
           borderRadius: radius.medium,
@@ -87,10 +91,11 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
             color: colors.textPrimary,
             size: widget.iconSize,
           ),
-          prefixIconConstraints: const BoxConstraints(
-            minWidth: 48,
-            minHeight: 48,
-          ),
+          prefixIconConstraints: widget.iconConstraints ??
+              const BoxConstraints(
+                minWidth: 48,
+                minHeight: 48,
+              ),
           suffixIcon: _hasText
               ? IconButton(
                   icon: Icon(
@@ -102,10 +107,11 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                 )
               : null,
           suffixIconConstraints: _hasText
-              ? const BoxConstraints(
-                  minWidth: 48,
-                  minHeight: 48,
-                )
+              ? (widget.iconConstraints ??
+                  const BoxConstraints(
+                    minWidth: 48,
+                    minHeight: 48,
+                  ))
               : null,
           border: InputBorder.none,
           contentPadding: widget.padding ??

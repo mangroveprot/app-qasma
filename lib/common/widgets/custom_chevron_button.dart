@@ -16,6 +16,7 @@ class CustomChevronButton extends StatelessWidget {
   final int? count;
   final Color? countBackgroundColor;
   final Color? countTextColor;
+  final Widget? trailing;
 
   const CustomChevronButton({
     super.key,
@@ -32,6 +33,7 @@ class CustomChevronButton extends StatelessWidget {
     this.count,
     this.countBackgroundColor,
     this.countTextColor,
+    this.trailing,
   });
 
   @override
@@ -92,6 +94,8 @@ class CustomChevronButton extends StatelessWidget {
                                 color: colors.black,
                                 fontStyle: titleFontStyle ?? FontStyle.normal,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             if (subtitle != null) ...[
                               const SizedBox(height: 4),
@@ -134,6 +138,10 @@ class CustomChevronButton extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (trailing != null) ...[
+                  Spacing.horizontalSmall,
+                  trailing!,
+                ],
                 Padding(
                   padding: const EdgeInsets.all(4),
                   child: Icon(

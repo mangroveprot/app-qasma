@@ -8,6 +8,8 @@ import '../../../../common/manager/user_manager.dart';
 import '../../../../common/utils/button_ids.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 import '../../../../infrastructure/injection/service_locator.dart';
+import '../../../activity_logs/domain/usecases/get_activity_logs_by_user_usecase.dart';
+import '../../../activity_logs/presentation/bloc/activity_logs_cubit.dart';
 import '../../../appointment/presentation/bloc/appointments/appointments_cubit.dart';
 import '../../../users/presentation/bloc/user_cubit.dart';
 
@@ -15,6 +17,7 @@ class DashboardController {
   late final AppointmentsCubit _appointmentsCubit;
   late final UserCubit _userCubit;
   late final ButtonCubit _buttonCubit;
+  late final ActivityLogsCubit _activityLogsCubit;
 
   late final AppointmentManager _appointmentManager;
   late final UserManager _userManager;
@@ -23,6 +26,9 @@ class DashboardController {
   // bool get isInitialized => _isInitialized;
 
   List<BlocProvider> get blocProviders => [
+        BlocProvider<ActivityLogsCubit>(
+          create: (context) => _activityLogsCubit,
+        ),
         BlocProvider<AppointmentsCubit>(
           create: (context) => _appointmentsCubit,
         ),
@@ -50,11 +56,13 @@ class DashboardController {
     _appointmentsCubit = AppointmentsCubit();
     _userCubit = UserCubit();
     _buttonCubit = ButtonCubit();
+    _activityLogsCubit = ActivityLogsCubit();
   }
 
   void _loadInitialData() {
     _loadUsersData();
     _loadAppointmentsData();
+    _loadActivityLogs();
   }
 
   void _loadUsersData() {
@@ -63,6 +71,21 @@ class DashboardController {
 
   void _loadAppointmentsData() {
     _appointmentManager.loadAllAppointments(_appointmentsCubit);
+  }
+
+  void _loadActivityLogs() {
+    _syncAndLoadActivityLogs(forceRefresh: true);
+  }
+
+  Future<void> _syncAndLoadActivityLogs({bool forceRefresh = true}) async {
+    await _activityLogsCubit.loadActivityLogs(
+      params: {
+        'page': 1,
+        'limit': 20,
+        'forceRefresh': forceRefresh,
+      },
+      usecase: sl<GetActivityLogsByUserUsecase>(),
+    );
   }
 
   Future<void> refreshUsersData() async {

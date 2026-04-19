@@ -150,6 +150,7 @@ class RemoteRepository<T> extends BaseRepository
 
         DateTime? latestUpdatedAt;
         bool allItemsProcessedSuccessfully = true;
+        final itemsToSave = [];
 
         for (final item in updatedItems) {
           try {
@@ -177,12 +178,16 @@ class RemoteRepository<T> extends BaseRepository
             }
 
             if (shouldSave) {
-              await _localRepository.saveItem(item);
+              itemsToSave.add(item);
             }
           } catch (e) {
-            debugPrint('Failed to sync item ${getId(item)}: $e');
+            debugPrint('Failed to process item ${getId(item)}: $e');
             allItemsProcessedSuccessfully = false;
           }
+        }
+
+        if (itemsToSave.isNotEmpty) {
+          await _localRepository.saveAllItems(itemsToSave);
         }
 
         if (allItemsProcessedSuccessfully) {

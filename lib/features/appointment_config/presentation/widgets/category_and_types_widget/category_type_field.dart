@@ -9,6 +9,7 @@ class CategoryTypeField extends StatelessWidget {
   final TextInputType? keyboardType;
   final String? suffixText;
   final Function(String) onChanged;
+  final TextEditingController? controller;
 
   const CategoryTypeField({
     super.key,
@@ -18,6 +19,7 @@ class CategoryTypeField extends StatelessWidget {
     required this.onChanged,
     this.keyboardType,
     this.suffixText,
+    this.controller,
   });
 
   @override
@@ -34,7 +36,9 @@ class CategoryTypeField extends StatelessWidget {
                 fontWeight: FontWeight.w500)),
         const SizedBox(height: 6),
         TextFormField(
-          initialValue: initialValue,
+          controller: controller,
+          // Only use initialValue when no controller is provided
+          initialValue: controller == null ? initialValue : null,
           keyboardType: keyboardType,
           decoration: _inputDecoration(colors, hintText, suffixText),
           style: const TextStyle(fontSize: 15),

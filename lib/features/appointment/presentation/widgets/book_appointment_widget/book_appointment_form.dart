@@ -68,6 +68,7 @@ class BookAppointmentForm extends StatelessWidget {
             textControllers: state.textControllers,
             dropdownControllers: state.dropdownControllers,
             category: state.category,
+            isRescheduling: state.isRescheduling,
           ),
           Spacing.verticalMedium,
           if (!state.isRescheduling) ...[

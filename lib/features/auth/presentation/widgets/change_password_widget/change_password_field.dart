@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../common/utils/form_field_config.dart';
 import '../custom_password_field.dart';
+import '../login_widget/login_forgot_password_btn.dart';
 
 class ChangePasswordField extends StatelessWidget {
   final TextEditingController currentPasswordController;
@@ -52,6 +53,10 @@ class ChangePasswordField extends StatelessWidget {
               showPasswordRule: false,
             ),
           ],
+        ),
+        const Align(
+          alignment: Alignment.centerRight,
+          child: LoginForgotPasswordBtn(),
         ),
       ],
     );

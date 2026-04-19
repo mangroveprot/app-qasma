@@ -120,13 +120,13 @@ class ProfileFormUtils {
       'address': controllers['address']?.text ?? '',
       'contact_number': controllers['contact_number']?.text ?? '',
       'facebook': controllers['facebook']?.text ?? '',
-      if (user.role == RoleType.student.field)
-        'course': user.other_info.course ?? '',
-      if (user.role == RoleType.student.field)
-        'yearLevel': user.other_info.yearLevel ?? '',
-      if (user.role == RoleType.student.field)
-        'block': user.other_info.block ?? '',
       'date_of_birth': user.date_of_birth.toIso8601String(),
+      if (user.role == RoleType.student.field)
+        'other_info': {
+          'course': user.other_info.course ?? '',
+          'yearLevel': user.other_info.yearLevel ?? '',
+          'block': user.other_info.block ?? '',
+        },
     };
   }
 }

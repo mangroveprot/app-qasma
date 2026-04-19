@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../common/helpers/helpers.dart';
 import '../../../../common/utils/form_field_config.dart';
 import '../../../../common/widgets/bloc/button/button_cubit.dart';
 
@@ -52,16 +51,7 @@ class ProfileSetupPageState extends State<ProfileSetupPage> {
     final email = controller.getTextValue(field_email);
     final cubit = context.read<ButtonCubit>();
     final formCubit = context.read<FormCubit>();
-    final fbURL = controller.getTextValue(field_facebook);
     FocusScope.of(context).unfocus();
-
-    final isValidFbURL = isFacebookValid(fbURL);
-
-    if (fbURL.isNotEmpty && !isValidFbURL)
-      return formCubit.setFieldError(
-        field_facebook.field_key,
-        'We couldn\'t recognize that Facebook link. Example: facebook.com/username or facebook.com/profile.php?id=123456789.',
-      );
 
     if (email.isNotEmpty) {
       cubit.emitLoading();
